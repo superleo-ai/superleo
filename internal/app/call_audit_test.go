@@ -28,7 +28,7 @@ func TestEveryCallThatChangesSomethingIsWrittenDown(t *testing.T) {
 func TestWhichCallsChangeState(t *testing.T) {
 	for name, want := range map[string]bool{
 		"DeleteDashboard": true, "SetDashboardCron": true, "HiveTaskCancel": true, "HiveSpawn": true,
-		"Dashboards": false, "HiveStatus": false, "ChatHistory": false, "StandingAgents": false,
+		"Dashboards": false, "HiveStatus": false, "ChatHistory": false, "StandingAgents": false, "LongRunList": false, "GetSettings": false,
 	} {
 		if got := changesState(name); got != want {
 			t.Errorf("changesState(%s) = %v, want %v", name, got, want)

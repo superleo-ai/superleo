@@ -53,8 +53,16 @@ func camelWords(name string) []string {
 	return append(out, name[start:])
 }
 
+// readWords end or start a name that only reads: LongRunList, GetSettings,
+// HiveStatus — whatever other words they hold.
+var readWords = map[string]bool{"List": true, "Get": true, "Status": true, "History": true, "Info": true}
+
 func changesState(name string) bool {
-	for _, w := range camelWords(name) {
+	ws := camelWords(name)
+	if readWords[ws[0]] || readWords[ws[len(ws)-1]] {
+		return false
+	}
+	for _, w := range ws {
 		if changeWords[w] {
 			return true
 		}
