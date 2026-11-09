@@ -18,6 +18,7 @@ import Command from "./Command";
 import StatsHud from "./StatsHud";
 import { agendaOf, touchesNoted, type AgendaEntry } from "./agenda";
 import { dashboards as dashApi, type Dashboard } from "../lib/dashboards";
+import { holoLines } from "./holoLines";
 import { Response } from "@/components/ai-elements/response";
 import { RefreshCwIcon, XIcon } from "lucide-react";
 import "./world.css";
@@ -44,7 +45,7 @@ function useSlow() {
   useEffect(() => {
     let alive = true;
     const load = () => {
-      Dashboards().then((l: any) => { if (alive) setDashboards(((l ?? []) as any[]).map((d) => ({ id: String(d.id), name: String(d.name ?? d.title ?? "Dashboard"), refreshed_at: d.refreshed_at }))); }).catch(() => {});
+      Dashboards().then((l: any) => { if (alive) setDashboards(((l ?? []) as any[]).map((d) => ({ id: String(d.id), name: String(d.name ?? d.title ?? "Dashboard"), refreshed_at: d.refreshed_at, lines: holoLines(d.source) }))); }).catch(() => {});
       Skills().then((l: any) => { if (alive) setSkills(((l ?? []) as any[]).map((s) => String(s.name))); }).catch(() => {});
       MCP().then((l: any) => { if (alive) setMcp(((l ?? []) as any[]).map((s) => ({ name: String(s.name), ok: !!s.running, tools: Number(s.tool_count ?? 0) }))); }).catch(() => {});
       loadDesktop();

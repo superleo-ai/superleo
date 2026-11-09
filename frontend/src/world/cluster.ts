@@ -30,7 +30,7 @@ export interface WorldData {
   attention: AttentionItem[];
   /** noted's day, still to come (NotedToday). */
   agenda: AgendaEntry[];
-  dashboards: { id: string; name: string; refreshed_at?: string }[];
+  dashboards: { id: string; name: string; refreshed_at?: string; lines?: string[] }[];
   skills: string[];
   mcp: { name: string; ok: boolean; tools: number }[];
   /** Desktop control, when it is on: not an MCP server, but tools the queen
@@ -1610,7 +1610,7 @@ export const cluster: District<WorldData> = {
           if (!dash || w.id === dash.id + (dash.refreshed_at ?? "")) return;
           w.id = dash.id + (dash.refreshed_at ?? "");
           ctx.pickable(w.node, { kind: "dashboard", id: dash.id, title: dash.name });
-          paint(w.sc, dash.name, dash.refreshed_at ? "updated " + new Date(dash.refreshed_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }) : "dashboard", [], false, false);
+          paint(w.sc, dash.name, dash.refreshed_at ? "updated " + new Date(dash.refreshed_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }) : "dashboard", dash.lines ?? [], false, false);
         });
 
         {
