@@ -158,7 +158,7 @@ func TestRelayOnlyRoundTripsThroughTheSettingsRPC(t *testing.T) {
 	a.settings = s
 	defer a.Shutdown(context.Background())
 
-	got, err := callMethod(a, "GetSettings", nil)
+	got, err := callMethod(a, "test", "GetSettings", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -167,10 +167,10 @@ func TestRelayOnlyRoundTripsThroughTheSettingsRPC(t *testing.T) {
 	_ = json.Unmarshal(raw, &m)
 	m["agent_link"] = map[string]any{"relay_only": []any{" sds-e ", "", "SDS-E"}}
 	body, _ := json.Marshal(m)
-	if _, err := callMethod(a, "SaveSettings", []json.RawMessage{body}); err != nil {
+	if _, err := callMethod(a, "test", "SaveSettings", []json.RawMessage{body}); err != nil {
 		t.Fatal(err)
 	}
-	back, _ := callMethod(a, "GetSettings", nil)
+	back, _ := callMethod(a, "test", "GetSettings", nil)
 	if r := back.(backend.Settings).AgentLink.RelayOnly; strings.Join(r, ",") != "sds-e" {
 		t.Fatalf("after save: %v", r)
 	}

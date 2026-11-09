@@ -361,7 +361,7 @@ func (a *App) answerCall(c *agentlinkpb.Call) *agentlinkpb.Reply {
 	}
 	// Core's flow, continued by the work this call starts (flow_link.go).
 	r.Traceparent = acceptCallFlow(c.GetMethod(), raw, "", c.GetTraceparent(), c.GetTracestate())
-	result, err := callMethod(a, c.GetMethod(), raw)
+	result, err := callMethod(a, "agent-link", c.GetMethod(), raw)
 	if err != nil {
 		r.Error = err.Error()
 		return r

@@ -191,8 +191,30 @@ function installWebShim() {
   w.superleoServed = true;
 }
 
+// In the desktop window, every bound call goes through the Go side's
+// Call(name, args): the same dispatcher a browser tab's /api/rpc and core's
+// agent-link calls reach, which writes each call into the log
+// (internal/app/call_audit.go). Calling Wails' own binding for each method
+// would skip it, and a dashboard deleted from the window left no trace.
+function routeWindowCalls() {
+  type Bound = Record<string, (...args: unknown[]) => Promise<unknown>>;
+  const w = window as unknown as { go?: { app?: { App?: Bound } } };
+  const bound = w.go?.app?.App;
+  if (!bound || typeof bound.Call !== "function") return;
+  const call = bound.Call;
+  w.go!.app!.App = new Proxy(bound, {
+    get: (target, prop) => {
+      const name = String(prop);
+      if (name === "Call" || typeof target[name] !== "function") return target[name];
+      return (...args: unknown[]) => call(name, args.map((a) => (a === undefined ? null : a)));
+    },
+  });
+}
+
 if (!(window as unknown as Record<string, unknown>).go) {
   installWebShim();
+} else {
+  routeWindowCalls();
 }
 
 export {};

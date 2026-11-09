@@ -65,7 +65,7 @@ func homeRPC(t *testing.T, a *App, method string, args ...string) map[string]any
 	for i, s := range args {
 		raw[i] = json.RawMessage(s)
 	}
-	out, err := callMethod(a, method, raw)
+	out, err := callMethod(a, "test", method, raw)
 	if err != nil {
 		t.Fatalf("%s: %v", method, err)
 	}
@@ -119,7 +119,7 @@ func TestHomeLayoutRPCsVersionAndAnnounce(t *testing.T) {
 		t.Fatalf("reset: %v", got)
 	}
 	// A broken layout is refused outright.
-	if _, err := callMethod(a, "SetHomeLayout", []json.RawMessage{json.RawMessage(`{"widgets":[{"id":"x","kind":"hive"}]}`), json.RawMessage("3")}); err == nil {
+	if _, err := callMethod(a, "test", "SetHomeLayout", []json.RawMessage{json.RawMessage(`{"widgets":[{"id":"x","kind":"hive"}]}`), json.RawMessage("3")}); err == nil {
 		t.Fatal("accepted a widget whose id is not a UUID")
 	}
 }
@@ -170,7 +170,7 @@ func TestQuotesRPC(t *testing.T) {
 	for i := range many {
 		many[i] = fmt.Sprintf("%q", fmt.Sprint("S", i))
 	}
-	if _, err := callMethod(a, "Quotes", []json.RawMessage{json.RawMessage("[" + strings.Join(many, ",") + "]")}); err == nil {
+	if _, err := callMethod(a, "test", "Quotes", []json.RawMessage{json.RawMessage("[" + strings.Join(many, ",") + "]")}); err == nil {
 		t.Fatal("too many symbols accepted")
 	}
 }

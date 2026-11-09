@@ -31,7 +31,7 @@ func TestTheQueenEngineSurvivesTheEntrypointRewritingSettings(t *testing.T) {
 	if err := a.SaveSettings(*s); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := callMethod(a, "SetQueenEngine", []json.RawMessage{json.RawMessage(`"claude"`), json.RawMessage(`false`)}); err != nil {
+	if _, err := callMethod(a, "test", "SetQueenEngine", []json.RawMessage{json.RawMessage(`"claude"`), json.RawMessage(`false`)}); err != nil {
 		t.Fatal(err)
 	}
 

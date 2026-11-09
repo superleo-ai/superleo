@@ -53,6 +53,20 @@ var rpcDenied = map[string]string{
 	// has nothing to offer them — and opening listeners is not something a
 	// remote caller should be able to ask for on the strength of one session.
 	"OpenInBrowser": "you are already in a browser",
+	// The window's own way in (see Call): over HTTP it would reach the
+	// methods above by the back door.
+	"Call": "the desktop window's path; call the method itself",
+}
+
+// Call runs one App method by name for the desktop window. The window sends
+// every bound call through here (frontend/src/lib/callpath.ts) so that it
+// takes the same road as a browser tab's /api/rpc and core's agent-link
+// calls, and is written down the same way (call_audit.go).
+func (a *App) Call(name string, args []json.RawMessage) (any, error) {
+	if name == "Call" {
+		return nil, &callError{http.StatusBadRequest, "Call cannot call itself"}
+	}
+	return callMethod(a, "window", name, args)
 }
 
 // eventHub fans one emitted event out to every connected SSE client. A slow
@@ -229,7 +243,7 @@ func rpcCall(app *App, w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	acceptHTTPFlow(w, r, name, raw)
-	result, err := callMethod(app, name, raw)
+	result, err := callMethod(app, "http", name, raw)
 	if err != nil {
 		code := http.StatusInternalServerError
 		var ce *callError
@@ -255,7 +269,9 @@ func (e *callError) Error() string { return e.msg }
 // callMethod runs one App method by name with its arguments as JSON — the one
 // dispatcher behind /api/rpc and behind the calls core makes on an agent over
 // the agent link, so the two can never disagree about a method.
-func callMethod(app *App, name string, raw []json.RawMessage) (any, error) {
+func callMethod(app *App, via, name string, raw []json.RawMessage) (result any, err error) {
+	t0 := time.Now()
+	defer func() { auditCall(via, name, raw, time.Since(t0), err) }()
 	m := reflect.ValueOf(app).MethodByName(name)
 	if !m.IsValid() {
 		return nil, &callError{http.StatusNotFound, "no such method: " + name}
@@ -284,7 +300,6 @@ func callMethod(app *App, name string, raw []json.RawMessage) (any, error) {
 	// with no dynamic type at all, the assertion says "not an error", and the
 	// nil then overwrites the result. Every method returning (T, error) was
 	// answering `null` on success.
-	var result any
 	for i, o := range out {
 		if mt.Out(i) == errorType {
 			if err, _ := o.Interface().(error); err != nil {

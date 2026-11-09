@@ -37,7 +37,7 @@ func rpcJSON(t *testing.T, a *App, name string, args ...any) any {
 		b, _ := json.Marshal(v)
 		raw[i] = b
 	}
-	out, err := callMethod(a, name, raw)
+	out, err := callMethod(a, "test", name, raw)
 	if err != nil {
 		t.Fatalf("%s: %v", name, err)
 	}

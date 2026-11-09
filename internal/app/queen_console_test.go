@@ -8,7 +8,7 @@ import (
 // Every client asks the core which conversation is the queen's, over the same
 // RPC the browser and the phones use, and gets the one shared id.
 func TestQueenConsoleNamesTheOneSharedConversation(t *testing.T) {
-	got, err := callMethod(&App{}, "QueenConsole", nil)
+	got, err := callMethod(&App{}, "test", "QueenConsole", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
