@@ -45,7 +45,7 @@ function useSlow() {
   useEffect(() => {
     let alive = true;
     const load = () => {
-      Dashboards().then((l: any) => { if (alive) setDashboards(((l ?? []) as any[]).map((d) => ({ id: String(d.id), name: String(d.name ?? d.title ?? "Dashboard"), refreshed_at: d.refreshed_at, lines: holoLines(d.source) }))); }).catch(() => {});
+      Dashboards().then((l: any) => { if (alive) setDashboards(((l ?? []) as any[]).map((d) => ({ id: String(d.id), name: String(d.name ?? d.title ?? "Dashboard"), refreshed_at: d.refreshed_at, lines: holoLines(d.source), source: d.source }))); }).catch(() => {});
       Skills().then((l: any) => { if (alive) setSkills(((l ?? []) as any[]).map((s) => String(s.name))); }).catch(() => {});
       MCP().then((l: any) => { if (alive) setMcp(((l ?? []) as any[]).map((s) => ({ name: String(s.name), ok: !!s.running, tools: Number(s.tool_count ?? 0) }))); }).catch(() => {});
       loadDesktop();

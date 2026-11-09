@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import type { District, DistrictCtx, Label } from "./engine";
 import { FIN, beam, box, contact, cyl, hash01, mat, ownMat, projector, rbox, screen, smooth } from "./kit";
+import { boardOf, paintBoard } from "./holoBoard";
 import { INK, ghost, pose, robot, setState, type RobotState } from "./robots";
 import { forgetActor, registerActor } from "./bubbles";
 import { Packets, type Link } from "./packets";
@@ -30,7 +31,7 @@ export interface WorldData {
   attention: AttentionItem[];
   /** noted's day, still to come (NotedToday). */
   agenda: AgendaEntry[];
-  dashboards: { id: string; name: string; refreshed_at?: string; lines?: string[] }[];
+  dashboards: { id: string; name: string; refreshed_at?: string; lines?: string[]; source?: string }[];
   skills: string[];
   mcp: { name: string; ok: boolean; tools: number }[];
   /** Desktop control, when it is on: not an MCP server, but tools the queen
@@ -555,7 +556,8 @@ export const cluster: District<WorldData> = {
       const node = new THREE.Group();
       const sw = 3.7, sh = 2.2, mid = 3.65;
       const bar = projector(2.4, 0.4);
-      const sc = screen(sw, sh, 640, true);
+      // Wider than a desk's screen: a dashboard's charts are drawn on it.
+      const sc = screen(sw, sh, 1024, true);
       sc.mesh.position.set(0, mid, 0);
       node.add(bar, beam(0.08, mid - sh / 2, 1.9, sw), sc.mesh);
       node.position.set(-6.6 + i * 4.4, 0, 0);
@@ -1610,7 +1612,19 @@ export const cluster: District<WorldData> = {
           if (!dash || w.id === dash.id + (dash.refreshed_at ?? "")) return;
           w.id = dash.id + (dash.refreshed_at ?? "");
           ctx.pickable(w.node, { kind: "dashboard", id: dash.id, title: dash.name });
-          paint(w.sc, dash.name, dash.refreshed_at ? "updated " + new Date(dash.refreshed_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }) : "dashboard", dash.lines ?? [], false, false);
+          const status = dash.refreshed_at ? "updated " + new Date(dash.refreshed_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }) : "dashboard";
+          const board = boardOf(dash.source);
+          if (!board) {
+            paint(w.sc, dash.name, status, dash.lines ?? [], false, false);
+            return;
+          }
+          // A bigscreen dashboard is drawn as its panels; painted again when
+          // day turns to night, and when a chart's image is ready.
+          const sc = w.sc, key = w.id;
+          const draw = () => sc.draw((c, cw, ch) => paintBoard(c, cw, ch, key + (holoNight ? "/n" : "/d"), dash.name, status, board, holoNight, draw));
+          sc.mesh.userData.repaint = draw;
+          sc.cursor(null);
+          draw();
         });
 
         {
