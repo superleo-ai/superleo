@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -396,8 +397,47 @@ func (s *Service) ApplyDashboardRefresh(id, source string, runErr error) (Dashbo
 			d.LastError = "the refresh returned nothing"
 			return
 		}
+		// A board that came back without its blocks did not refresh: it is an
+		// apology or a question ("我拿到了持仓明细，但还缺少目标金额…"), and
+		// stored it replaced 资产管理's panels with a paragraph. Kept as the
+		// reason, the panels stay.
+		if lost := missingBlocks(d.Source, source); len(lost) > 0 {
+			d.LastError = "the refresh came back without the dashboard's " + strings.Join(lost, ", ") + ": " + firstWords(source, 200)
+			return
+		}
 		d.Source = source
 		d.RefreshedAt = time.Now()
 		d.LastError = ""
 	})
+}
+
+var fenceLang = regexp.MustCompile("(?m)^```([A-Za-z0-9_-]+)")
+
+// dashboardBlocks are the fenced blocks a dashboard draws as panels.
+var dashboardBlocks = map[string]bool{"bigscreen": true, "ui": true, "chart": true, "list": true, "mermaid": true, "timeline": true}
+
+// missingBlocks are the kinds of panel block old has and next does not.
+func missingBlocks(old, next string) []string {
+	has := map[string]bool{}
+	for _, m := range fenceLang.FindAllStringSubmatch(next, -1) {
+		has[m[1]] = true
+	}
+	var lost []string
+	seen := map[string]bool{}
+	for _, m := range fenceLang.FindAllStringSubmatch(old, -1) {
+		if l := m[1]; dashboardBlocks[l] && !has[l] && !seen[l] {
+			seen[l] = true
+			lost = append(lost, l)
+		}
+	}
+	return lost
+}
+
+// firstWords is s on one line, cut at n runes.
+func firstWords(s string, n int) string {
+	s = strings.Join(strings.Fields(s), " ")
+	if r := []rune(s); len(r) > n {
+		return string(r[:n]) + "…"
+	}
+	return s
 }

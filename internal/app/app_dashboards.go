@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -82,10 +83,16 @@ func (a *App) DeleteDashboard(id string) map[string]any {
 	if svc == nil {
 		return failWith("backend not ready")
 	}
+	name := ""
+	if d, ok := svc.Dashboard(id); ok {
+		name = d.Name
+	}
 	a.dropDashboardSchedule(id)
 	if err := svc.DeleteDashboard(id); err != nil {
 		return failWith(err.Error())
 	}
+	// Said in the log: four boards once went with nothing there to say how.
+	slog.Info("dashboard deleted", "id", id, "name", name)
 	return okData(nil)
 }
 
@@ -143,8 +150,14 @@ func (a *App) finishDashboardRefresh(id, answer string, runErr error) {
 	reply, _ := backend.SplitEmotion(answer)
 	updated, err := svc.ApplyDashboardRefresh(id, reply, runErr)
 	if err != nil {
+		slog.Warn("dashboard refresh: not stored", "id", id, "error", err.Error())
 		a.emit("dashboard:updated", map[string]any{"id": id, "error": err.Error()})
 		return
+	}
+	if updated.LastError != "" {
+		slog.Warn("dashboard refresh: kept the last good board", "id", id, "name", updated.Name, "why", cliClip(updated.LastError, 300))
+	} else {
+		slog.Info("dashboard refreshed", "id", id, "name", updated.Name, "bytes", len(updated.Source))
 	}
 	a.emit("dashboard:updated", map[string]any{
 		"id":        updated.ID,

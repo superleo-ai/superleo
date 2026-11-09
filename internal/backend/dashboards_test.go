@@ -174,3 +174,27 @@ func TestAnAmbiguousNameIsRefusedRatherThanGuessed(t *testing.T) {
 		t.Errorf("an id did not break the tie: %q / %q", got, refuse)
 	}
 }
+
+// 资产管理 was refreshed into a paragraph saying what data was missing, and
+// its panels were gone. A refresh without the board's blocks keeps the board
+// and says why; one with them replaces it as before.
+func TestARefreshThatLosesThePanelsKeepsTheBoard(t *testing.T) {
+	s := dashService(t)
+	board := "资产\n```bigscreen\n{\"panels\":[{\"kind\":\"kpi\",\"value\":1}]}\n```\n"
+	d, err := s.SaveDashboard("资产管理", board, "q")
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := s.ApplyDashboardRefresh(d.ID, "我拿到了持仓明细，但还缺少目标金额。", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Source != strings.TrimSpace(board) || !strings.Contains(got.LastError, "bigscreen") || !strings.Contains(got.LastError, "缺少目标金额") {
+		t.Fatalf("source %q error %q", got.Source, got.LastError)
+	}
+	next := "```bigscreen\n{\"panels\":[{\"kind\":\"kpi\",\"value\":2}]}\n```"
+	got, _ = s.ApplyDashboardRefresh(d.ID, next, nil)
+	if got.Source != next || got.LastError != "" {
+		t.Fatalf("source %q error %q", got.Source, got.LastError)
+	}
+}
