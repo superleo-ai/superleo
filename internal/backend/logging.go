@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	agentgolog "github.com/liliang-cn/agent-go/v3/pkg/log"
+	agenttrace "github.com/liliang-cn/agent-go/v3/pkg/trace"
 )
 
 // SuperLeo's logger.
@@ -104,7 +105,25 @@ func SetupLogging(component string, also ...io.Writer) *slog.Logger {
 	log.SetFlags(0)
 	log.SetPrefix("")
 	agentgolog.SetLogger(agentGoLog)
+	// agent-go's trace lines — each model call and tool, with what it took —
+	// go where the log goes, on unless AGENTGO_TRACE turns them off. Before
+	// this only a process started with AGENTGO_TRACE=1 had them: the hive's
+	// pods, never the desktop app, whose log then said what a turn did and
+	// nothing of how.
+	if !traceOff(os.Getenv("AGENTGO_TRACE")) {
+		agenttrace.SetEnabled(true)
+		agenttrace.SetOutput(out)
+	}
 	return rootLogger
+}
+
+// traceOff is AGENTGO_TRACE saying no.
+func traceOff(v string) bool {
+	switch strings.ToLower(strings.TrimSpace(v)) {
+	case "0", "false", "off", "no":
+		return true
+	}
+	return false
 }
 
 // Logger is SuperLeo's logger, with attrs for module.
