@@ -132,7 +132,12 @@ type cliDriver struct {
 // among it ("→ Installing Python dependencies…"). Read together they made
 // one answer, install and all. Kept apart, those lines go to the log and the
 // run's events, never into what the person reads.
-func cliStderrApart(agent string) bool { return agent == "hermes" }
+//
+// Codex too: its --json events are on stdout, and what it says on stderr —
+// "Reconnecting... 3/5" before "workspace routing discovery failed" — is the
+// only account of why a run failed. Mixed into stdout the JSON reader dropped
+// it, and the log had the last line and nothing before it.
+func cliStderrApart(agent string) bool { return agent == "hermes" || agent == "codex" }
 
 // cliStderrEvents is how many stderr lines a run keeps as events; the log
 // has all of them.
@@ -596,7 +601,7 @@ func (d *cliDriver) resume(ctx context.Context) (<-chan int, error) {
 // out of it, and finishes the run the way it ended.
 func (d *cliDriver) finish(ctx context.Context, code int, failure error) {
 	d.mu.Lock()
-	sess, calls, outPath, errLast := d.sess, d.calls, d.live.outPath(), d.errLast
+	sess, calls, outPath, errLast, errLines := d.sess, d.calls, d.live.outPath(), d.errLast, d.errLines
 	d.mu.Unlock()
 	output, _ := os.ReadFile(outPath)
 	result, tail, finErr := sess.Finalize(context.Background(), output, code)
@@ -630,6 +635,13 @@ func (d *cliDriver) finish(ctx context.Context, code int, failure error) {
 			run.State = "done"
 		}
 	})
+	// A failed run says so in the log with what it had to go on, so the
+	// reason can be read there and not only in the run's record.
+	if d.run.State == "failed" {
+		slog.Warn("cli run: failed", "run", d.run.ID, "agent", d.run.Agent, "exit", code,
+			"error", cliClip(d.run.Error, 500), "stderr_lines", errLines, "stderr_last", cliClip(errLast, 300),
+			"took", time.Since(d.run.Started).Round(time.Millisecond).String())
+	}
 }
 
 func readExitCode(path string) (int, bool) {
