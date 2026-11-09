@@ -131,8 +131,10 @@ func TestCodexTakesAServerOnlyAsItCanBeWritten(t *testing.T) {
 		{"a header half a variable", map[string]any{"url": "https://x/mcp", "headers": map[string]any{"X": "a ${K}"}}, nil},
 		{"a variable under another name", map[string]any{"command": "x", "env": map[string]any{"A": "${B}"}}, nil},
 		{"neither", map[string]any{"type": "http"}, nil},
+		{"an argument naming a variable its env does not set", map[string]any{"command": "x", "args": []any{"--header", "A:${K}"}}, nil},
+		{"a variable in the command", map[string]any{"command": "${BIN}", "env": map[string]any{"BIN": "/x"}}, nil},
 	} {
-		got, err := codexServer(c.entry)
+		got, _, err := codexServer(c.entry)
 		if c.want == nil {
 			if err == nil {
 				t.Errorf("%s: taken as %v", c.name, got)
@@ -144,6 +146,40 @@ func TestCodexTakesAServerOnlyAsItCanBeWritten(t *testing.T) {
 		if err != nil || string(a) != string(b) {
 			t.Errorf("%s: %s, %v; want %s", c.name, a, err, b)
 		}
+	}
+}
+
+// mcp-remote's own form, the way noted is set up on the Mac: the header
+// argument names a variable the entry's env sets. Codex refused every turn
+// on it ("its command names a variable") and SuperLeo answered instead.
+func TestCodexTakesMcpRemoteWithItsHeaderFromTheEnv(t *testing.T) {
+	entry := map[string]any{
+		"command": "/bin/mcp-remote",
+		"args":    []any{"http://127.0.0.1:43100/mcp", "--allow-http", "--header", "Authorization:${NOTED_AUTH}"},
+		"env":     map[string]any{"NOTED_AUTH": "Bearer secret_n", "NOTED_MODE": "x"},
+	}
+	got, env, err := codexServer(entry)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(got["env_vars"].([]any), []any{"NOTED_AUTH"}) || env["NOTED_AUTH"] != "Bearer secret_n" {
+		t.Fatalf("got %v, env %v", got, env)
+	}
+	if e, _ := got["env"].(map[string]any); e["NOTED_MODE"] != "x" || e["NOTED_AUTH"] != nil {
+		t.Fatalf("env %v", got["env"])
+	}
+	a, _ := json.Marshal(got)
+	if strings.Contains(string(a), "secret_n") {
+		t.Fatalf("the token is on codex's command line: %s", a)
+	}
+
+	// Through codexQueen it lands in the CLI's environment.
+	req := &agentexec.Request{}
+	if err := codexQueen(req, &QueenKit{Servers: map[string]any{"noted": entry}}, false, ""); err != nil {
+		t.Fatal(err)
+	}
+	if req.Env["NOTED_AUTH"] != "Bearer secret_n" || strings.Contains(strings.Join(req.ExtraArgs, " "), "secret_n") {
+		t.Fatalf("env %v args %q", req.Env, req.ExtraArgs)
 	}
 }
 

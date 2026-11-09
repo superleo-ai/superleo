@@ -170,9 +170,15 @@ func codexQueen(req *agentexec.Request, kit *QueenKit, _ bool, _ string) error {
 	unasked := allowedServers(kit)
 	for _, name := range sortedNames(kit.Servers) {
 		entry, _ := kit.Servers[name].(map[string]any)
-		c, err := codexServer(entry)
+		c, env, err := codexServer(entry)
 		if err != nil {
 			return fmt.Errorf("MCP server %s: %w", name, err)
+		}
+		for k, v := range env {
+			if req.Env == nil {
+				req.Env = map[string]string{}
+			}
+			req.Env[k] = v
 		}
 		if unasked[name] {
 			c["default_tools_approval_mode"] = "approve"
@@ -189,7 +195,12 @@ var mcpRefOnly = regexp.MustCompile(`^\$\{([A-Za-z_][A-Za-z0-9_]*)\}$`)
 // codexServer is a Claude-shaped server entry as codex's mcp_servers reads
 // it. Codex fills in no ${NAME} itself, so a reference becomes the setting
 // that names the variable: bearer_token_env_var, env_http_headers, env_vars.
-func codexServer(e map[string]any) (map[string]any, error) {
+//
+// An argument may name a variable the entry's own env sets: the program fills
+// it in, as mcp-remote does with --header "Authorization:${AUTH}". Codex then
+// passes that variable through, and its value comes back in env for the
+// CLI's environment, so it is not on codex's command line.
+func codexServer(e map[string]any) (map[string]any, map[string]string, error) {
 	out := map[string]any{}
 	refIn := func(v any) bool {
 		raw, _ := json.Marshal(v)
@@ -197,7 +208,7 @@ func codexServer(e map[string]any) (map[string]any, error) {
 	}
 	if u, _ := e["url"].(string); u != "" {
 		if refIn(u) {
-			return nil, errors.New("its URL names a variable")
+			return nil, nil, errors.New("its URL names a variable")
 		}
 		out["url"] = u
 		headers, _ := e["headers"].(map[string]any)
@@ -216,7 +227,7 @@ func codexServer(e map[string]any) (map[string]any, error) {
 			case m != nil:
 				fromEnv[h] = m[1]
 			case refIn(v):
-				return nil, fmt.Errorf("header %s is not a variable or a value", h)
+				return nil, nil, fmt.Errorf("header %s is not a variable or a value", h)
 			default:
 				plain[h] = v
 			}
@@ -227,29 +238,41 @@ func codexServer(e map[string]any) (map[string]any, error) {
 		if len(fromEnv) > 0 {
 			out["env_http_headers"] = fromEnv
 		}
-		return out, nil
+		return out, nil, nil
 	}
 	cmd, _ := e["command"].(string)
 	if cmd == "" {
-		return nil, errors.New("it has neither a URL nor a command")
+		return nil, nil, errors.New("it has neither a URL nor a command")
 	}
-	if refIn(cmd) || refIn(e["args"]) {
-		return nil, errors.New("its command names a variable")
+	if refIn(cmd) {
+		return nil, nil, errors.New("its command names a variable")
+	}
+	env, _ := e["env"].(map[string]any)
+	raw, _ := json.Marshal(e["args"])
+	inArgs := map[string]bool{}
+	for _, name := range backend.MCPEnvRefs(string(raw)) {
+		if _, ok := env[name]; !ok {
+			return nil, nil, fmt.Errorf("an argument names %s, which its env does not set", name)
+		}
+		inArgs[name] = true
 	}
 	out["command"] = cmd
 	if args, ok := e["args"].([]any); ok && len(args) > 0 {
 		out["args"] = args
 	}
-	env, _ := e["env"].(map[string]any)
 	plain := map[string]any{}
 	var pass []any
+	values := map[string]string{}
 	for _, k := range sortedNames(env) {
 		v, _ := env[k].(string)
 		switch m := mcpRefOnly.FindStringSubmatch(v); {
 		case m != nil && m[1] == k:
 			pass = append(pass, k)
+		case inArgs[k] && !refIn(v):
+			pass = append(pass, k)
+			values[k] = v
 		case refIn(v):
-			return nil, fmt.Errorf("%s is set from another variable", k)
+			return nil, nil, fmt.Errorf("%s is set from another variable", k)
 		default:
 			plain[k] = v
 		}
@@ -260,7 +283,7 @@ func codexServer(e map[string]any) (map[string]any, error) {
 	if len(pass) > 0 {
 		out["env_vars"] = pass
 	}
-	return out, nil
+	return out, values, nil
 }
 
 // tomlString is s as a TOML basic string: JSON's escapes are TOML's.
