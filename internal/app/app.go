@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
@@ -16,6 +18,7 @@ import (
 	"github.com/liliang-cn/agent-go/v3/pkg/agent"
 	"github.com/liliang-cn/agent-go/v3/pkg/mcp"
 	"github.com/liliang-cn/superleo/internal/backend"
+	"github.com/liliang-cn/superleo/internal/watchdog"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -340,6 +343,8 @@ func NewApp() *App {
 func (a *App) Startup(ctx context.Context) {
 	a.ctx = ctx
 	a.desktop = true
+	// Opened again: the watchdog looks after it from here (Shutdown).
+	_ = os.Remove(filepath.Join(backend.DataDir(), watchdog.QuitMarker))
 	a.launchedKeepRunning.Store(KeepRunningWanted())
 	a.refreshMember()
 	a.startHiveLink()
@@ -446,6 +451,11 @@ func (a *App) syncProxy() {
 
 // shutdown releases backend resources.
 func (a *App) Shutdown(ctx context.Context) {
+	// Quit on purpose (Cmd+Q, the menu, a logout): the watchdog is not to
+	// open it again. A crash never gets here, so it still is.
+	if a.desktop {
+		_ = os.WriteFile(filepath.Join(backend.DataDir(), watchdog.QuitMarker), nil, 0o644)
+	}
 	// First: the long runs the turns' stopping ends must not be recorded as
 	// finished or failed.
 	a.quitting.Store(true)

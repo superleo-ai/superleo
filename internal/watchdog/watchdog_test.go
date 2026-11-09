@@ -200,6 +200,25 @@ func TestPauseFile(t *testing.T) {
 	}
 }
 
+func TestAQuitAppStaysQuit(t *testing.T) {
+	r := newRig(t)
+	r.api.onFn("GetStatus", func([]json.RawMessage) (any, int) { return nil, 500 })
+	r.host.running = false
+	if err := os.WriteFile(filepath.Join(r.home, QuitMarker), nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	r.tick(0)
+	if r.host.launches != 0 || !strings.Contains(r.logText(t), "result=down_quit") {
+		t.Fatalf("quit but launches=%d", r.host.launches)
+	}
+	// Without the marker, as after a crash, it is opened again.
+	os.Remove(filepath.Join(r.home, QuitMarker))
+	r.tick(time.Minute)
+	if r.host.launches != 1 {
+		t.Fatalf("crashed but launches=%d", r.host.launches)
+	}
+}
+
 func TestHungAPIEscalatesNeverKills(t *testing.T) {
 	r := newRig(t)
 	r.api.onFn("GetStatus", func([]json.RawMessage) (any, int) { return nil, -1 })

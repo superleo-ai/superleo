@@ -25,6 +25,11 @@ type Watchdog struct {
 }
 
 // New builds a Watchdog with the real host and judge.
+
+// QuitMarker is the file in the SuperLeo home that says the person quit the
+// app: while it is there the watchdog does not reopen it.
+const QuitMarker = "watchdog.quit"
+
 func New(cfg Config) (*Watchdog, error) {
 	tok, err := ReadToken(cfg.Home)
 	log := NewLog(cfg.Home, cfg.LogMaxMB)
@@ -120,6 +125,13 @@ func (w *Watchdog) checkAlive(ctx context.Context) {
 	w.State.HangSince = time.Time{}
 	if _, perr := os.Stat(filepath.Join(w.Cfg.Home, "watchdog.pause")); perr == nil {
 		w.Log.Line("alive", "down_paused")
+		return
+	}
+	// Quit on purpose: the app leaves QuitMarker when it shuts down cleanly
+	// and takes it away when it starts, so Cmd+Q stays quit while a crash,
+	// which never gets to write it, is still relaunched.
+	if _, qerr := os.Stat(filepath.Join(w.Cfg.Home, QuitMarker)); qerr == nil {
+		w.Log.Line("alive", "down_quit")
 		return
 	}
 	// Forget relaunches older than the window.
