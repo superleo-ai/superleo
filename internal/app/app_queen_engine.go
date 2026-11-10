@@ -332,7 +332,10 @@ func (a *App) routeToEngine(requestID, sessionID, engine, message string, busy b
 		// busy: the conversation's own session is still answering, so this
 		// turn starts one of its own and is handed the conversation instead.
 		// A CLI that keeps no session (hermes) is new to every turn.
-		if prev := a.lastChatRun(sessionID, eng, true); prev != nil && !busy && queenEngineTraits(eng).Resumes {
+		// A session worn long (many turns, or since hours ago) is left for a
+		// new one, handed the last turns: resumed for ever it carries every
+		// tool result since, and each turn sends all of it again.
+		if prev := a.lastChatRun(sessionID, eng, true); prev != nil && !busy && queenEngineTraits(eng).Resumes && !a.queenSessionWorn(prev, time.Now()) {
 			o.Thread, o.Session, o.Cwd, o.Model, o.Prev = prev.Thread, prev.Session, prev.Cwd, prev.Model, prev
 		}
 		// What was said here that the engine's session did not hear goes in

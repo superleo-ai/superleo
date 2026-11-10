@@ -92,6 +92,35 @@ func (a *App) routeToCLI(requestID, sessionID, name, prompt string) {
 	a.trackRun(requestID, func() { a.CancelCLIRun(run.ID) })
 }
 
+// How long the queen keeps one engine session going: this many turns, or
+// this long since its first. Past either, her next turn starts a new session
+// and is handed the conversation's last turns (handoffText).
+const (
+	queenSessionTurns  = 8
+	queenSessionMaxAge = 6 * time.Hour
+)
+
+// queenSessionWorn reports whether the session prev ran on has had
+// queenSessionTurns of the queen's turns, or began queenSessionMaxAge ago.
+func (a *App) queenSessionWorn(prev *CLIRun, now time.Time) bool {
+	if prev == nil || prev.Session == "" {
+		return false
+	}
+	s := a.cliStore()
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	turns, first := 0, prev.Started
+	for _, r := range s.runs {
+		if r.Queen && r.Chat == prev.Chat && r.Agent == prev.Agent && r.Session == prev.Session {
+			turns++
+			if r.Started.Before(first) {
+				first = r.Started
+			}
+		}
+	}
+	return turns >= queenSessionTurns || now.Sub(first) >= queenSessionMaxAge
+}
+
 // lastChatRun is the newest finished run of an agent started from a
 // conversation, the one whose session the next @mention continues — or, with
 // queen, the next turn the agent thinks for the queen there. The two are kept

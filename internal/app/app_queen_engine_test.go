@@ -348,6 +348,39 @@ func TestTheNextTurnInAConversationResumesItsEngineSession(t *testing.T) {
 	}
 }
 
+func TestTheQueenLeavesASessionWornByTurns(t *testing.T) {
+	h := newEngineHarness(t, fakeClaudeTurn, 0)
+	for i := 1; i <= queenSessionTurns+1; i++ {
+		h.ev.wait(t, h.a.SendChat("c1", fmt.Sprint("问题", i), nil))
+	}
+	if got := argAfter(fakeArgs(t, h.dir, queenSessionTurns), "--resume"); got != "sess-1" {
+		t.Fatalf("turn %d resumed %q", queenSessionTurns, got)
+	}
+	args := fakeArgs(t, h.dir, queenSessionTurns+1)
+	if got := argAfter(args, "--resume"); got != "" {
+		t.Fatalf("turn %d still resumed %q", queenSessionTurns+1, got)
+	}
+	// The new session is handed what was said last.
+	if !strings.Contains(strings.Join(args, " "), "问题8") {
+		t.Fatal("the new session was not handed the earlier turns")
+	}
+}
+
+func TestTheQueenLeavesASessionWornByAge(t *testing.T) {
+	h := newEngineHarness(t, fakeClaudeTurn, 0)
+	h.ev.wait(t, h.a.SendChat("c1", "昨晚的问题", nil))
+	s := h.a.cliStore()
+	s.mu.Lock()
+	for _, r := range s.runs {
+		r.Started = r.Started.Add(-queenSessionMaxAge - time.Minute)
+	}
+	s.mu.Unlock()
+	h.ev.wait(t, h.a.SendChat("c1", "今早的问题", nil))
+	if got := argAfter(fakeArgs(t, h.dir, 2), "--resume"); got != "" {
+		t.Fatalf("a session from hours ago was resumed %q", got)
+	}
+}
+
 func TestAnAtMentionOfTheSameCLIIsStillAnAtMention(t *testing.T) {
 	h := newEngineHarness(t, fakeClaudeTurn, 0)
 	_, done := h.ev.wait(t, h.a.SendChat("c1", "@claude 看一下测试", nil))
