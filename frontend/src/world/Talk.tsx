@@ -110,14 +110,19 @@ export default function Talk({ who, placeholder }: { who: Talker; placeholder: s
     return () => { set.delete(fn); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
-  // The queen's card opens on where the conversation with her is.
+  // The queen's card opens on where the conversation with her is, read afresh
+  // each time: what was said in the chat panel, on the phone or anywhere else
+  // while the card was closed never reached this card's events. The kept lines
+  // show until the history comes.
   useEffect(() => {
-    if (who.kind !== "queen" || threads.get(key)?.lines.length) return;
+    if (who.kind !== "queen") return;
     loadQueenSession().then((id) => ChatHistory(id)).then((turns: any[]) => {
+      if (live.current) return; // a turn of this card is streaming; its lines are newer
       const last = (turns ?? []).filter((x) => (x.role === "user" || x.role === "assistant") && x.kind !== "context" && x.kind !== "interim" && x.content && !isInjectedMemory(x.role, String(x.content))).slice(-6);
-      const th = { lines: last.map((x) => ({ who: x.role === "user" ? "you" : "it", text: String(x.content).slice(0, 4000) }) as Line) };
+      const th = { ...(threads.get(key) ?? {}), lines: last.map((x) => ({ who: x.role === "user" ? "you" : "it", text: String(x.content).slice(0, 4000) }) as Line) };
       threads.set(key, th);
-      setLines(th.lines);
+      notify(key);
+      if (alive.current) setLines(th.lines);
     }).catch(() => {});
   }, [key]);
   // The thread stays on its newest line; sending brings it back down.
