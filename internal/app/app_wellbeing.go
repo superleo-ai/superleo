@@ -2,7 +2,6 @@ package app
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -22,19 +21,7 @@ import (
 
 // vitaRead calls one of vita's read-only tools.
 func (a *App) vitaRead(tool string, args map[string]any) (any, error) {
-	res := a.mcpActions().Call(context.Background(), backend.VitaServer, tool, args, backend.MCPCallOptions{
-		Unlisted: true,
-		Quiet:    true,
-	})
-	switch {
-	case res.Code == backend.ActionNotConfigured:
-		return nil, &callError{http.StatusServiceUnavailable, res.Error}
-	case !res.OK:
-		return nil, &callError{http.StatusBadGateway, res.Error}
-	case res.Structured != nil:
-		return res.Structured, nil
-	}
-	return map[string]any{"text": res.Text}, nil
+	return a.mcpRead(backend.VitaServer, tool, args)
 }
 
 // WellbeingToday is today's summary, or the newest day (health_today).

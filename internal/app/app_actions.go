@@ -128,15 +128,23 @@ func (a *App) NotedTimeEntries() (any, error) {
 	})
 }
 
-// NotedHoldings is every investment with its position (list_holdings).
+// NotedHoldings is every investment with its position (list_holdings),
+// from finance when it is connected and from noted before that. The name
+// stays: the phone calls it.
 func (a *App) NotedHoldings() (any, error) {
-	return a.notedRead("list_holdings", map[string]any{})
+	return a.mcpRead(backend.HoldingsServer(), "list_holdings", map[string]any{})
 }
 
 // notedRead runs one of the fixed reads. An unconfigured noted answers 503,
 // a failing one 502, each with the reason as the body.
 func (a *App) notedRead(tool string, args map[string]any) (any, error) {
-	res := a.mcpActions().Call(context.Background(), backend.NotedServer, tool, args, backend.MCPCallOptions{
+	return a.mcpRead(backend.NotedServer, tool, args)
+}
+
+// mcpRead calls one tool of a configured MCP server for a page or the phone:
+// 503 when the server is not set up, 502 when the call fails.
+func (a *App) mcpRead(server, tool string, args map[string]any) (any, error) {
+	res := a.mcpActions().Call(context.Background(), server, tool, args, backend.MCPCallOptions{
 		Unlisted: true,
 		Quiet:    true,
 	})

@@ -14,6 +14,7 @@ package app
 // talking about it.
 
 import (
+	"log/slog"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -95,6 +96,17 @@ func (a *App) Quotes(symbols []string) (map[string]any, error) {
 	}
 	if len(symbols) > backend.QuoteMaxSymbols {
 		return nil, &callError{400, fmt.Sprintf("at most %d symbols at once", backend.QuoteMaxSymbols)}
+	}
+	// Finance keeps the quotes when it is connected; SuperLeo's own service
+	// answers before that, and when finance cannot.
+	if backend.FinanceConfigured() {
+		if out, err := a.mcpRead(backend.FinanceServer, "quote", map[string]any{"symbols": symbols}); err == nil {
+			if m, ok := out.(map[string]any); ok && m["quotes"] != nil {
+				return m, nil
+			}
+		} else {
+			slog.Warn("quotes: finance did not answer, using our own", "symbols", len(symbols), "error", err)
+		}
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()

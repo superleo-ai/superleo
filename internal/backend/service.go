@@ -300,7 +300,7 @@ func NewService(s *Settings) (*Service, error) {
 	_, vitaMissing, _, vitaConfigured := findMCPServer(MCPConfigSources(), VitaServer, os.LookupEnv)
 	vitaConfigured = vitaConfigured && len(vitaMissing) == 0
 	b := agent.New("SuperLeo").
-		WithPrompt(buildPersona(time.Now(), !s.DisableSelfInstall, s.ExternalAgents.Enabled) + browserSection(s.browserMode()) + desktopSection(s.desktopControl()) + hiveSection(s.Hive) + queenNameSection(s) + homeLayoutSection(s.Hive) + notedSectionFor(notedConfigured, s.Hive.Role) + vitaSection(vitaConfigured) + uiRulesSection()).
+		WithPrompt(buildPersona(time.Now(), !s.DisableSelfInstall, s.ExternalAgents.Enabled) + browserSection(s.browserMode()) + desktopSection(s.desktopControl()) + hiveSection(s.Hive) + queenNameSection(s) + homeLayoutSection(s.Hive) + notedSectionFor(notedConfigured, s.Hive.Role) + vitaSection(vitaConfigured) + financeSection(FinanceConfigured()) + uiRulesSection()).
 		WithConfig(cfg).
 		WithLLM(brain).
 		WithSandbox(sb).
@@ -1074,7 +1074,7 @@ const answerLanguageRule = `Answer in Chinese — short and natural; never Engli
 // a US market drop, the queen once said she could not know the person's
 // positions — which are in noted — and gave general principles and a line that
 // she is not their advisor.
-const investingRule = `A question about the markets or the person's money (buy or sell, a drop, a position) is answered from their data, never with general principles: first read their holdings in noted (list_holdings) and today's prices and news — never say you cannot know their positions. Say what they hold in what is asked about, its weight and gain or loss, what moved and why, and what buying more would do to that weight; then your view in plain words, with the reason and what would change it. No line that you are not their advisor: the person knows the decision is theirs.`
+const investingRule = `A question about the markets or the person's money (buy or sell, a drop, a position) is answered from their data, never with general principles: first read their holdings (list_holdings: in finance when it is connected, else in noted) and today's prices and news — never say you cannot know their positions. Say what they hold in what is asked about, its weight and gain or loss, what moved and why, and what buying more would do to that weight; then your view in plain words, with the reason and what would change it. No line that you are not their advisor: the person knows the decision is theirs.`
 
 // queenChineseName is the hive's word for its queen in Chinese. A CLI left to
 // translate "queen" calls itself by the word for a monarch, which SuperLeo
@@ -1548,6 +1548,9 @@ const singleUserID = "owner"
 // them, and a worker that has to search for them finds the wrong ones.
 func eagerTools(s *Settings, browser bool) []string {
 	out := append([]string{}, eagerNotedTools...)
+	if FinanceConfigured() {
+		out = append(out, eagerFinanceTools...)
+	}
 	if browser {
 		out = append(out, browserEagerTools...)
 	}
@@ -1573,6 +1576,13 @@ var eagerNotedTools = []string{
 	"mcp_noted_list_holdings", "mcp_noted_create_event", "mcp_noted_create_task",
 	"mcp_noted_complete_task", "mcp_noted_update_task", "mcp_noted_search_notes",
 	"mcp_noted_create_note", "mcp_noted_log_time",
+}
+
+// eagerFinanceTools are finance's everyday tools: the portfolio, a quote,
+// the news and recording a trade.
+var eagerFinanceTools = []string{
+	"mcp_finance_list_holdings", "mcp_finance_portfolio_summary", "mcp_finance_quote",
+	"mcp_finance_news", "mcp_finance_record_trade",
 }
 
 // deferredToolPatterns are the tools this app keeps behind the index rather

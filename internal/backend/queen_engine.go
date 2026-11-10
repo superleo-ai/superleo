@@ -13,7 +13,7 @@ import (
 // thinking for the queen is handed too, when they are configured here: the
 // person's data (noted), their health (vita) and the shared brain (cortexdb).
 // The rest stay SuperLeo's.
-var QueenEngineServers = []string{NotedServer, VitaServer, "cortexdb"}
+var QueenEngineServers = []string{NotedServer, VitaServer, FinanceServer, "cortexdb"}
 
 // EngineMCPServer is one of this instance's MCP servers as an agent CLI is
 // handed it, in the shape Claude's --mcp-config reads. The entry keeps its
