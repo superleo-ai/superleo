@@ -139,6 +139,10 @@ export function ExportWorkspaceFile(arg1:string):Promise<string>;
 
 export function ExternalAgentsStatus():Promise<Array<backend.ExternalAgentStatus>>;
 
+export function FinanceNews(arg1:string,arg2:number):Promise<any>;
+
+export function FinanceTopics(arg1:string,arg2:string,arg3:number):Promise<any>;
+
 export function FinishOnboarding(arg1:string,arg2:boolean):Promise<void>;
 
 export function FlowLines(arg1:string):Promise<Array<string>>;

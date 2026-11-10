@@ -266,6 +266,14 @@ export function ExternalAgentsStatus() {
   return window['go']['app']['App']['ExternalAgentsStatus']();
 }
 
+export function FinanceNews(arg1, arg2) {
+  return window['go']['app']['App']['FinanceNews'](arg1, arg2);
+}
+
+export function FinanceTopics(arg1, arg2, arg3) {
+  return window['go']['app']['App']['FinanceTopics'](arg1, arg2, arg3);
+}
+
 export function FinishOnboarding(arg1, arg2) {
   return window['go']['app']['App']['FinishOnboarding'](arg1, arg2);
 }
