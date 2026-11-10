@@ -255,9 +255,11 @@ func (a *App) routeToEngine(requestID, sessionID, engine, message string, busy b
 		}
 	})
 	a.runSession(requestID, sessionID)
+	a.pendingAsks.Store(requestID, pendingAsk{session: sessionID, message: message, at: started})
 	end := func() {
 		a.untrackRun(requestID)
 		a.openTurns.Delete(requestID)
+		a.pendingAsks.Delete(requestID)
 	}
 
 	rest := queenEnginesAfter(&s, engine)
@@ -336,7 +338,11 @@ func (a *App) routeToEngine(requestID, sessionID, engine, message string, busy b
 		// What was said here that the engine's session did not hear goes in
 		// front of the question: the whole conversation for a session new to
 		// it, the turns since its last answer for one it continues.
-		if earlier := handoffText(a.unseenTurns(sessionID, eng, o.Prev != nil)); earlier != "" {
+		unseen := a.unseenTurns(sessionID, eng, o.Prev != nil)
+		if busy {
+			unseen = append(unseen, a.stillAsked(sessionID, requestID)...)
+		}
+		if earlier := handoffText(unseen); earlier != "" {
 			o.Prompt = earlier + message
 		}
 
@@ -821,6 +827,30 @@ func (a *App) unseenTurns(sessionID, engine string, resumed bool) []backend.Chat
 		if t.Kind == "" && (t.Role == "user" || t.Role == "assistant") && strings.TrimSpace(t.Content) != "" {
 			out = append(out, t)
 		}
+	}
+	return out
+}
+
+// pendingAsk is one engine turn's question while it is being answered.
+type pendingAsk struct {
+	session, message string
+	at               time.Time
+}
+
+// stillAsked are the questions in a conversation that its other engine turns
+// are still answering, oldest first, as the person's turns.
+func (a *App) stillAsked(sessionID, except string) []backend.ChatTurn {
+	var asks []pendingAsk
+	a.pendingAsks.Range(func(k, v any) bool {
+		if p, ok := v.(pendingAsk); ok && k != except && p.session == sessionID {
+			asks = append(asks, p)
+		}
+		return true
+	})
+	slices.SortFunc(asks, func(x, y pendingAsk) int { return x.at.Compare(y.at) })
+	out := make([]backend.ChatTurn, 0, len(asks))
+	for _, p := range asks {
+		out = append(out, backend.ChatTurn{Role: "user", Content: p.message})
 	}
 	return out
 }

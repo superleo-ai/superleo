@@ -53,6 +53,11 @@ type App struct {
 	// openTurns are the turns still running, by request id, as the session
 	// list shows them (ChatSessions).
 	openTurns sync.Map
+	// pendingAsks are the questions of the engine turns still running, by
+	// request id: an engine records a question with its answer, at the end,
+	// so a turn started meanwhile would not otherwise hear what is still
+	// being answered ("明天呢？" after "今天有什么日程？").
+	pendingAsks sync.Map
 	// turnSess is each running turn's conversation, for its events
 	// (queen_console.go).
 	turnSess turnSessions

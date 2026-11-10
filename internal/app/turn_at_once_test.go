@@ -2,7 +2,9 @@ package app
 
 import (
 	"context"
+	"strings"
 	"testing"
+	"time"
 )
 
 // busyWith tracks a turn running in a conversation, the way a call turn on the
@@ -94,5 +96,22 @@ func TestAFreeConversationGoesToTheQueenEngine(t *testing.T) {
 	}
 	if len(h.owned()) != 0 {
 		t.Fatalf("SuperLeo's model answered instead: %v", h.owned())
+	}
+}
+
+// A turn started while another engine turn in the conversation is still
+// answering hears that question: "明天呢？" means nothing without "今天有什么日程？".
+func TestAnEngineTurnHearsTheQuestionStillBeingAnswered(t *testing.T) {
+	a := &App{}
+	now := time.Now()
+	a.pendingAsks.Store("first", pendingAsk{session: "c", message: "今天有什么日程？", at: now.Add(-2 * time.Second)})
+	a.pendingAsks.Store("elsewhere", pendingAsk{session: "other", message: "不相干", at: now})
+	a.pendingAsks.Store("second", pendingAsk{session: "c", message: "明天呢？", at: now})
+	got := a.stillAsked("c", "second")
+	if len(got) != 1 || got[0].Content != "今天有什么日程？" || got[0].Role != "user" {
+		t.Fatalf("handed %v", got)
+	}
+	if !strings.Contains(handoffText(got), "Person: 今天有什么日程？") {
+		t.Fatalf("not in the handoff: %q", handoffText(got))
 	}
 }
