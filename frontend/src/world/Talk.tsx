@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useStickToBottom } from "../lib/useStickToBottom";
 import { HistoryIcon, SendIcon } from "lucide-react";
-import { AskIn, ChatHistory, CLIRunDetail, FollowUpCLIRun, SendChat, StandingReports, StartCLIRun, WakeStandingAgent } from "../../wailsjs/go/app/App";
+import { AskIn, ChatHistory, CLIRunDetail, FollowUpCLIRun, SendChat, StandingReports, StartCLIRun, TurnTraces, WakeStandingAgent } from "../../wailsjs/go/app/App";
 import { EventsOn } from "../../wailsjs/runtime";
 import { loadQueenSession, queenSession } from "../lib/queenConsole";
 import { useI18n } from "../lib/i18n";
@@ -91,6 +91,9 @@ export default function Talk({ who, placeholder }: { who: Talker; placeholder: s
   const [liveReq, setLiveReq] = useState("");
   // What this card just sent, until SendChat names its request.
   const mine = useRef("");
+  // The queen's turns taken elsewhere (the chat bar, the panel, the phone)
+  // whose answers this card is waiting for.
+  const othersRef = useRef(new Set<string>());
   const end = useRef<HTMLDivElement>(null);
   const alive = useRef(true);
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
@@ -114,12 +117,22 @@ export default function Talk({ who, placeholder }: { who: Talker; placeholder: s
   // each time: what was said in the chat panel, on the phone or anywhere else
   // while the card was closed never reached this card's events. The kept lines
   // show until the history comes.
+  // A turn already running when the card opened (asked in the chat bar or the
+  // panel) is not in the history yet, and its chat:turn went before this card
+  // listened: it is taken from the running turns, and its answer is awaited.
   useEffect(() => {
     if (who.kind !== "queen") return;
-    loadQueenSession().then((id) => ChatHistory(id)).then((turns: any[]) => {
+    loadQueenSession().then(async (id) => {
+      const [turns, running] = await Promise.all([ChatHistory(id), TurnTraces(20).catch(() => [])]);
       if (live.current) return; // a turn of this card is streaming; its lines are newer
-      const last = (turns ?? []).filter((x) => (x.role === "user" || x.role === "assistant") && x.kind !== "context" && x.kind !== "interim" && x.content && !isInjectedMemory(x.role, String(x.content))).slice(-6);
-      const th = { ...(threads.get(key) ?? {}), lines: last.map((x) => ({ who: x.role === "user" ? "you" : "it", text: String(x.content).slice(0, 4000) }) as Line) };
+      const last = (turns ?? []).filter((x: any) => (x.role === "user" || x.role === "assistant") && x.kind !== "context" && x.kind !== "interim" && x.content && !isInjectedMemory(x.role, String(x.content))).slice(-6);
+      const lines = last.map((x: any) => ({ who: x.role === "user" ? "you" : "it", text: String(x.content).slice(0, 4000) }) as Line);
+      for (const r of ((running ?? []) as any[]).filter((r) => r.state === "running" && r.session === id && r.id).reverse()) {
+        othersRef.current.add(r.id);
+        const tail = lines[lines.length - 1];
+        if (!(tail?.who === "you" && tail.text === r.message)) lines.push({ who: "you", text: String(r.message ?? "") });
+      }
+      const th = { ...(threads.get(key) ?? {}), lines };
       threads.set(key, th);
       notify(key);
       if (alive.current) setLines(th.lines);
@@ -146,7 +159,7 @@ export default function Talk({ who, placeholder }: { who: Talker; placeholder: s
   // too: its words when it starts, its answer when it ends.
   useEffect(() => {
     if (who.kind !== "queen") return;
-    const others = new Set<string>();
+    const others = othersRef.current;
     const settle = () => { live.current = ""; raw.current = ""; setStreamed(""); setBusy(""); setLiveReq(""); };
     const offs = [
       EventsOn("chat:turn", (p: any) => {
