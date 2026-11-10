@@ -7,6 +7,7 @@ import { useRoom } from "./lib/useViewport";
 import StatusBar from "./components/StatusBar";
 import ChatView from "./views/ChatView";
 import StatsView from "./views/StatsView";
+import WellbeingView from "./views/WellbeingView";
 import HiveView from "./views/HiveView";
 import AgentsView from "./views/AgentsView";
 import StandingView from "./views/StandingView";
@@ -200,6 +201,7 @@ export default function App() {
       <Route path="/tasks" element={<TasksView attention={attention} approvals={approvals.pending} onOpenConversation={openConversation} onResolve={approvals.resolve} />} />
       <Route path="/schedule" element={<ScheduleView />} />
       <Route path="/stats" element={<StatsView />} />
+      <Route path="/wellbeing" element={<WellbeingView />} />
       {/* Everything under /hive is the Hive screen's own to route:
           the overview, and one page per task. */}
       <Route path="/hive/*" element={<HiveView />} />

@@ -569,7 +569,6 @@ func (a *App) rebuild() {
 	a.registerRemoteTools(svc, cfg.RemoteAgents)
 	a.registerCodingAgentTools(svc, cfg)
 	a.registerScheduleTools(svc)
-	a.registerWellbeingTools(svc)
 	a.registerSelfTools(svc)
 	a.registerHomeLayoutTool(svc, cfg)
 	a.registerHiveTools(svc, cfg)

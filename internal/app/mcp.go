@@ -141,7 +141,6 @@ func newMCPServer(app *App, version, caller, instructions string) *mcp.Server {
 	addSelfMCPTools(s, app, caller)
 	addAskMCPTools(s, app)
 	addHiveMCPTools(s, app, caller)
-	addWellbeingMCPTools(s, app)
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:  "superleo_schedule_create",

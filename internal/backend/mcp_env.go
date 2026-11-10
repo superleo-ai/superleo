@@ -182,13 +182,6 @@ func resolveMCPConfig(src string, lookup func(string) (string, bool)) (string, e
 			localized = true
 			continue
 		}
-		// Health is SuperLeo's own now (vita.go): the old vita server would
-		// offer the same days again under other names.
-		if name == VitaServer {
-			slog.Info("mcp server left out: health is SuperLeo's own module", "server", name, "path", src)
-			localized = true
-			continue
-		}
 		resolved, missing := expandMCPEntry(entry, lookup)
 		if len(missing) > 0 {
 			slog.Warn("mcp server left out: variables not set", "server", name, "path", src, "missing", strings.Join(missing, ", "))

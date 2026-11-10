@@ -294,11 +294,13 @@ func NewService(s *Settings) (*Service, error) {
 
 	// --- Build the agent service. ---
 	// With noted connected, personal data has a home of its own and the
-	// prompt says so (notedSection). Health is SuperLeo's own (wellbeingSection).
+	// prompt says so (notedSection); with Vita, health does (vitaSection).
 	_, notedMissing, _, notedConfigured := findMCPServer(MCPConfigSources(), NotedServer, os.LookupEnv)
 	notedConfigured = notedConfigured && len(notedMissing) == 0
+	_, vitaMissing, _, vitaConfigured := findMCPServer(MCPConfigSources(), VitaServer, os.LookupEnv)
+	vitaConfigured = vitaConfigured && len(vitaMissing) == 0
 	b := agent.New("SuperLeo").
-		WithPrompt(buildPersona(time.Now(), !s.DisableSelfInstall, s.ExternalAgents.Enabled) + browserSection(s.browserMode()) + desktopSection(s.desktopControl()) + hiveSection(s.Hive) + queenNameSection(s) + homeLayoutSection(s.Hive) + notedSectionFor(notedConfigured, s.Hive.Role) + wellbeingSection() + uiRulesSection()).
+		WithPrompt(buildPersona(time.Now(), !s.DisableSelfInstall, s.ExternalAgents.Enabled) + browserSection(s.browserMode()) + desktopSection(s.desktopControl()) + hiveSection(s.Hive) + queenNameSection(s) + homeLayoutSection(s.Hive) + notedSectionFor(notedConfigured, s.Hive.Role) + vitaSection(vitaConfigured) + uiRulesSection()).
 		WithConfig(cfg).
 		WithLLM(brain).
 		WithSandbox(sb).

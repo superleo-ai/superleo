@@ -1,0 +1,74 @@
+/* Wellbeing: daylight instrument — cool white, ink, one signal blue, fine lines. */
+.wb-view {
+  --wb-blue: #2f6bff;
+  --wb-good: #2f6bff;
+  --wb-mid: #6f96ff;
+  --wb-low: #d9822b;
+  --wb-t0: var(--text-0, var(--ink, #1d1a16));
+  --wb-t2: var(--text-2, var(--ink-2, rgba(29, 26, 22, 0.62)));
+  --wb-t3: var(--ink-3, rgba(29, 26, 22, 0.42));
+  --wb-line: var(--border, var(--line, rgba(29, 26, 22, 0.08)));
+  --wb-card: var(--bg-1, rgba(255, 255, 255, 0.72));
+  display: flex; flex-direction: column; gap: 16px;
+  flex: 1; min-width: 0; min-height: 0; overflow-y: auto;
+  padding: 20px 24px 28px;
+  color: var(--wb-t0);
+  font-family: var(--font-sans, "Geist Variable", system-ui, sans-serif);
+}
+.wb-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.wb-head h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+.wb-meta { display: flex; gap: 14px; color: var(--wb-t2); font-size: 12.5px; font-family: "Geist Mono Variable", ui-monospace, monospace; }
+.wb-error { color: #c0392b; font-size: 13px; }
+
+.wb-scores { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.wb-stat, .wb-ring, .wb-card {
+  background: var(--wb-card); border: 1px solid var(--wb-line); border-radius: 12px;
+}
+.wb-stat { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; min-height: 104px; }
+.wb-label { font-size: 12px; color: var(--wb-t2); letter-spacing: 0.02em; }
+.wb-value { font-family: "Geist Mono Variable", ui-monospace, monospace; font-size: 28px; font-weight: 600; line-height: 1.1; color: var(--wb-t0); }
+.wb-unit { font-size: 13px; font-weight: 500; color: var(--wb-t2); margin-left: 4px; }
+.wb-sub { font-size: 11.5px; color: var(--wb-t3); font-family: "Geist Mono Variable", ui-monospace, monospace; }
+
+.wb-ring { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 8px 10px; gap: 4px; min-height: 104px; }
+.wb-ring svg { display: block; }
+.wb-ring-track { fill: none; stroke: var(--wb-line); stroke-width: 5; }
+.wb-ring-fill { fill: none; stroke: var(--wb-blue); stroke-width: 5; stroke-linecap: round; transition: stroke-dasharray 0.5s ease; }
+.wb-ring.mid .wb-ring-fill { stroke: var(--wb-mid); }
+.wb-ring.low .wb-ring-fill { stroke: var(--wb-low); }
+.wb-ring-val { position: absolute; top: 38px; font-family: "Geist Mono Variable", ui-monospace, monospace; font-size: 20px; font-weight: 600; }
+
+.wb-card { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.wb-card-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.wb-card-title { font-size: 13px; font-weight: 600; color: var(--wb-t0); }
+.wb-tabs { display: flex; gap: 2px; flex-wrap: wrap; }
+.wb-tabs button {
+  border: 0; background: transparent; color: var(--wb-t2); font: inherit; font-size: 12.5px;
+  padding: 5px 10px; border-radius: 7px; cursor: pointer;
+}
+.wb-tabs button:hover { color: var(--wb-t0); }
+.wb-tabs button.on { background: rgba(47, 107, 255, 0.1); color: var(--wb-blue); font-weight: 600; }
+.wb-trend-sum { display: flex; gap: 18px; font-size: 12.5px; color: var(--wb-t2); }
+.wb-trend-sum b { color: var(--wb-t0); font-family: "Geist Mono Variable", ui-monospace, monospace; font-weight: 600; }
+.wb-chart { width: 100%; height: 240px; }
+.wb-none { color: var(--wb-t3); font-size: 13px; padding: 40px 0; text-align: center; }
+
+.wb-notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.wb-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.wb-list li { display: flex; flex-direction: column; gap: 2px; padding-left: 10px; border-left: 2px solid var(--wb-line); font-size: 13px; }
+.wb-list li b { font-weight: 600; }
+.wb-list li span { color: var(--wb-t2); font-size: 12.5px; line-height: 1.45; }
+.wb-list li.wb-tone-good { border-left-color: var(--wb-blue); }
+.wb-list li.wb-tone-caution { border-left-color: var(--wb-low); }
+
+.wb-empty { display: flex; flex-direction: column; gap: 12px; padding: 28px 24px; border: 1px dashed var(--wb-line); border-radius: 12px; max-width: 640px; }
+.wb-empty-title { font-size: 15px; font-weight: 600; }
+.wb-steps { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; color: var(--wb-t2); font-size: 13px; }
+.wb-steps code { font-family: "Geist Mono Variable", ui-monospace, monospace; font-size: 12px; color: var(--wb-t0); background: rgba(47, 107, 255, 0.07); padding: 2px 6px; border-radius: 5px; user-select: all; }
+.wb-foot { color: var(--wb-t3); font-size: 11.5px; }
+
+@media (max-width: 640px) {
+  .wb-view { padding: 14px 16px 24px; }
+  .wb-scores { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wb-chart { height: 200px; }
+}

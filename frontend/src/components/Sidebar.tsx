@@ -19,6 +19,7 @@ import {
   PlugIcon,
   PuzzleIcon,
   SettingsIcon,
+  HeartPulseIcon,
 } from "lucide-react";
 import { ViewKey } from "../lib/types";
 import { openBrowserPanel } from "../lib/browser";
@@ -49,6 +50,7 @@ const NAV: {
       { key: "home", label: "Home", Icon: LayoutGridIcon },
       { key: "dashboards", label: "Dashboards", Icon: LayoutDashboardIcon },
       { key: "schedule", label: "Schedule", Icon: CalendarDaysIcon },
+      { key: "wellbeing", label: "Wellbeing", Icon: HeartPulseIcon },
       { key: "tasks", label: "Needs your attention", Icon: ListTodoIcon },
       { key: "chat", label: "Chat", Icon: MessageSquareIcon, shortcut: "1" },
       { key: "conversations", label: "Conversations", Icon: MessagesSquareIcon },

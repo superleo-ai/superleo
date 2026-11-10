@@ -56,9 +56,6 @@ var queenMCPTools = []string{
 	"superleo_schedule_delete", "superleo_schedule_run_now",
 	// approvals, read only, and the conversations
 	"superleo_approvals_pending", "superleo_conversations", "superleo_chat_history",
-	// the person's health, read only (app_wellbeing.go)
-	"superleo_health_today", "superleo_health_days", "superleo_health_trend",
-	"superleo_health_knowledge", "superleo_health_assess",
 }
 
 // onlyTools is the queen server's enforcement: tools/list shows the allowed
