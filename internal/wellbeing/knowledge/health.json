@@ -1,0 +1,3838 @@
+{
+ "version": 1,
+ "entries": [
+  {
+   "id": "resting-hr",
+   "topic": "Resting heart rate",
+   "tags": [
+    "resting heart rate",
+    "rhr",
+    "pulse",
+    "heart rate",
+    "静息心率",
+    "安静心率",
+    "心率",
+    "脉搏",
+    "Ruhepuls",
+    "安静時心拍数"
+   ],
+   "text": "Resting heart rate (RHR) for adults is typically 60–100 bpm; well-trained people often sit at 40–60 bpm. A sustained RHR above 100 bpm at rest, or below 40 bpm with dizziness, fatigue or fainting, is worth a doctor's review. Within the normal range, a lower RHR goes with better fitness: in large cohorts every 10 bpm higher RHR is linked to about 9% higher all-cause mortality.",
+   "source": "AHA; Zhang et al., CMAJ 2016",
+   "urgent": false
+  },
+  {
+   "id": "rhr-trend",
+   "topic": "Resting heart rate against your baseline",
+   "tags": [
+    "resting heart rate up",
+    "rhr baseline",
+    "heart rate higher",
+    "elevated resting",
+    "心率升高",
+    "心率偏高",
+    "静息心率升高",
+    "心率变高"
+   ],
+   "text": "Compare resting heart rate with your own 30-day baseline, not with other people. A rise of 3–5 bpm for a day or two commonly follows short sleep, alcohol, dehydration, heat, stress or hard training. A rise of 5–10 bpm for several days, especially with higher wrist temperature or breathing rate, often comes before an infection. A slow fall over weeks usually reflects improving aerobic fitness.",
+   "source": "Radin et al., Lancet Digit Health 2020; Mishra et al., Nat Biomed Eng 2020",
+   "urgent": false
+  },
+  {
+   "id": "hrv-basics",
+   "topic": "What HRV is",
+   "tags": [
+    "hrv",
+    "heart rate variability",
+    "sdnn",
+    "心率变异性",
+    "心率变异",
+    "变异性",
+    "Herzfrequenzvariabilität",
+    "心拍変動"
+   ],
+   "text": "Apple Watch reports heart rate variability as SDNN in milliseconds, measured in short readings and overnight. Values differ a lot between people (roughly 20–100+ ms in adults) and fall with age, so a single number says little; the trend against your own baseline matters. HRV above your baseline signals good parasympathetic recovery.",
+   "source": "Shaffer & Ginsberg, Front Public Health 2017",
+   "urgent": false
+  },
+  {
+   "id": "hrv-reading",
+   "topic": "Reading HRV against baseline",
+   "tags": [
+    "hrv low",
+    "hrv dropped",
+    "hrv baseline",
+    "hrv higher",
+    "hrv lower",
+    "hrv下降",
+    "hrv低",
+    "hrv高",
+    "hrv升高",
+    "心率变异性下降"
+   ],
+   "text": "Read HRV as a percentage of your 30-day baseline: within about ±10% is normal day-to-day noise; 10–25% below suggests incomplete recovery; more than 25% below for two or more days points to strain, illness or poor sleep and calls for an easier day. A 7-day rolling average is more reliable than one night.",
+   "source": "Plews et al., Sports Med 2013",
+   "urgent": false
+  },
+  {
+   "id": "hrv-factors",
+   "topic": "What raises and lowers HRV",
+   "tags": [
+    "improve hrv",
+    "raise hrv",
+    "why hrv",
+    "hrv alcohol",
+    "提高hrv",
+    "提升心率变异",
+    "为什么hrv",
+    "hrv为什么"
+   ],
+   "text": "Things that reliably lower next-morning HRV: alcohol (even 1–2 drinks), late heavy meals, short or irregular sleep, dehydration, a high training load, psychological stress, illness and heat. Things that raise it over weeks: regular aerobic exercise, consistent sleep timing, slow-breathing practice, and lower body fat.",
+   "source": "Shaffer & Ginsberg 2017; Pichot et al. 2016",
+   "urgent": false
+  },
+  {
+   "id": "max-hr",
+   "topic": "Maximum heart rate",
+   "tags": [
+    "max heart rate",
+    "maximum heart rate",
+    "220",
+    "最大心率",
+    "最高心率",
+    "maximale herzfrequenz"
+   ],
+   "text": "Maximum heart rate is commonly estimated as 220 − age or, more accurately for adults, 208 − 0.7 × age (Tanaka). Individuals differ from either formula by about ±10–12 bpm, so an observed peak in a hard effort is better when known.",
+   "source": "Tanaka et al., JACC 2001",
+   "urgent": false
+  },
+  {
+   "id": "hr-zones",
+   "topic": "Heart-rate training zones",
+   "tags": [
+    "heart rate zone",
+    "zones",
+    "karvonen",
+    "心率区间",
+    "心率分区",
+    "训练区间",
+    "zone 2",
+    "二区"
+   ],
+   "text": "Zones by heart-rate reserve (Karvonen: target = resting + % × (max − resting)): zone 1 50–60% recovery, zone 2 60–70% easy aerobic base, zone 3 70–80% tempo, zone 4 80–90% threshold, zone 5 90–100% maximal. For health and endurance most weekly time belongs in zones 1–2.",
+   "source": "ACSM Guidelines, 11th ed.",
+   "urgent": false
+  },
+  {
+   "id": "hr-recovery",
+   "topic": "Heart-rate recovery after exercise",
+   "tags": [
+    "heart rate recovery",
+    "hrr",
+    "心率恢复",
+    "运动后心率"
+   ],
+   "text": "Heart-rate recovery — the drop in the first minute after stopping hard exercise — is a fitness marker. A fall of 12 bpm or less in one minute with an upright cool-down is linked to higher cardiovascular risk; fit people often drop 20–30 bpm or more.",
+   "source": "Cole et al., NEJM 1999",
+   "urgent": false
+  },
+  {
+   "id": "palpitations",
+   "topic": "Palpitations and skipped beats",
+   "tags": [
+    "palpitations",
+    "skipped beat",
+    "irregular heartbeat",
+    "heart racing",
+    "心悸",
+    "心慌",
+    "早搏",
+    "心跳不齐",
+    "心跳快",
+    "Herzrasen",
+    "動悸"
+   ],
+   "text": "Occasional skipped or extra beats (ectopics) are common and usually harmless, often triggered by caffeine, alcohol, stress, poor sleep or dehydration. Get a medical review if palpitations last more than a few minutes, are fast and irregular, or come with chest pain, breathlessness, dizziness or fainting.",
+   "source": "NHS; ESC",
+   "urgent": false
+  },
+  {
+   "id": "afib",
+   "topic": "Irregular rhythm notification (AF)",
+   "tags": [
+    "atrial fibrillation",
+    "afib",
+    "irregular rhythm",
+    "ecg",
+    "房颤",
+    "心房颤动",
+    "心律不齐",
+    "心电图",
+    "Vorhofflimmern",
+    "心房細動"
+   ],
+   "text": "An Apple Watch irregular-rhythm notification means repeated readings suggested atrial fibrillation (AF). AF raises stroke risk about five-fold, so a notification should lead to a medical review and an ECG; record a 30-second ECG on the watch to bring along. The watch cannot detect heart attacks.",
+   "source": "ESC AF Guidelines 2024; Apple",
+   "urgent": false
+  },
+  {
+   "id": "bp-categories",
+   "topic": "Blood pressure categories",
+   "tags": [
+    "blood pressure",
+    "hypertension",
+    "systolic",
+    "diastolic",
+    "血压",
+    "高血压",
+    "收缩压",
+    "舒张压",
+    "低压",
+    "高压",
+    "Blutdruck",
+    "血圧"
+   ],
+   "text": "AHA/ACC 2017: normal below 120/80 mmHg; elevated 120–129 and below 80; stage 1 hypertension 130–139 or 80–89; stage 2 140+ or 90+; hypertensive crisis above 180 and/or above 120. Chinese (2024) and European guidelines define hypertension as 140/90 or more measured in clinic, and home readings of 135/85 or more also count as high. A diagnosis needs repeated readings on separate days, not one value.",
+   "source": "AHA/ACC 2017; Chinese Hypertension Guidelines 2024; ESC 2024",
+   "urgent": false
+  },
+  {
+   "id": "bp-measure",
+   "topic": "Measuring blood pressure at home",
+   "tags": [
+    "measure blood pressure",
+    "how to measure",
+    "cuff",
+    "home reading",
+    "量血压",
+    "测血压",
+    "血压计",
+    "怎么测血压"
+   ],
+   "text": "For an accurate home reading: no caffeine, exercise or smoking for 30 minutes, empty bladder, sit for 5 minutes with back supported and feet flat, arm resting at heart level, cuff on the bare upper arm, no talking. Take two readings one minute apart and average them; measure morning and evening for 7 days before judging.",
+   "source": "AHA Scientific Statement on Home BP 2019",
+   "urgent": false
+  },
+  {
+   "id": "bp-lifestyle",
+   "topic": "Lowering blood pressure without medicine",
+   "tags": [
+    "lower blood pressure",
+    "reduce blood pressure",
+    "dash",
+    "降血压",
+    "降压",
+    "血压怎么降"
+   ],
+   "text": "Measured effects on systolic pressure: weight loss about −1 mmHg per kg lost; DASH-style diet −11 mmHg in people with hypertension; cutting sodium by about 1 g a day −5 to −6; more potassium from vegetables and fruit −4 to −5; 90–150 min of aerobic exercise a week −5 to −8; isometric or resistance training −4 to −5; limiting alcohol −4.",
+   "source": "AHA/ACC 2017 Table 15",
+   "urgent": false
+  },
+  {
+   "id": "bp-low",
+   "topic": "Low blood pressure",
+   "tags": [
+    "low blood pressure",
+    "hypotension",
+    "低血压",
+    "血压低",
+    "血压偏低"
+   ],
+   "text": "Blood pressure below about 90/60 mmHg is only a problem when it causes symptoms such as dizziness, blurred vision or fainting. Drinking enough, standing up slowly and avoiding long hot showers help; new low pressure with symptoms, especially on a new medicine, should be reviewed.",
+   "source": "NHS; AHA",
+   "urgent": false
+  },
+  {
+   "id": "orthostatic",
+   "topic": "Dizziness on standing",
+   "tags": [
+    "dizzy when standing",
+    "orthostatic",
+    "head rush",
+    "stand up dizzy",
+    "站起来头晕",
+    "起立头晕",
+    "体位性低血压",
+    "眼前发黑"
+   ],
+   "text": "Orthostatic hypotension is a drop of 20+ mmHg systolic or 10+ mmHg diastolic within 3 minutes of standing. Light-headedness on standing is common after dehydration, alcohol, heat or long bed rest; frequent episodes, falls or fainting need a doctor's check, especially in older adults or people on blood-pressure medicines.",
+   "source": "Freeman et al., Consensus statement 2011",
+   "urgent": false
+  },
+  {
+   "id": "spo2",
+   "topic": "Blood oxygen",
+   "tags": [
+    "blood oxygen",
+    "spo2",
+    "oxygen saturation",
+    "血氧",
+    "血氧饱和度",
+    "Sauerstoffsättigung",
+    "血中酸素"
+   ],
+   "text": "Normal blood oxygen saturation at sea level is 95–100%. Readings of 91–94% deserve a repeat at rest with warm hands and a still wrist; a reliable reading of 90% or below, especially with breathlessness, needs prompt medical attention.",
+   "source": "WHO pulse oximetry manual; BTS",
+   "urgent": false
+  },
+  {
+   "id": "spo2-sleep",
+   "topic": "Blood oxygen during sleep",
+   "tags": [
+    "oxygen at night",
+    "spo2 sleep",
+    "睡眠血氧",
+    "夜间血氧",
+    "晚上血氧"
+   ],
+   "text": "Brief dips into the low 90s during sleep are common. Repeated drops below 90%, together with loud snoring, gasping, morning headaches or daytime sleepiness, suggest sleep apnea and are worth raising with a doctor.",
+   "source": "AASM",
+   "urgent": false
+  },
+  {
+   "id": "spo2-altitude",
+   "topic": "Blood oxygen and altitude",
+   "tags": [
+    "altitude",
+    "high altitude",
+    "mountain sickness",
+    "高原",
+    "高反",
+    "高原反应",
+    "海拔"
+   ],
+   "text": "Blood oxygen falls with altitude: around 2,500 m readings of 90–95% are normal, and above 3,500 m healthy people can read in the mid-80s. Headache, nausea and poor sleep after going above 2,500 m suggest acute mountain sickness: stop ascending. Breathlessness at rest, confusion or unsteady walking means descend at once.",
+   "source": "Wilderness Medical Society 2019",
+   "urgent": false
+  },
+  {
+   "id": "spo2-accuracy",
+   "topic": "Accuracy of wrist oximetry",
+   "tags": [
+    "spo2 accuracy",
+    "oxygen reading wrong",
+    "血氧不准",
+    "血氧准吗"
+   ],
+   "text": "Wrist oximetry is less accurate than a fingertip clip: cold skin, tattoos, a loose band, movement and darker skin pigmentation can distort readings. Trust repeated readings at rest and trends rather than a single value.",
+   "source": "FDA 2022; Sjoding et al., NEJM 2020",
+   "urgent": false
+  },
+  {
+   "id": "respiratory-rate",
+   "topic": "Respiratory rate",
+   "tags": [
+    "respiratory rate",
+    "breathing rate",
+    "breaths per minute",
+    "呼吸频率",
+    "呼吸率",
+    "Atemfrequenz",
+    "呼吸数"
+   ],
+   "text": "A normal adult respiratory rate at rest is 12–20 breaths per minute; during sleep the watch typically reads 12–18. A sustained rise of 2–3 breaths/min above your baseline can be an early sign of infection or, with a high resting heart rate, of overreaching.",
+   "source": "Clinical reference ranges; Natarajan et al. 2020",
+   "urgent": false
+  },
+  {
+   "id": "wrist-temp",
+   "topic": "Wrist temperature",
+   "tags": [
+    "wrist temperature",
+    "skin temperature",
+    "temperature deviation",
+    "手腕温度",
+    "腕温",
+    "体表温度",
+    "温度偏高"
+   ],
+   "text": "Apple Watch wrist temperature is a deviation from your own baseline measured during sleep, not body temperature. Shifts within ±0.5 °C are normal; +0.5 to +1 °C over two nights can come from alcohol, a warm room, illness or the luteal phase of the menstrual cycle; above +1 °C together with a raised resting heart rate often signals fever.",
+   "source": "Apple; Mason et al., Sci Rep 2022",
+   "urgent": false
+  },
+  {
+   "id": "body-temp",
+   "topic": "Body temperature and fever",
+   "tags": [
+    "fever",
+    "body temperature",
+    "temperature",
+    "发烧",
+    "发热",
+    "体温",
+    "低烧",
+    "高烧",
+    "Fieber",
+    "発熱"
+   ],
+   "text": "Normal body temperature is about 36.1–37.2 °C. In China 37.3 °C or more (armpit) is called fever: 37.3–38.0 °C low-grade, 38.1–39.0 °C moderate, 39.1–41.0 °C high, and above 41 °C hyperpyrexia, an emergency. Below 35 °C is hypothermia.",
+   "source": "Chinese clinical convention; WHO",
+   "urgent": false
+  },
+  {
+   "id": "fever-care",
+   "topic": "Looking after a fever",
+   "tags": [
+    "fever care",
+    "what to do fever",
+    "退烧",
+    "发烧怎么办",
+    "感冒",
+    "cold",
+    "flu",
+    "流感"
+   ],
+   "text": "For a fever: rest, drink fluids, and take paracetamol or ibuprofen as directed on the label if uncomfortable. See a doctor if fever lasts more than 3 days, goes above 39.5 °C, or comes with a stiff neck, a rash that does not fade under pressure, confusion, chest pain, breathlessness or severe headache.",
+   "source": "NHS; NICE NG143",
+   "urgent": false
+  },
+  {
+   "id": "cycle-temp",
+   "topic": "Menstrual cycle and body signals",
+   "tags": [
+    "menstrual cycle",
+    "period",
+    "ovulation",
+    "luteal",
+    "月经",
+    "经期",
+    "排卵",
+    "黄体期",
+    "生理期"
+   ],
+   "text": "After ovulation, wrist and basal temperature rise by about 0.2–0.5 °C and stay up through the luteal phase until the period; resting heart rate may be 2–4 bpm higher and HRV a little lower in that phase. This is normal and not a sign of illness.",
+   "source": "Shilaih et al. 2018; Apple Women's Health Study",
+   "urgent": false
+  },
+  {
+   "id": "sleep-duration",
+   "topic": "How much sleep",
+   "tags": [
+    "sleep",
+    "how much sleep",
+    "hours of sleep",
+    "sleep duration",
+    "slept",
+    "sleep last night",
+    "睡眠",
+    "睡多久",
+    "睡眠时间",
+    "睡几个小时",
+    "睡得",
+    "昨晚睡",
+    "睡了多久",
+    "Schlaf",
+    "睡眠時間",
+    "眠れ"
+   ],
+   "text": "Recommended sleep: adults 18–64 need 7–9 hours, adults 65+ 7–8 hours, teenagers 13–18 8–10 hours. Regularly sleeping under 7 hours is linked to weight gain, high blood pressure, diabetes, depression and weaker immunity; regularly needing more than 9 hours can signal poor sleep quality or illness.",
+   "source": "AASM/SRS 2015; National Sleep Foundation 2015",
+   "urgent": false
+  },
+  {
+   "id": "sleep-stages",
+   "topic": "Sleep stages",
+   "tags": [
+    "sleep stages",
+    "light sleep",
+    "core sleep",
+    "睡眠阶段",
+    "浅睡",
+    "核心睡眠",
+    "睡眠分期"
+   ],
+   "text": "An adult night cycles about every 90 minutes through light sleep (N1/N2, about 50–60% of the night), deep sleep (N3, about 13–23%, mostly in the first half) and REM (about 20–25%, mostly in the second half). For 7.5 hours that is roughly 60–100 minutes of deep and 90–120 minutes of REM. Wearables estimate stages from movement and heart rate, so treat stage minutes as approximate.",
+   "source": "Ohayon et al., Sleep 2004",
+   "urgent": false
+  },
+  {
+   "id": "deep-sleep",
+   "topic": "Deep sleep",
+   "tags": [
+    "deep sleep",
+    "slow wave",
+    "深睡",
+    "深度睡眠",
+    "深睡眠",
+    "Tiefschlaf",
+    "深い睡眠"
+   ],
+   "text": "Deep sleep supports physical recovery, growth-hormone release and memory, and it declines with age. Alcohol, late caffeine, a warm bedroom, late intense exercise and irregular bedtimes reduce it; consistent sleep timing, daytime activity and a cool (about 16–19 °C), dark room help.",
+   "source": "Walker 2017; AASM",
+   "urgent": false
+  },
+  {
+   "id": "rem-sleep",
+   "topic": "REM sleep",
+   "tags": [
+    "rem",
+    "rem sleep",
+    "dreams",
+    "快速眼动",
+    "做梦",
+    "rem睡眠",
+    "レム睡眠"
+   ],
+   "text": "REM sleep supports emotional processing and learning and is concentrated in the last third of the night, so cutting the morning short loses REM first. Alcohol strongly suppresses REM in the first half of the night.",
+   "source": "Ebrahim et al., Alcohol Clin Exp Res 2013",
+   "urgent": false
+  },
+  {
+   "id": "sleep-regularity",
+   "topic": "Regular sleep timing",
+   "tags": [
+    "bedtime",
+    "regular sleep",
+    "sleep schedule",
+    "social jet lag",
+    "作息",
+    "规律作息",
+    "几点睡",
+    "熬夜",
+    "睡太晚",
+    "晚睡"
+   ],
+   "text": "Sleep regularity — going to bed and waking at similar times (within 30–60 minutes), weekends included — predicts health and mortality as strongly as sleep duration in large studies. Shifting by 2 or more hours at weekends (\"social jet lag\") worsens the following week's sleep and metabolic markers.",
+   "source": "Windred et al., Sleep 2024",
+   "urgent": false
+  },
+  {
+   "id": "caffeine",
+   "topic": "Caffeine",
+   "tags": [
+    "caffeine",
+    "coffee",
+    "tea",
+    "energy drink",
+    "咖啡",
+    "咖啡因",
+    "茶",
+    "浓茶",
+    "Koffein",
+    "カフェイン"
+   ],
+   "text": "Caffeine has a half-life of about 5 hours (range 2–10), so a 200 mg coffee at 16:00 still leaves about 100 mg at 21:00. Stop caffeine at least 8 hours before bed if sleep is light or short. Up to 400 mg a day (about 4 cups of brewed coffee) is considered safe for healthy adults; in pregnancy the limit is 200 mg a day.",
+   "source": "EFSA 2015; FDA; Gardiner et al., Sleep Med Rev 2023",
+   "urgent": false
+  },
+  {
+   "id": "alcohol-sleep",
+   "topic": "Alcohol and sleep",
+   "tags": [
+    "alcohol sleep",
+    "drinking sleep",
+    "wine before bed",
+    "喝酒睡眠",
+    "酒后睡眠",
+    "喝酒",
+    "饮酒"
+   ],
+   "text": "Alcohol helps people fall asleep but fragments the second half of the night, suppresses REM, raises resting heart rate by several bpm and lowers HRV; wearables show it after even 1–2 drinks. Finish drinking at least 3–4 hours before bed.",
+   "source": "Pietilä et al., JMIR Ment Health 2018",
+   "urgent": false
+  },
+  {
+   "id": "naps",
+   "topic": "Napping",
+   "tags": [
+    "nap",
+    "napping",
+    "afternoon nap",
+    "午睡",
+    "小睡",
+    "打盹",
+    "午觉"
+   ],
+   "text": "Naps of 10–20 minutes before about 15:00 improve alertness without hurting night sleep. Naps over 30 minutes bring grogginess, and long late naps delay bedtime; frequent long daytime naps in older adults can signal poor night sleep.",
+   "source": "Dhand & Sohal 2006; NSF",
+   "urgent": false
+  },
+  {
+   "id": "light",
+   "topic": "Light and the body clock",
+   "tags": [
+    "morning light",
+    "sunlight",
+    "blue light",
+    "screen before bed",
+    "晒太阳",
+    "早上光照",
+    "蓝光",
+    "睡前玩手机"
+   ],
+   "text": "Morning outdoor light (10–30 minutes, even when cloudy) anchors the body clock and makes falling asleep easier at night. In the last 1–2 hours before bed, dim screens and overhead lights; reducing brightness and engagement matters more than blue-light filters.",
+   "source": "Blume et al. 2019; Chang et al., PNAS 2015",
+   "urgent": false
+  },
+  {
+   "id": "sleep-hygiene",
+   "topic": "Sleep habits",
+   "tags": [
+    "sleep better",
+    "sleep hygiene",
+    "can't sleep",
+    "trouble sleeping",
+    "睡不好",
+    "失眠怎么办",
+    "睡眠质量",
+    "改善睡眠",
+    "怎么睡得好"
+   ],
+   "text": "Core habits: a fixed wake time, bed only for sleep, a cool dark quiet room, no heavy meals 2–3 hours before bed, no intense exercise in the last 1–2 hours, a 30–60 minute wind-down, and getting up if still awake after about 20 minutes.",
+   "source": "AASM; NICE",
+   "urgent": false
+  },
+  {
+   "id": "insomnia",
+   "topic": "Insomnia and CBT-I",
+   "tags": [
+    "insomnia",
+    "cbt-i",
+    "sleeping pills",
+    "失眠",
+    "入睡困难",
+    "早醒",
+    "安眠药",
+    "Schlaflosigkeit",
+    "不眠"
+   ],
+   "text": "Insomnia is trouble falling or staying asleep at least 3 nights a week for 3 months with daytime effects. CBT-I (sleep restriction, stimulus control, cognitive techniques) is the first-line treatment and lasts longer than sleeping pills; digital CBT-I programs work too.",
+   "source": "ACP 2016; AASM 2021",
+   "urgent": false
+  },
+  {
+   "id": "sleep-apnea",
+   "topic": "Sleep apnea",
+   "tags": [
+    "sleep apnea",
+    "snoring",
+    "gasping",
+    "osa",
+    "打鼾",
+    "打呼噜",
+    "睡眠呼吸暂停",
+    "憋醒",
+    "Schnarchen",
+    "いびき"
+   ],
+   "text": "Signs of obstructive sleep apnea: loud snoring, witnessed pauses or gasping, waking with a dry mouth or headache, daytime sleepiness, and blood pressure that is hard to control. Risk rises with neck size, weight, age and alcohol. It is diagnosed with a sleep study and is very treatable; untreated it raises the risk of hypertension, AF and stroke.",
+   "source": "AASM 2017",
+   "urgent": false
+  },
+  {
+   "id": "breathing-478",
+   "topic": "Slow breathing",
+   "tags": [
+    "breathing exercise",
+    "4-7-8",
+    "box breathing",
+    "slow breathing",
+    "呼吸练习",
+    "深呼吸",
+    "腹式呼吸",
+    "放松呼吸"
+   ],
+   "text": "4-7-8 breathing: in through the nose for 4 seconds, hold 7, out slowly through the mouth for 8; repeat 4 times. Breathing at about 6 breaths per minute (for example 5 s in, 5 s out) for 5–10 minutes raises HRV in the moment and helps with stress and falling asleep.",
+   "source": "Zaccaro et al., Front Hum Neurosci 2018",
+   "urgent": false
+  },
+  {
+   "id": "sleep-debt",
+   "topic": "After a short night",
+   "tags": [
+    "short sleep",
+    "slept badly",
+    "sleep debt",
+    "没睡好",
+    "睡得少",
+    "熬夜后",
+    "补觉",
+    "睡眠不足"
+   ],
+   "text": "One short night can be partly made up with an earlier bedtime or a short nap, but chronic short sleep is not repaid by weekend lie-ins. After a short night, avoid hard training if possible, keep caffeine before noon, and go to bed earlier rather than sleeping very late the next morning.",
+   "source": "Depner et al., Curr Biol 2019",
+   "urgent": false
+  },
+  {
+   "id": "who-activity",
+   "topic": "How much exercise",
+   "tags": [
+    "exercise",
+    "physical activity",
+    "how much exercise",
+    "150 minutes",
+    "workout",
+    "运动",
+    "锻炼",
+    "运动量",
+    "每周运动",
+    "Bewegung",
+    "運動"
+   ],
+   "text": "WHO 2020: adults should do 150–300 minutes a week of moderate aerobic activity or 75–150 minutes of vigorous activity (or a mix), plus muscle-strengthening for all major muscle groups on 2 or more days. Any amount beats none and benefits keep rising to about 300 minutes. Adults 65+ should add balance training on 3 or more days.",
+   "source": "WHO Guidelines on Physical Activity 2020",
+   "urgent": false
+  },
+  {
+   "id": "steps",
+   "topic": "Daily steps",
+   "tags": [
+    "steps",
+    "step count",
+    "10000 steps",
+    "walking",
+    "步数",
+    "走路",
+    "一万步",
+    "日行",
+    "Schritte",
+    "歩数"
+   ],
+   "text": "Mortality risk falls steeply from about 2,500 steps a day up to 6,000–8,000 for adults over 60 and 8,000–10,000 for younger adults, then levels off. 10,000 is a fine goal but not a threshold; each extra 1,000 steps a day is linked to roughly 15% lower all-cause mortality.",
+   "source": "Paluch et al., Lancet Public Health 2022; Banach et al., EJPC 2023",
+   "urgent": false
+  },
+  {
+   "id": "intensity",
+   "topic": "Moderate versus vigorous",
+   "tags": [
+    "intensity",
+    "moderate",
+    "vigorous",
+    "met",
+    "talk test",
+    "强度",
+    "中等强度",
+    "高强度",
+    "运动强度"
+   ],
+   "text": "Moderate intensity means you can talk but not sing (about 3–6 METs, such as brisk walking at 5–6 km/h); vigorous means only a few words at a time (above 6 METs, such as running, fast cycling or HIIT). One minute of vigorous activity counts about the same as two of moderate toward the weekly target.",
+   "source": "WHO 2020; ACSM",
+   "urgent": false
+  },
+  {
+   "id": "zone2",
+   "topic": "Zone 2 training",
+   "tags": [
+    "zone 2",
+    "aerobic base",
+    "easy run",
+    "low intensity",
+    "二区",
+    "有氧基础",
+    "慢跑",
+    "低强度有氧",
+    "燃脂区"
+   ],
+   "text": "Zone 2 is steady effort at about 60–70% of heart-rate reserve where you can still talk in full sentences. It builds aerobic capacity with little fatigue; 2–4 sessions of 30–60 minutes a week lower resting heart rate and raise VO2max over 8–12 weeks.",
+   "source": "Seiler 2010; ACSM",
+   "urgent": false
+  },
+  {
+   "id": "hiit",
+   "topic": "HIIT",
+   "tags": [
+    "hiit",
+    "interval training",
+    "tabata",
+    "intervals",
+    "高强度间歇",
+    "间歇训练",
+    "燃脂",
+    "Intervalltraining"
+   ],
+   "text": "High-intensity interval training (for example 4 × 4 minutes at 85–95% of max heart rate with 3 minutes easy, or 20 s hard / 10 s rest Tabata) raises VO2max quickly. Keep it to 1–3 sessions a week with at least 48 hours between them, put it on good-recovery days, and skip it when HRV is well below baseline or you are ill.",
+   "source": "Helgerud et al. 2007; Milanović et al., Sports Med 2015",
+   "urgent": false
+  },
+  {
+   "id": "strength",
+   "topic": "Strength training",
+   "tags": [
+    "strength training",
+    "resistance",
+    "weights",
+    "push-ups",
+    "squats",
+    "muscle",
+    "力量训练",
+    "无氧",
+    "撸铁",
+    "肌肉",
+    "俯卧撑",
+    "深蹲",
+    "Krafttraining",
+    "筋トレ"
+   ],
+   "text": "Muscle-strengthening on 2 or more days a week is linked to 10–20% lower all-cause mortality and protects bones, blood sugar control and joints. A simple plan: 2–3 sets of 8–15 reps of squats, push-ups, lunges, rows and planks, stopping each set 1–3 reps short of failure; progress by adding reps, sets or load.",
+   "source": "Momma et al., BJSM 2022; WHO 2020",
+   "urgent": false
+  },
+  {
+   "id": "sitting",
+   "topic": "Sitting too long",
+   "tags": [
+    "sitting",
+    "sedentary",
+    "desk job",
+    "久坐",
+    "坐太久",
+    "坐着工作",
+    "办公室",
+    "Sitzen",
+    "座りすぎ"
+   ],
+   "text": "Sitting more than about 8 hours a day raises cardiometabolic risk; 60–75 minutes of moderate activity a day largely offsets it. Break up sitting every 30–60 minutes with 2–5 minutes of walking or stairs.",
+   "source": "Ekelund et al., Lancet 2016",
+   "urgent": false
+  },
+  {
+   "id": "warmup",
+   "topic": "Warm-up and cool-down",
+   "tags": [
+    "warm up",
+    "warm-up",
+    "cool down",
+    "stretch before",
+    "热身",
+    "拉伸",
+    "放松",
+    "运动前",
+    "运动后"
+   ],
+   "text": "Warm up for 5–10 minutes before hard sessions: easy cardio until slightly breathless, then dynamic moves (leg swings, lunges, arm circles) and a few build-up reps of the main exercise. Cool down for 5–10 minutes with easy movement; static stretching fits best after training or in its own mobility session.",
+   "source": "ACSM; Fradkin et al. 2010",
+   "urgent": false
+  },
+  {
+   "id": "doms",
+   "topic": "Muscle soreness",
+   "tags": [
+    "sore muscles",
+    "doms",
+    "muscle pain after exercise",
+    "肌肉酸痛",
+    "酸痛",
+    "延迟性肌肉酸痛",
+    "腿酸",
+    "Muskelkater",
+    "筋肉痛"
+   ],
+   "text": "Delayed-onset muscle soreness peaks 24–72 hours after unfamiliar or eccentric exercise and fades within 5–7 days. Light movement, sleep and protein help; soreness is not a measure of a good workout. Sharp pain, joint swelling, or dark cola-coloured urine after extreme exercise is not soreness — the last can mean rhabdomyolysis and needs urgent care.",
+   "source": "Cheung et al., Sports Med 2003",
+   "urgent": false
+  },
+  {
+   "id": "readiness",
+   "topic": "Ready to train today?",
+   "tags": [
+    "ready to train",
+    "readiness",
+    "should i train",
+    "train today",
+    "can i exercise",
+    "今天能练吗",
+    "适合运动吗",
+    "今天运动",
+    "能不能运动",
+    "训练状态",
+    "适合训练"
+   ],
+   "text": "Use morning recovery signals together: HRV near or above baseline, resting heart rate at or below baseline and 7+ hours of sleep support a hard session. Two or more signals off (HRV more than 10–15% down, resting heart rate 5+ bpm up, sleep under 6 hours) suggest an easy session or rest. How you feel counts too.",
+   "source": "Plews et al. 2013; Kiviniemi et al. 2007",
+   "urgent": false
+  },
+  {
+   "id": "overtraining",
+   "topic": "Overreaching and overtraining",
+   "tags": [
+    "overtraining",
+    "overreaching",
+    "tired all the time",
+    "fatigue",
+    "过度训练",
+    "疲劳",
+    "累",
+    "练太多",
+    "没劲"
+   ],
+   "text": "Signs of overreaching: performance falling despite training, a resting heart rate that stays up, HRV suppressed for a week or more, poor sleep, irritability, heavy legs and frequent colds. Cut training volume by 30–50% for 1–2 weeks; most people recover within days to weeks. Plan an easier week every 3–4 weeks.",
+   "source": "Meeusen et al., ECSS/ACSM consensus 2013",
+   "urgent": false
+  },
+  {
+   "id": "progression",
+   "topic": "Increasing training safely",
+   "tags": [
+    "increase training",
+    "progression",
+    "injury",
+    "how fast increase",
+    "加量",
+    "受伤",
+    "训练计划",
+    "循序渐进"
+   ],
+   "text": "Raise weekly training volume by about 10% or less and change one thing at a time (duration, frequency or intensity). Sudden spikes — more than about 1.5 times the average load of the previous 4 weeks — raise injury risk.",
+   "source": "Gabbett, BJSM 2016",
+   "urgent": false
+  },
+  {
+   "id": "sick-training",
+   "topic": "Exercising when ill",
+   "tags": [
+    "exercise when sick",
+    "train with a cold",
+    "sick",
+    "ill",
+    "生病运动",
+    "感冒能运动吗",
+    "生病了",
+    "病了"
+   ],
+   "text": "\"Neck check\": if symptoms are only above the neck (runny nose, mild sore throat), light exercise at reduced intensity is usually fine. With symptoms below the neck (fever, chest congestion, body aches, diarrhoea) rest until 24–48 hours after they resolve. After a fever or COVID-type illness, return gradually over 1–2 weeks and stop for chest pain or palpitations.",
+   "source": "Eichner 1993; BJSM return-to-play 2020",
+   "urgent": false
+  },
+  {
+   "id": "heat",
+   "topic": "Exercising in the heat",
+   "tags": [
+    "heat",
+    "hot weather",
+    "summer exercise",
+    "dehydration",
+    "中暑",
+    "高温",
+    "天热运动",
+    "脱水"
+   ],
+   "text": "In heat, drink before you are thirsty, slow down and train in cooler hours. Heat exhaustion (heavy sweating, dizziness, nausea, headache) means stop, cool off and drink. Heat stroke — body temperature above 40 °C with confusion or collapse — is an emergency.",
+   "source": "ACSM heat illness statement 2023",
+   "urgent": false
+  },
+  {
+   "id": "exercise-hydration",
+   "topic": "Drinking during exercise",
+   "tags": [
+    "drink during exercise",
+    "sweat",
+    "electrolytes",
+    "运动喝水",
+    "运动补水",
+    "电解质",
+    "出汗"
+   ],
+   "text": "For sessions over an hour, drink about 400–800 mL per hour depending on sweat rate, with some sodium in heat or long efforts. Weighing before and after shows sweat loss: replace each kilogram lost with about 1.25–1.5 L over the next hours.",
+   "source": "ACSM fluid replacement statement 2007",
+   "urgent": false
+  },
+  {
+   "id": "vo2max",
+   "topic": "VO2max",
+   "tags": [
+    "vo2max",
+    "vo2 max",
+    "cardio fitness",
+    "aerobic capacity",
+    "最大摄氧量",
+    "心肺耐力",
+    "心肺功能",
+    "有氧能力",
+    "心肺适能"
+   ],
+   "text": "VO2max is the most oxygen the body can use, in mL/kg/min, and one of the strongest predictors of longevity: moving up from the lowest fitness group brings the largest drop in mortality risk. Apple Watch estimates it from outdoor walks, runs and hikes with heart rate, so it needs regular outdoor activity to stay current.",
+   "source": "Mandsager et al., JAMA Netw Open 2018; Ross et al., AHA statement 2016",
+   "urgent": false
+  },
+  {
+   "id": "vo2max-raise",
+   "topic": "Raising VO2max",
+   "tags": [
+    "improve vo2max",
+    "raise vo2max",
+    "提高最大摄氧量",
+    "提升心肺",
+    "提高心肺"
+   ],
+   "text": "VO2max rises fastest with easy volume (zone 2, 2–4 sessions a week) plus one or two interval sessions such as 4 × 4 minutes at 85–95% of max heart rate; untrained people commonly gain 10–20% in 8–12 weeks. Losing excess body fat also raises the per-kilogram value.",
+   "source": "Helgerud et al., MSSE 2007",
+   "urgent": false
+  },
+  {
+   "id": "balance",
+   "topic": "Balance and falls",
+   "tags": [
+    "balance",
+    "fall",
+    "single leg",
+    "elderly",
+    "平衡",
+    "跌倒",
+    "单腿站",
+    "老人"
+   ],
+   "text": "Balance and leg strength prevent falls, the leading cause of injury in older adults. Practise standing on one leg (aim for 10+ seconds; failing at age 50–75 is linked to higher mortality), heel-to-toe walking and sit-to-stand from a chair.",
+   "source": "Araujo et al., BJSM 2022; WHO 2020",
+   "urgent": false
+  },
+  {
+   "id": "flexibility",
+   "topic": "Flexibility and mobility",
+   "tags": [
+    "flexibility",
+    "mobility",
+    "stretching",
+    "stiff",
+    "柔韧",
+    "柔韧性",
+    "拉筋",
+    "僵硬"
+   ],
+   "text": "Static stretches held 30–60 seconds per muscle group, 2–3 days a week, improve range of motion. Mobility work matters most for joints stiffened by sitting: hips, upper back, ankles and shoulders.",
+   "source": "ACSM",
+   "urgent": false
+  },
+  {
+   "id": "post-meal-walk",
+   "topic": "Walking after meals",
+   "tags": [
+    "walk after eating",
+    "after meal",
+    "post-meal",
+    "饭后散步",
+    "饭后走",
+    "餐后运动",
+    "饭后"
+   ],
+   "text": "A 10–15 minute walk within 30 minutes after a meal lowers the post-meal glucose rise by roughly 20–30% in many people, with the biggest effect after the largest meal of the day.",
+   "source": "Buffey et al., Sports Med 2022; Reynolds et al., Diabetologia 2016",
+   "urgent": false
+  },
+  {
+   "id": "glucose-fasting",
+   "topic": "Fasting blood glucose",
+   "tags": [
+    "blood sugar",
+    "glucose",
+    "fasting glucose",
+    "血糖",
+    "空腹血糖",
+    "糖尿病",
+    "diabetes",
+    "Blutzucker",
+    "血糖値"
+   ],
+   "text": "Fasting plasma glucose below 5.6 mmol/L (100 mg/dL) is normal; 5.6–6.9 mmol/L is prediabetes by ADA (WHO and China use 6.1–6.9 for impaired fasting glucose); 7.0 mmol/L (126 mg/dL) or more on two occasions indicates diabetes. mg/dL ÷ 18 = mmol/L.",
+   "source": "ADA Standards of Care 2025; WHO; Chinese Diabetes Society 2024",
+   "urgent": false
+  },
+  {
+   "id": "glucose-post-meal",
+   "topic": "Glucose after meals",
+   "tags": [
+    "post meal glucose",
+    "after eating sugar",
+    "cgm",
+    "glucose spike",
+    "餐后血糖",
+    "饭后血糖",
+    "血糖波动",
+    "动态血糖"
+   ],
+   "text": "Two hours after a meal (or a 75 g glucose test), below 7.8 mmol/L is normal, 7.8–11.0 is impaired glucose tolerance, and 11.1 mmol/L or more indicates diabetes. People without diabetes wearing a CGM usually stay under about 7.8–8.9 mmol/L after meals and spend most of the day between 3.9 and 7.8.",
+   "source": "ADA 2025; Shah et al., JCEM 2019",
+   "urgent": false
+  },
+  {
+   "id": "hba1c",
+   "topic": "HbA1c",
+   "tags": [
+    "hba1c",
+    "a1c",
+    "glycated hemoglobin",
+    "糖化血红蛋白",
+    "糖化"
+   ],
+   "text": "HbA1c reflects average glucose over about 3 months: below 5.7% (39 mmol/mol) is normal, 5.7–6.4% is prediabetes, and 6.5% (48 mmol/mol) or more indicates diabetes. Most adults with diabetes aim for below 7%.",
+   "source": "ADA 2025",
+   "urgent": false
+  },
+  {
+   "id": "prediabetes",
+   "topic": "Reversing prediabetes",
+   "tags": [
+    "prediabetes",
+    "insulin resistance",
+    "糖尿病前期",
+    "血糖偏高",
+    "胰岛素抵抗"
+   ],
+   "text": "Prediabetes can often be reversed: losing 5–7% of body weight plus 150 minutes of brisk activity a week cut progression to type 2 diabetes by 58% in the Diabetes Prevention Program. Recheck glucose or HbA1c every year.",
+   "source": "DPP, NEJM 2002",
+   "urgent": false
+  },
+  {
+   "id": "hypoglycemia",
+   "topic": "Low blood sugar",
+   "tags": [
+    "low blood sugar",
+    "hypoglycemia",
+    "shaky",
+    "低血糖",
+    "血糖低",
+    "手抖出汗"
+   ],
+   "text": "Glucose below 3.9 mmol/L (70 mg/dL) is low; symptoms are shakiness, sweating, hunger, a fast heartbeat and confusion. Use the 15-15 rule: take 15 g of fast sugar (juice, glucose tablets), recheck after 15 minutes, repeat if still low, then eat a snack. Below 3.0 mmol/L or with confusion it is serious.",
+   "source": "ADA 2025",
+   "urgent": false
+  },
+  {
+   "id": "glucose-food",
+   "topic": "Flattening glucose spikes",
+   "tags": [
+    "glycemic",
+    "carbs",
+    "rice",
+    "sugar spike",
+    "控糖",
+    "碳水",
+    "米饭",
+    "升糖",
+    "主食"
+   ],
+   "text": "To flatten glucose spikes: eat vegetables and protein before starches, choose whole grains and legumes over white rice, white bread and sugary drinks, eat fruit whole rather than as juice, and walk after meals. Pairing carbs with fibre, fat or protein slows absorption.",
+   "source": "Shukla et al., Diabetes Care 2015; ADA",
+   "urgent": false
+  },
+  {
+   "id": "ldl",
+   "topic": "LDL cholesterol",
+   "tags": [
+    "cholesterol",
+    "ldl",
+    "lipids",
+    "bad cholesterol",
+    "胆固醇",
+    "血脂",
+    "低密度脂蛋白",
+    "坏胆固醇",
+    "Cholesterin",
+    "コレステロール"
+   ],
+   "text": "LDL cholesterol: below 2.6 mmol/L optimal, 2.6–3.3 near optimal, 3.4–4.0 borderline high, 4.1–4.8 high, 4.9 or more very high (possible familial hypercholesterolaemia). People with diabetes or heart disease have lower targets (below 1.8 or 1.4) set by their doctor. mg/dL ÷ 38.67 = mmol/L.",
+   "source": "NCEP ATP III; Chinese Lipid Guidelines 2023; ESC 2019",
+   "urgent": false
+  },
+  {
+   "id": "hdl-tg",
+   "topic": "HDL and triglycerides",
+   "tags": [
+    "hdl",
+    "triglycerides",
+    "good cholesterol",
+    "甘油三酯",
+    "高密度脂蛋白",
+    "好胆固醇",
+    "Triglyceride"
+   ],
+   "text": "HDL below 1.0 mmol/L in men or 1.3 mmol/L in women is low. Fasting triglycerides below 1.7 mmol/L are normal, 1.7–2.2 borderline, 2.3–5.6 high, and above 5.6 very high with a risk of pancreatitis. Triglycerides fall with less sugar and alcohol, weight loss and exercise.",
+   "source": "NCEP ATP III; Chinese Lipid Guidelines 2023",
+   "urgent": false
+  },
+  {
+   "id": "cholesterol-diet",
+   "topic": "Eating to lower cholesterol",
+   "tags": [
+    "lower cholesterol",
+    "saturated fat",
+    "eggs",
+    "降血脂",
+    "降胆固醇",
+    "鸡蛋",
+    "饱和脂肪"
+   ],
+   "text": "To lower LDL: swap saturated fat (fatty meat, butter, lard, palm oil) for unsaturated fats (olive or canola oil, nuts, fish), eat 5–10 g of soluble fibre a day (oats, beans, barley) and add plant sterols; together these cut LDL by 10–20%. For most people dietary cholesterol from eggs matters less than saturated fat.",
+   "source": "AHA 2021 dietary guidance; Jenkins et al., JAMA 2003",
+   "urgent": false
+  },
+  {
+   "id": "uric-acid",
+   "topic": "Uric acid and gout",
+   "tags": [
+    "uric acid",
+    "gout",
+    "purine",
+    "尿酸",
+    "痛风",
+    "高尿酸",
+    "嘌呤",
+    "Gicht",
+    "痛風"
+   ],
+   "text": "Serum uric acid above 420 µmol/L (7 mg/dL) is hyperuricaemia by China's definition (some labs use 360 µmol/L for women). Gout attacks are sudden, very painful swollen joints, often the big toe. Risk rises with beer and spirits, sugary drinks and fructose, organ meats, shellfish, dehydration and obesity; low-fat dairy, coffee, cherries and weight loss help.",
+   "source": "Chinese Hyperuricaemia & Gout Guidelines 2019; ACR 2020",
+   "urgent": false
+  },
+  {
+   "id": "fatty-liver",
+   "topic": "Fatty liver",
+   "tags": [
+    "fatty liver",
+    "nafld",
+    "masld",
+    "liver",
+    "alt",
+    "脂肪肝",
+    "肝功能",
+    "转氨酶",
+    "Fettleber",
+    "脂肪肝"
+   ],
+   "text": "Metabolic dysfunction-associated fatty liver (MASLD, formerly NAFLD) affects about a third of adults in China and is driven by excess weight, insulin resistance and alcohol. Losing 7–10% of body weight improves liver fat and inflammation; avoid sugary drinks and limit alcohol. An ALT above the lab range on repeat tests should be reviewed.",
+   "source": "EASL-EASD-EASO 2024; Chinese MAFLD guidance",
+   "urgent": false
+  },
+  {
+   "id": "kidney",
+   "topic": "Kidney health",
+   "tags": [
+    "kidney",
+    "egfr",
+    "creatinine",
+    "protein in urine",
+    "肾",
+    "肾功能",
+    "肌酐",
+    "尿蛋白"
+   ],
+   "text": "Kidney function is screened with eGFR (below 60 mL/min/1.73 m² for 3 months indicates chronic kidney disease) and urine albumin. High blood pressure and diabetes are the main causes; control them, avoid long-term high-dose painkillers such as ibuprofen, and stay hydrated.",
+   "source": "KDIGO 2024",
+   "urgent": false
+  },
+  {
+   "id": "bmi",
+   "topic": "BMI",
+   "tags": [
+    "bmi",
+    "body mass index",
+    "weight",
+    "overweight",
+    "obese",
+    "体重",
+    "胖",
+    "超重",
+    "肥胖",
+    "体重指数",
+    "Übergewicht",
+    "肥満"
+   ],
+   "text": "BMI = weight (kg) ÷ height (m)². WHO: below 18.5 underweight, 18.5–24.9 normal, 25–29.9 overweight, 30+ obese. China uses lower cut-offs because risk rises at lower BMI in Asian people: 18.5–23.9 normal, 24–27.9 overweight, 28+ obese. BMI cannot tell muscle from fat, so very muscular people can read high.",
+   "source": "WHO; China NHC WS/T 428-2013",
+   "urgent": false
+  },
+  {
+   "id": "waist",
+   "topic": "Waist circumference",
+   "tags": [
+    "waist",
+    "belly fat",
+    "abdominal fat",
+    "腰围",
+    "肚子",
+    "腹部脂肪",
+    "啤酒肚",
+    "Bauchumfang",
+    "腹囲"
+   ],
+   "text": "Waist size measures abdominal fat, which drives metabolic risk more than weight does. Central obesity in China is a waist of 90 cm or more for men and 85 cm or more for women (IDF uses 90/80 for Asian populations). Measure midway between the lowest rib and the top of the hip bone after breathing out. A waist under half your height is a good target for anyone.",
+   "source": "China NHC; IDF 2006; Ashwell et al. 2012",
+   "urgent": false
+  },
+  {
+   "id": "body-fat",
+   "topic": "Body fat percentage",
+   "tags": [
+    "body fat",
+    "fat percentage",
+    "体脂",
+    "体脂率",
+    "脂肪率",
+    "Körperfett",
+    "体脂肪"
+   ],
+   "text": "Typical body fat (ACE): men — athletes 6–13%, fit 14–17%, average 18–24%, obese 25%+; women — athletes 14–20%, fit 21–24%, average 25–31%, obese 32%+. Essential fat is about 2–5% in men and 10–13% in women. Smart-scale readings swing with hydration, so compare at the same time of day.",
+   "source": "American Council on Exercise",
+   "urgent": false
+  },
+  {
+   "id": "weight-loss",
+   "topic": "Losing weight",
+   "tags": [
+    "lose weight",
+    "weight loss",
+    "diet",
+    "calorie deficit",
+    "减肥",
+    "减重",
+    "瘦",
+    "节食",
+    "热量缺口",
+    "abnehmen",
+    "ダイエット"
+   ],
+   "text": "A sustainable pace is about 0.5–1% of body weight a week (roughly 0.25–1 kg). Faster loss tends to cost muscle and is hard to keep; combine a moderate deficit of about 300–500 kcal a day with high protein and strength training. Unintended loss of 5% or more in 6–12 months should be checked by a doctor.",
+   "source": "NICE; Hall & Kahan 2018",
+   "urgent": false
+  },
+  {
+   "id": "weight-fluctuation",
+   "topic": "Daily weight swings",
+   "tags": [
+    "weight fluctuation",
+    "weight went up",
+    "heavier today",
+    "体重波动",
+    "体重涨了",
+    "体重变化"
+   ],
+   "text": "Body weight swings 0.5–2 kg from day to day with water, salt, carbohydrate stores and bowel contents. Weigh at the same time (after waking and the bathroom, before eating) and judge the 7-day average or the trend over 2–4 weeks.",
+   "source": "Turicchi et al. 2019",
+   "urgent": false
+  },
+  {
+   "id": "muscle-loss",
+   "topic": "Keeping muscle with age",
+   "tags": [
+    "sarcopenia",
+    "muscle loss",
+    "aging muscle",
+    "肌少症",
+    "肌肉流失",
+    "掉肌肉"
+   ],
+   "text": "From about age 30–40 adults lose roughly 3–8% of muscle per decade unless they train it, faster after 60. Strength training plus enough protein (1.0–1.6 g/kg a day) slows or reverses this at any age.",
+   "source": "Volpi et al. 2004; PROT-AGE 2013",
+   "urgent": false
+  },
+  {
+   "id": "protein",
+   "topic": "Protein",
+   "tags": [
+    "protein",
+    "how much protein",
+    "蛋白质",
+    "蛋白",
+    "吃多少蛋白",
+    "Eiweiß",
+    "タンパク質"
+   ],
+   "text": "0.8 g/kg a day prevents deficiency in sedentary adults; 1.2–1.6 g/kg a day is better for active people, when building muscle, during weight loss and for adults over 65. Spread it over 3–4 meals of about 25–40 g (0.3–0.4 g/kg per meal).",
+   "source": "ISSN Position Stand 2017; PROT-AGE 2013",
+   "urgent": false
+  },
+  {
+   "id": "fiber",
+   "topic": "Fibre",
+   "tags": [
+    "fiber",
+    "fibre",
+    "vegetables",
+    "whole grains",
+    "膳食纤维",
+    "纤维",
+    "蔬菜",
+    "粗粮",
+    "全谷物",
+    "Ballaststoffe"
+   ],
+   "text": "Adults should eat 25–30 g of fibre a day (China recommends the same); most eat about half that. Each extra 8 g a day is linked to 5–27% lower risk of heart disease, type 2 diabetes and colorectal cancer. Sources: vegetables, legumes, whole grains, fruit and nuts.",
+   "source": "Reynolds et al., Lancet 2019; Chinese Dietary Guidelines 2022",
+   "urgent": false
+  },
+  {
+   "id": "salt",
+   "topic": "Salt",
+   "tags": [
+    "salt",
+    "sodium",
+    "soy sauce",
+    "salty",
+    "盐",
+    "钠",
+    "酱油",
+    "咸",
+    "口味重",
+    "Salz",
+    "塩分"
+   ],
+   "text": "Keep salt below 5 g a day (2 g sodium), which is also China's guideline; average intake in China is about 9–10 g. Most comes from soy sauce, pickles, processed meat, instant noodles and restaurant food. Cutting salt lowers blood pressure within weeks.",
+   "source": "WHO 2012; Chinese Dietary Guidelines 2022",
+   "urgent": false
+  },
+  {
+   "id": "sugar",
+   "topic": "Added sugar",
+   "tags": [
+    "sugar",
+    "sweets",
+    "soft drinks",
+    "soda",
+    "milk tea",
+    "糖",
+    "甜食",
+    "饮料",
+    "奶茶",
+    "可乐",
+    "Zucker",
+    "砂糖"
+   ],
+   "text": "Keep free sugars below 10% of energy, ideally below 5% — about 25 g (6 teaspoons) a day. A 500 mL sugary drink holds about 50 g; a large milk tea can hold 30–60 g. Sugary drinks are linked to weight gain, type 2 diabetes, fatty liver, gout and tooth decay.",
+   "source": "WHO Sugars Guideline 2015",
+   "urgent": false
+  },
+  {
+   "id": "water",
+   "topic": "How much water",
+   "tags": [
+    "water",
+    "hydration",
+    "drink water",
+    "thirsty",
+    "喝水",
+    "饮水",
+    "喝多少水",
+    "补水",
+    "Wasser trinken",
+    "水分"
+   ],
+   "text": "Total water needs are about 2.0 L a day for women and 2.5 L for men from drinks and food (EFSA); China's guideline suggests 1.5–1.7 L of drinks a day. More is needed in heat, at altitude and with exercise. Pale yellow urine is a good practical guide.",
+   "source": "EFSA 2010; Chinese Dietary Guidelines 2022",
+   "urgent": false
+  },
+  {
+   "id": "alcohol",
+   "topic": "Alcohol",
+   "tags": [
+    "alcohol",
+    "beer",
+    "wine",
+    "baijiu",
+    "drinking",
+    "酒",
+    "啤酒",
+    "白酒",
+    "红酒",
+    "喝酒",
+    "Alkohol",
+    "お酒"
+   ],
+   "text": "No level of alcohol is risk-free for health (WHO 2023). If drinking, keep to no more than about 1 standard drink a day for women and 2 for men (China: 15 g of alcohol a day at most), with alcohol-free days. Alcohol raises blood pressure, triglycerides, AF risk, liver fat and cancer risk, and disrupts sleep.",
+   "source": "WHO 2023; Chinese Dietary Guidelines 2022",
+   "urgent": false
+  },
+  {
+   "id": "omega3",
+   "topic": "Fish and omega-3",
+   "tags": [
+    "omega-3",
+    "fish oil",
+    "fish",
+    "鱼油",
+    "吃鱼",
+    "深海鱼"
+   ],
+   "text": "Eat fish, ideally oily fish (salmon, mackerel, sardines), about twice a week for EPA and DHA. Supplements lower very high triglycerides but have shown little benefit against heart attacks in healthy people; check with a doctor if you take blood thinners.",
+   "source": "AHA 2018; VITAL trial 2019",
+   "urgent": false
+  },
+  {
+   "id": "vitamin-d",
+   "topic": "Vitamin D",
+   "tags": [
+    "vitamin d",
+    "sunshine vitamin",
+    "维生素d",
+    "维d",
+    "补钙"
+   ],
+   "text": "Vitamin D comes from sunlight on the skin and a few foods. Blood 25(OH)D below 50 nmol/L (20 ng/mL) is often called insufficient and below 30 nmol/L (12 ng/mL) deficient. Typical adult intake recommendations are 600–800 IU (15–20 µg) a day; do not exceed 4,000 IU a day without medical advice.",
+   "source": "IOM 2011; Chinese DRIs 2023",
+   "urgent": false
+  },
+  {
+   "id": "calcium",
+   "topic": "Calcium and bones",
+   "tags": [
+    "calcium",
+    "bone",
+    "osteoporosis",
+    "钙",
+    "骨质疏松",
+    "骨密度",
+    "骨头"
+   ],
+   "text": "Adults need about 800 mg calcium a day (China) or 1,000–1,200 mg (US, more for women over 50 and adults over 70). Dairy, calcium-set tofu, leafy greens and small fish with bones are good sources; get most from food. Strength and impact exercise, vitamin D and not smoking protect bone density.",
+   "source": "Chinese DRIs 2023; NOF",
+   "urgent": false
+  },
+  {
+   "id": "healthy-plate",
+   "topic": "A balanced plate",
+   "tags": [
+    "healthy diet",
+    "what to eat",
+    "balanced diet",
+    "nutrition",
+    "饮食",
+    "吃什么",
+    "营养",
+    "健康饮食",
+    "膳食",
+    "Ernährung",
+    "食事"
+   ],
+   "text": "A practical plate: half vegetables and fruit, a quarter whole grains or potatoes, a quarter protein (fish, poultry, beans, tofu, eggs, lean meat), with water to drink. China's Dietary Guidelines suggest 300–500 g vegetables, 200–350 g fruit, 300–500 g dairy and 25–35 g soy and nuts a day.",
+   "source": "Chinese Dietary Guidelines 2022; Harvard Healthy Eating Plate",
+   "urgent": false
+  },
+  {
+   "id": "ultra-processed",
+   "topic": "Ultra-processed food",
+   "tags": [
+    "processed food",
+    "junk food",
+    "snacks",
+    "instant noodles",
+    "takeaway",
+    "加工食品",
+    "垃圾食品",
+    "零食",
+    "外卖",
+    "方便面"
+   ],
+   "text": "Higher intake of ultra-processed foods (packaged snacks, sweet drinks, processed meats, instant meals) is linked to weight gain, type 2 diabetes, heart disease and depression; in a controlled trial people ate about 500 kcal a day more on an ultra-processed diet. Cook simple meals from whole ingredients most days.",
+   "source": "Hall et al., Cell Metab 2019; Lane et al., BMJ 2024",
+   "urgent": false
+  },
+  {
+   "id": "meal-timing",
+   "topic": "Meal timing",
+   "tags": [
+    "dinner late",
+    "late eating",
+    "intermittent fasting",
+    "time-restricted",
+    "晚饭",
+    "宵夜",
+    "吃太晚",
+    "轻断食",
+    "间歇性断食",
+    "16:8"
+   ],
+   "text": "Eating most calories earlier and leaving 2–3 hours between dinner and bed helps sleep, reflux and glucose control. Time-restricted eating (for example an 8–10 hour window) helps mainly by reducing total intake.",
+   "source": "Lowe et al., JAMA IM 2020; Liu et al., NEJM 2022",
+   "urgent": false
+  },
+  {
+   "id": "workout-nutrition",
+   "topic": "Eating around training",
+   "tags": [
+    "eat before workout",
+    "after workout",
+    "protein shake",
+    "运动前吃",
+    "运动后吃",
+    "练后",
+    "蛋白粉"
+   ],
+   "text": "Before training, a light snack with carbohydrate 1–3 hours earlier helps performance. Afterwards about 20–40 g of protein plus carbohydrate within a few hours supports recovery; the daily protein total matters more than exact timing.",
+   "source": "ISSN Position Stand on nutrient timing 2017",
+   "urgent": false
+  },
+  {
+   "id": "stress-body",
+   "topic": "Stress and the body",
+   "tags": [
+    "stress",
+    "stressed",
+    "pressure",
+    "压力",
+    "压力大",
+    "紧张",
+    "焦虑",
+    "Stress",
+    "ストレス"
+   ],
+   "text": "Stress raises resting heart rate and lowers HRV through the sympathetic nervous system; chronic stress worsens sleep, blood pressure and blood sugar. Regular exercise, sleep, social contact, time outdoors and slow-breathing or meditation practice all lower physiological stress markers.",
+   "source": "McEwen, NEJM 1998; Kim et al. 2018",
+   "urgent": false
+  },
+  {
+   "id": "meditation",
+   "topic": "Meditation",
+   "tags": [
+    "meditation",
+    "mindfulness",
+    "mindful",
+    "冥想",
+    "正念",
+    "静坐",
+    "Meditation",
+    "瞑想"
+   ],
+   "text": "Eight-week mindfulness programs reduce anxiety, depression and perceived stress with moderate effect sizes in meta-analyses; even 10 minutes a day helps. Apple Watch Mindfulness sessions count as mindful minutes in Health.",
+   "source": "Goyal et al., JAMA Intern Med 2014",
+   "urgent": false
+  },
+  {
+   "id": "burnout",
+   "topic": "Burnout",
+   "tags": [
+    "burnout",
+    "exhausted",
+    "overworked",
+    "职业倦怠",
+    "倦怠",
+    "精疲力尽",
+    "加班",
+    "过劳"
+   ],
+   "text": "Burnout shows as exhaustion, cynicism or detachment, and reduced effectiveness, often with poor sleep and frequent illness. Protect sleep and recovery time, set limits on working hours, take real breaks, and talk to a professional if it lasts for weeks.",
+   "source": "WHO ICD-11 QD85; Maslach",
+   "urgent": false
+  },
+  {
+   "id": "low-mood",
+   "topic": "Low mood and depression",
+   "tags": [
+    "depressed",
+    "depression",
+    "low mood",
+    "sad",
+    "no interest",
+    "抑郁",
+    "情绪低落",
+    "不开心",
+    "没兴趣",
+    "Depression",
+    "うつ"
+   ],
+   "text": "Two screening questions (PHQ-2): over the last 2 weeks, have you often had little interest or pleasure in doing things, or felt down, depressed or hopeless? If either happens on more than half the days, talk to a doctor or counsellor. Exercise is an effective treatment for mild to moderate depression.",
+   "source": "Kroenke et al. 2003; Noetel et al., BMJ 2024",
+   "urgent": false
+  },
+  {
+   "id": "anxiety",
+   "topic": "Anxiety",
+   "tags": [
+    "anxiety",
+    "anxious",
+    "panic",
+    "nervous",
+    "焦虑",
+    "惊恐",
+    "心慌意乱",
+    "紧张不安",
+    "Angst",
+    "不安"
+   ],
+   "text": "Anxiety often shows up in the body: a fast heartbeat, tight chest, rapid breathing, stomach upset. Long, slow out-breaths calm the nervous system within minutes; anxiety that limits daily life responds well to CBT.",
+   "source": "NICE CG113",
+   "urgent": false
+  },
+  {
+   "id": "social",
+   "topic": "Social connection",
+   "tags": [
+    "lonely",
+    "loneliness",
+    "friends",
+    "孤独",
+    "社交",
+    "朋友"
+   ],
+   "text": "Strong social connection is linked to about 50% better odds of survival in meta-analyses, comparable to quitting smoking. Regular contact with friends and family, volunteering and group exercise all count.",
+   "source": "Holt-Lunstad et al., PLoS Med 2010",
+   "urgent": false
+  },
+  {
+   "id": "eye-surgery-followup",
+   "topic": "Follow-up after eye surgery",
+   "tags": [
+    "eye surgery",
+    "lasik",
+    "smile",
+    "cataract",
+    "eye operation",
+    "follow-up",
+    "眼睛手术",
+    "眼科手术",
+    "近视手术",
+    "白内障",
+    "复查",
+    "全飞秒",
+    "Augen-OP",
+    "目の手術"
+   ],
+   "text": "Typical follow-up after eye surgery: LASIK/SMILE at 1 day, 1 week, 1 month, 3 months and 6–12 months, then yearly; cataract surgery at 1 day, 1 week and 4–6 weeks; retinal or glaucoma surgery on the surgeon's schedule. Keep every appointment even when vision feels fine, because pressure changes and inflammation can be silent.",
+   "source": "AAO Preferred Practice Patterns",
+   "urgent": false
+  },
+  {
+   "id": "eye-aftercare",
+   "topic": "Caring for your eyes after surgery",
+   "tags": [
+    "after eye surgery",
+    "eye drops",
+    "rub eyes",
+    "swimming after",
+    "术后",
+    "眼药水",
+    "揉眼睛",
+    "术后游泳",
+    "术后注意"
+   ],
+   "text": "After refractive or cataract surgery: use drops exactly as prescribed, do not rub the eye, keep water, soap and make-up out for 1–2 weeks, wear sunglasses outdoors, and avoid swimming and contact sports for about 2–4 weeks or as advised. Dry eye is common for 3–6 months after LASIK; preservative-free artificial tears help.",
+   "source": "AAO; RCOphth",
+   "urgent": false
+  },
+  {
+   "id": "eye-strain",
+   "topic": "Screen eye strain",
+   "tags": [
+    "eye strain",
+    "screen time",
+    "20-20-20",
+    "tired eyes",
+    "眼疲劳",
+    "看屏幕",
+    "眼睛累",
+    "用眼",
+    "视疲劳"
+   ],
+   "text": "Use the 20-20-20 rule: every 20 minutes look at something 6 m (20 feet) away for 20 seconds. Blink fully, keep the screen about an arm's length away and slightly below eye level, and cut glare. Children benefit from 2 hours outdoors a day to slow myopia.",
+   "source": "AAO; He et al., JAMA 2015",
+   "urgent": false
+  },
+  {
+   "id": "dry-eye",
+   "topic": "Dry eye",
+   "tags": [
+    "dry eye",
+    "gritty eyes",
+    "burning eyes",
+    "干眼",
+    "眼睛干",
+    "眼睛涩",
+    "眼干"
+   ],
+   "text": "Dry eye causes burning, grittiness, redness and fluctuating vision, worse with screens, air-conditioning and after LASIK. Use preservative-free artificial tears, take screen breaks, use a humidifier, and see an ophthalmologist if it persists.",
+   "source": "TFOS DEWS II 2017",
+   "urgent": false
+  },
+  {
+   "id": "eye-checks",
+   "topic": "Routine eye checks",
+   "tags": [
+    "eye exam",
+    "myopia",
+    "glaucoma",
+    "eye pressure",
+    "眼科检查",
+    "近视",
+    "高度近视",
+    "青光眼",
+    "眼压"
+   ],
+   "text": "Adults without symptoms should have a full eye exam every 1–2 years, yearly after 60 or with diabetes, high myopia or a family history of glaucoma. High myopia (beyond −6 D) raises the risk of retinal detachment and glaucoma even after laser correction, because the eye's shape does not change.",
+   "source": "AAO",
+   "urgent": false
+  },
+  {
+   "id": "adherence",
+   "topic": "Taking medicines regularly",
+   "tags": [
+    "medication",
+    "medicine",
+    "pills",
+    "forgot",
+    "adherence",
+    "吃药",
+    "药",
+    "服药",
+    "忘记吃药",
+    "Medikamente",
+    "薬"
+   ],
+   "text": "Take medicines at the same time each day tied to a routine such as breakfast, and use Health app reminders. Do not stop blood-pressure, cholesterol, antidepressant or other long-term medicines on your own when the numbers look good — that usually means the medicine is working.",
+   "source": "WHO adherence report 2003",
+   "urgent": false
+  },
+  {
+   "id": "missed-dose",
+   "topic": "A missed dose",
+   "tags": [
+    "missed dose",
+    "forgot pill",
+    "double dose",
+    "漏服",
+    "忘了吃药",
+    "补吃",
+    "吃两次"
+   ],
+   "text": "For a missed dose, follow the leaflet or ask a pharmacist. A common rule is to take it when you remember unless the next dose is almost due, in which case skip it. Never take a double dose to make up for a missed one.",
+   "source": "NHS",
+   "urgent": false
+  },
+  {
+   "id": "painkillers",
+   "topic": "Painkillers",
+   "tags": [
+    "ibuprofen",
+    "paracetamol",
+    "painkiller",
+    "nsaid",
+    "布洛芬",
+    "对乙酰氨基酚",
+    "止痛药",
+    "退烧药"
+   ],
+   "text": "Ibuprofen and other NSAIDs can raise blood pressure, irritate the stomach and strain the kidneys, especially with dehydration or long-term use. Paracetamol (acetaminophen) is gentler on the stomach but has a strict daily maximum, usually 4 g for healthy adults and lower with regular alcohol use or liver disease.",
+   "source": "NICE; FDA",
+   "urgent": false
+  },
+  {
+   "id": "interactions",
+   "topic": "Medicine interactions",
+   "tags": [
+    "interaction",
+    "grapefruit",
+    "supplements",
+    "相互作用",
+    "西柚",
+    "保健品",
+    "一起吃"
+   ],
+   "text": "Grapefruit interacts with some statins, blood-pressure and other medicines; alcohol interacts with sedatives, painkillers and metformin; St John's wort interacts with many drugs. Tell your doctor or pharmacist about every supplement you take.",
+   "source": "FDA",
+   "urgent": false
+  },
+  {
+   "id": "screenings",
+   "topic": "Health check-ups",
+   "tags": [
+    "check-up",
+    "screening",
+    "physical exam",
+    "health check",
+    "体检",
+    "筛查",
+    "年度体检",
+    "检查",
+    "Vorsorge",
+    "健康診断"
+   ],
+   "text": "Common adult screening (varies by country): blood pressure at least yearly; lipids every 4–6 years from age 20–40 and more often with risk; fasting glucose or HbA1c every 3 years from 35–45, earlier with overweight; colorectal screening from 45–50; cervical screening from 21–25; breast imaging from 40–50; low-dose CT for heavy smokers aged 50–80. China recommends a yearly physical exam for adults.",
+   "source": "USPSTF; Chinese expert consensus on health check-ups",
+   "urgent": false
+  },
+  {
+   "id": "vaccines",
+   "topic": "Adult vaccines",
+   "tags": [
+    "vaccine",
+    "flu shot",
+    "vaccination",
+    "疫苗",
+    "流感疫苗",
+    "打疫苗"
+   ],
+   "text": "Adults benefit from a yearly flu vaccine, a tetanus booster every 10 years, and, depending on age, pneumococcal and shingles vaccines from 50–65. COVID boosters follow current national advice.",
+   "source": "WHO; CDC adult schedule",
+   "urgent": false
+  },
+  {
+   "id": "back-pain",
+   "topic": "Low back pain",
+   "tags": [
+    "back pain",
+    "lower back",
+    "sciatica",
+    "腰疼",
+    "腰痛",
+    "背痛",
+    "腰椎",
+    "坐骨神经",
+    "Rückenschmerzen",
+    "腰痛"
+   ],
+   "text": "Most low back pain is non-specific and improves within 2–6 weeks. Staying active and walking beat bed rest; heat and short-term anti-inflammatories can help. Get urgent care for numbness around the groin, loss of bladder or bowel control, leg weakness, fever, or pain after a major fall.",
+   "source": "NICE NG59; Lancet Low Back Pain Series 2018",
+   "urgent": false
+  },
+  {
+   "id": "neck-shoulder",
+   "topic": "Neck and shoulder pain",
+   "tags": [
+    "neck pain",
+    "shoulder pain",
+    "posture",
+    "颈椎",
+    "脖子疼",
+    "肩膀疼",
+    "肩颈",
+    "姿势",
+    "体态"
+   ],
+   "text": "Desk neck and shoulder pain improves with the screen at eye level, elbows supported, regular changes of position, and strengthening the upper back (rows, band pull-aparts) 2–3 times a week.",
+   "source": "Cochrane; Andersen et al. 2011",
+   "urgent": false
+  },
+  {
+   "id": "smoking",
+   "topic": "Smoking",
+   "tags": [
+    "smoking",
+    "cigarettes",
+    "quit smoking",
+    "vape",
+    "e-cigarette",
+    "吸烟",
+    "抽烟",
+    "戒烟",
+    "电子烟",
+    "Rauchen",
+    "喫煙"
+   ],
+   "text": "Smoking doubles to quadruples the risk of heart disease and stroke and causes most lung cancer. Quitting at any age helps: heart-attack risk halves within about a year and stroke risk approaches a non-smoker's within 5–15 years. Nicotine replacement plus counselling more than doubles quit rates; e-cigarettes are not risk-free.",
+   "source": "WHO; US Surgeon General 2020",
+   "urgent": false
+  },
+  {
+   "id": "cycle-training",
+   "topic": "Training through the menstrual cycle",
+   "tags": [
+    "period training",
+    "exercise on period",
+    "menstruation",
+    "经期运动",
+    "来月经",
+    "月经期间运动",
+    "痛经"
+   ],
+   "text": "Training can continue through the whole cycle. Some feel stronger in the follicular phase and find heat and hard efforts tougher in the luteal phase. Very heavy bleeding (soaking a pad or tampon every 1–2 hours), periods absent for 3+ months without pregnancy, or severe pain should be checked; under-eating in athletes can stop periods.",
+   "source": "McNulty et al., Sports Med 2020; IOC RED-S 2023",
+   "urgent": false
+  },
+  {
+   "id": "pregnancy-exercise",
+   "topic": "Exercise in pregnancy",
+   "tags": [
+    "pregnant",
+    "pregnancy",
+    "怀孕",
+    "孕期",
+    "孕妇",
+    "备孕"
+   ],
+   "text": "Healthy pregnant people should aim for 150 minutes of moderate activity a week; avoid contact sports, lying flat on the back for long after the first trimester, and overheating. Stop and seek care for bleeding, fluid leakage, chest pain, dizziness or regular painful contractions.",
+   "source": "ACOG 2020; WHO 2020",
+   "urgent": false
+  },
+  {
+   "id": "immunity",
+   "topic": "Immunity",
+   "tags": [
+    "immune",
+    "immunity",
+    "catch colds",
+    "免疫",
+    "免疫力",
+    "老感冒",
+    "抵抗力"
+   ],
+   "text": "Best-supported ways to support immunity: enough sleep (under 6 hours raised the chance of catching a cold about four-fold after virus exposure), regular moderate exercise, vaccines, a balanced diet and not smoking. Megadoses of vitamin C or zinc have small effects at best.",
+   "source": "Prather et al., Sleep 2015",
+   "urgent": false
+  },
+  {
+   "id": "sun",
+   "topic": "Sun protection",
+   "tags": [
+    "sunscreen",
+    "sunburn",
+    "uv",
+    "moles",
+    "防晒",
+    "晒伤",
+    "紫外线",
+    "痣",
+    "太阳镜"
+   ],
+   "text": "Use broad-spectrum SPF 30+ on exposed skin when the UV index is 3 or more, reapply every 2 hours outdoors, and wear UV400 sunglasses — especially after eye surgery. Check moles for asymmetry, irregular borders, colour change, size over 6 mm or any change over time.",
+   "source": "WHO UV index; AAD",
+   "urgent": false
+  },
+  {
+   "id": "dental",
+   "topic": "Teeth and gums",
+   "tags": [
+    "teeth",
+    "gums",
+    "dentist",
+    "牙齿",
+    "牙龈",
+    "牙医",
+    "刷牙",
+    "洗牙"
+   ],
+   "text": "Brush twice a day for 2 minutes with fluoride toothpaste, clean between the teeth daily, and see a dentist every 6–12 months. Gum disease is linked to diabetes and heart disease.",
+   "source": "ADA (dental); WHO oral health",
+   "urgent": false
+  },
+  {
+   "id": "hearing",
+   "topic": "Hearing",
+   "tags": [
+    "hearing",
+    "noise",
+    "headphones",
+    "tinnitus",
+    "听力",
+    "噪音",
+    "耳机",
+    "耳鸣"
+   ],
+   "text": "Keep headphone volume below about 60% and limit exposure above 85 dB (heavy traffic) to under 8 hours; the Noise and headphone audio levels in Health track this. Ringing ears after loud events is a warning sign of damage.",
+   "source": "WHO Make Listening Safe 2022",
+   "urgent": false
+  },
+  {
+   "id": "jet-lag",
+   "topic": "Jet lag",
+   "tags": [
+    "jet lag",
+    "time difference",
+    "travel",
+    "时差",
+    "倒时差",
+    "出差",
+    "Jetlag",
+    "時差ボケ"
+   ],
+   "text": "Shift sleep by about an hour a day toward destination time before travel, seek morning light after flying east and evening light after flying west, keep caffeine early and skip alcohol on the flight. Low-dose melatonin (0.5–3 mg) at the destination bedtime can help after eastward flights.",
+   "source": "AASM; Herxheimer & Petrie, Cochrane 2002",
+   "urgent": false
+  },
+  {
+   "id": "vita-recovery",
+   "topic": "Vita's recovery score",
+   "tags": [
+    "recovery",
+    "recovery score",
+    "readiness score",
+    "恢复",
+    "恢复分",
+    "恢复度",
+    "恢复指数",
+    "Erholung",
+    "回復"
+   ],
+   "text": "Vita's recovery score (0–100) combines last night's HRV against its 30-day baseline, resting heart rate against its baseline, and sleep. 67–100 is green (hard training is fine), 34–66 yellow (train moderately), 0–33 red (rest, walk, mobility and an early night). It is an estimate, not a medical measurement.",
+   "source": "Vita",
+   "urgent": false
+  },
+  {
+   "id": "vita-heart-age",
+   "topic": "Vita's heart age",
+   "tags": [
+    "heart age",
+    "心脏年龄",
+    "心龄",
+    "Herzalter",
+    "心臓年齢"
+   ],
+   "text": "Vita's heart age is an estimate from resting heart rate and VO2max compared with typical values for your age and sex. Lowering resting heart rate and raising VO2max with regular aerobic training brings it down; it is not a diagnosis.",
+   "source": "Vita",
+   "urgent": false
+  },
+  {
+   "id": "vita-stress",
+   "topic": "Vita's stress index",
+   "tags": [
+    "stress index",
+    "stress score",
+    "压力指数",
+    "压力分"
+   ],
+   "text": "Vita's stress index (0–100) is the inverse of recovery: HRV against its baseline, adjusted by resting heart rate and sleep. It is not a laboratory measure of stress.",
+   "source": "Vita",
+   "urgent": false
+  },
+  {
+   "id": "urgent-chest-pain",
+   "topic": "Chest pain — call for help",
+   "tags": [
+    "chest pain",
+    "chest pressure",
+    "chest tightness",
+    "heart attack",
+    "胸痛",
+    "胸口痛",
+    "胸闷",
+    "胸口闷",
+    "心梗",
+    "心脏病发作",
+    "Brustschmerz",
+    "胸の痛み"
+   ],
+   "text": "Chest pain or pressure lasting more than a few minutes — especially spreading to the arm, jaw, neck or back, or with sweating, breathlessness, nausea or faintness — can be a heart attack. Call emergency services now (China 120, EU 112, US 911); do not drive yourself.",
+   "source": "AHA; ESC",
+   "urgent": true
+  },
+  {
+   "id": "urgent-stroke",
+   "topic": "Stroke signs — call for help",
+   "tags": [
+    "stroke",
+    "face drooping",
+    "slurred speech",
+    "arm weakness",
+    "numb on one side",
+    "中风",
+    "脑卒中",
+    "口角歪斜",
+    "口齿不清",
+    "说话不清",
+    "半身无力",
+    "一侧无力",
+    "Schlaganfall",
+    "脳卒中"
+   ],
+   "text": "Stroke signs (BE FAST): sudden loss of Balance, loss of vision in one or both Eyes, Face drooping, Arm or leg weakness, Speech slurred — Time to call emergency services immediately (China: 120, \"中风120\"). Note when symptoms began; treatment within 4.5 hours can prevent disability. Do not wait to see if it passes.",
+   "source": "AHA/ASA; Chinese Stroke Association",
+   "urgent": true
+  },
+  {
+   "id": "urgent-breathless",
+   "topic": "Severe breathlessness",
+   "tags": [
+    "can't breathe",
+    "short of breath",
+    "breathless",
+    "blue lips",
+    "呼吸困难",
+    "喘不上气",
+    "憋气",
+    "气短",
+    "Atemnot",
+    "息苦しい"
+   ],
+   "text": "Severe shortness of breath at rest, being unable to speak in full sentences, blue lips, or blood oxygen of 90% or less needs emergency care now.",
+   "source": "BTS; NICE",
+   "urgent": true
+  },
+  {
+   "id": "urgent-fainting",
+   "topic": "Fainting",
+   "tags": [
+    "fainted",
+    "fainting",
+    "passed out",
+    "blacked out",
+    "syncope",
+    "晕倒",
+    "昏倒",
+    "昏厥",
+    "晕厥",
+    "失去意识",
+    "Ohnmacht",
+    "失神"
+   ],
+   "text": "Fainting during exercise, with chest pain or palpitations, after a head injury, or without a clear cause needs urgent medical assessment — exercise-related fainting can signal a dangerous heart rhythm. A simple faint after standing a long time or seeing blood usually recovers within a minute lying down with the legs raised.",
+   "source": "ESC Syncope Guidelines 2018",
+   "urgent": true
+  },
+  {
+   "id": "urgent-suicide",
+   "topic": "Thoughts of suicide",
+   "tags": [
+    "suicide",
+    "kill myself",
+    "end my life",
+    "self-harm",
+    "want to die",
+    "自杀",
+    "不想活",
+    "轻生",
+    "自残",
+    "想死",
+    "活着没意思",
+    "Selbstmord",
+    "自殺",
+    "死にたい"
+   ],
+   "text": "If you are thinking about suicide or harming yourself, contact emergency services or a crisis line now and tell someone you trust. China: Beijing psychological crisis hotline 010-82951332 or 400-161-9995, or 120; US: 988; elsewhere, your local emergency number. You do not have to go through this alone.",
+   "source": "WHO; Beijing Suicide Research and Prevention Center",
+   "urgent": true
+  },
+  {
+   "id": "urgent-anaphylaxis",
+   "topic": "Severe allergic reaction",
+   "tags": [
+    "anaphylaxis",
+    "allergic reaction",
+    "throat swelling",
+    "swollen lips",
+    "严重过敏",
+    "过敏性休克",
+    "喉咙肿",
+    "嘴唇肿"
+   ],
+   "text": "Swelling of the lips, tongue or throat, trouble breathing or swallowing, hives with faintness, or collapse after a food, sting or medicine is anaphylaxis: use an adrenaline auto-injector if available and call emergency services immediately.",
+   "source": "WAO 2020; Resuscitation Council UK",
+   "urgent": true
+  },
+  {
+   "id": "urgent-bp-crisis",
+   "topic": "Very high blood pressure",
+   "tags": [
+    "blood pressure 180",
+    "very high blood pressure",
+    "hypertensive crisis",
+    "血压很高",
+    "血压180",
+    "血压特别高",
+    "高血压危象"
+   ],
+   "text": "Blood pressure above 180/120 mmHg: rest for 5 minutes and measure again. If it stays that high with chest pain, breathlessness, back pain, weakness or numbness, vision change, confusion or a severe headache, call emergency services. Without symptoms, contact a doctor the same day.",
+   "source": "AHA/ACC 2017",
+   "urgent": true
+  },
+  {
+   "id": "urgent-hypo",
+   "topic": "Severe low blood sugar",
+   "tags": [
+    "severe hypoglycemia",
+    "glucose very low",
+    "unconscious diabetic",
+    "严重低血糖",
+    "低血糖昏迷",
+    "血糖特别低"
+   ],
+   "text": "Glucose below 3.0 mmol/L, or low blood sugar with confusion, a seizure or inability to swallow, is an emergency. If the person can swallow give fast sugar; if not, give nothing by mouth — use glucagon if available and call emergency services.",
+   "source": "ADA 2025",
+   "urgent": true
+  },
+  {
+   "id": "urgent-meningitis",
+   "topic": "Fever with a stiff neck",
+   "tags": [
+    "stiff neck fever",
+    "rash that doesn't fade",
+    "meningitis",
+    "sepsis",
+    "发烧脖子僵硬",
+    "脑膜炎",
+    "败血症",
+    "脖子僵硬"
+   ],
+   "text": "Fever with a stiff neck, severe headache, sensitivity to light, confusion, or a rash that does not fade when pressed with a glass can be meningitis or sepsis: seek emergency care immediately.",
+   "source": "NICE NG240",
+   "urgent": true
+  },
+  {
+   "id": "urgent-vision",
+   "topic": "Sudden vision problems",
+   "tags": [
+    "sudden vision loss",
+    "curtain over vision",
+    "flashes",
+    "new floaters",
+    "eye pain",
+    "lost vision",
+    "突然看不见",
+    "视力突然下降",
+    "眼前黑影",
+    "闪光感",
+    "飞蚊突然增多",
+    "眼睛剧痛",
+    "视野缺损",
+    "plötzlicher Sehverlust",
+    "急に見えない"
+   ],
+   "text": "Sudden loss of vision, a curtain or shadow over part of the view, a shower of new floaters or flashes, or severe eye pain with redness, headache and nausea needs same-day emergency eye care — these can be retinal detachment, a stroke in the eye or acute glaucoma. After eye surgery, also report increasing pain, redness or worsening vision at once.",
+   "source": "AAO; RCOphth",
+   "urgent": true
+  },
+  {
+   "id": "urgent-gi-bleed",
+   "topic": "Bleeding from the gut",
+   "tags": [
+    "vomiting blood",
+    "black stool",
+    "blood in stool",
+    "呕血",
+    "吐血",
+    "黑便",
+    "柏油样便",
+    "便血"
+   ],
+   "text": "Vomiting blood or material like coffee grounds, black tarry stools, or a lot of blood from the bowel needs emergency care, especially with dizziness or fainting. Iron supplements and bismuth can darken stools, but they are not sticky and tarry.",
+   "source": "NICE CG141",
+   "urgent": true
+  },
+  {
+   "id": "urgent-heatstroke",
+   "topic": "Heat stroke",
+   "tags": [
+    "heat stroke",
+    "heatstroke",
+    "collapsed in heat",
+    "热射病",
+    "重度中暑"
+   ],
+   "text": "Heat stroke — body temperature above 40 °C with confusion, collapse or hot skin after heat or exercise — is life-threatening: call emergency services and cool the person at once with cold water, ice packs at the neck, armpits and groin, and fanning.",
+   "source": "ACSM 2023",
+   "urgent": true
+  }
+ ],
+ "ranges": [
+  {
+   "metric": "systolic",
+   "unit": "mmHg",
+   "sex": null,
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "bp-categories",
+   "bands": [
+    {
+     "below": 90,
+     "level": 1,
+     "label": "low",
+     "advice": "Fine without symptoms; drink enough and stand up slowly if dizzy."
+    },
+    {
+     "below": 120,
+     "level": 0,
+     "label": "normal",
+     "advice": "Keep it there: activity, little salt, healthy weight."
+    },
+    {
+     "below": 130,
+     "level": 1,
+     "label": "elevated",
+     "advice": "Recheck at home over a week; cut salt and move daily."
+    },
+    {
+     "below": 140,
+     "level": 2,
+     "label": "stage 1 hypertension (AHA)",
+     "advice": "Measure at home morning and evening for 7 days and discuss with a doctor."
+    },
+    {
+     "below": 180,
+     "level": 3,
+     "label": "stage 2 hypertension",
+     "advice": "See a doctor soon; confirm with home readings."
+    },
+    {
+     "below": null,
+     "level": 4,
+     "label": "hypertensive crisis range",
+     "advice": "Rest 5 minutes and remeasure; with chest pain, breathlessness, weakness or vision change call emergency services."
+    }
+   ]
+  },
+  {
+   "metric": "diastolic",
+   "unit": "mmHg",
+   "sex": null,
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "bp-categories",
+   "bands": [
+    {
+     "below": 60,
+     "level": 1,
+     "label": "low",
+     "advice": "Fine without symptoms."
+    },
+    {
+     "below": 80,
+     "level": 0,
+     "label": "normal",
+     "advice": "Keep it there."
+    },
+    {
+     "below": 90,
+     "level": 2,
+     "label": "stage 1 hypertension (AHA)",
+     "advice": "Recheck at home for a week and discuss with a doctor."
+    },
+    {
+     "below": 120,
+     "level": 3,
+     "label": "stage 2 hypertension",
+     "advice": "See a doctor soon."
+    },
+    {
+     "below": null,
+     "level": 4,
+     "label": "hypertensive crisis range",
+     "advice": "Remeasure after rest; with symptoms call emergency services."
+    }
+   ]
+  },
+  {
+   "metric": "resting_hr",
+   "unit": "bpm",
+   "sex": null,
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "resting-hr",
+   "bands": [
+    {
+     "below": 40,
+     "level": 1,
+     "label": "very low",
+     "advice": "Normal in endurance athletes; see a doctor if dizzy, faint or tired."
+    },
+    {
+     "below": 60,
+     "level": 0,
+     "label": "low (fit)",
+     "advice": "Typical of good aerobic fitness."
+    },
+    {
+     "below": 80,
+     "level": 0,
+     "label": "normal",
+     "advice": "Healthy range."
+    },
+    {
+     "below": 101,
+     "level": 1,
+     "label": "upper normal",
+     "advice": "More zone-2 cardio, sleep and less alcohol bring it down."
+    },
+    {
+     "below": null,
+     "level": 2,
+     "label": "high (tachycardia)",
+     "advice": "If it stays above 100 at rest, see a doctor."
+    }
+   ]
+  },
+  {
+   "metric": "spo2",
+   "unit": "%",
+   "sex": null,
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "spo2",
+   "bands": [
+    {
+     "below": 91,
+     "level": 3,
+     "label": "low",
+     "advice": "Remeasure at rest; 90% or below with breathlessness needs prompt medical care."
+    },
+    {
+     "below": 95,
+     "level": 1,
+     "label": "slightly low",
+     "advice": "Repeat at rest with a still, warm wrist; watch the trend."
+    },
+    {
+     "below": null,
+     "level": 0,
+     "label": "normal",
+     "advice": "Normal."
+    }
+   ]
+  },
+  {
+   "metric": "respiratory_rate",
+   "unit": "breaths/min",
+   "sex": null,
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "respiratory-rate",
+   "bands": [
+    {
+     "below": 10,
+     "level": 1,
+     "label": "low",
+     "advice": "Check the reading; low rates are uncommon awake."
+    },
+    {
+     "below": 21,
+     "level": 0,
+     "label": "normal",
+     "advice": "Normal."
+    },
+    {
+     "below": 25,
+     "level": 1,
+     "label": "raised",
+     "advice": "Can come before an infection; rest and watch temperature."
+    },
+    {
+     "below": null,
+     "level": 2,
+     "label": "high",
+     "advice": "Fast breathing at rest needs a medical check if it persists."
+    }
+   ]
+  },
+  {
+   "metric": "sleep_hours",
+   "unit": "h",
+   "sex": null,
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "sleep-duration",
+   "bands": [
+    {
+     "below": 5,
+     "level": 2,
+     "label": "very short",
+     "advice": "Make tonight an early night; avoid hard training today."
+    },
+    {
+     "below": 7,
+     "level": 1,
+     "label": "short",
+     "advice": "Aim for 7–9 h: earlier bedtime, no caffeine after noon."
+    },
+    {
+     "below": 9.01,
+     "level": 0,
+     "label": "recommended",
+     "advice": "Good amount."
+    },
+    {
+     "below": null,
+     "level": 1,
+     "label": "long",
+     "advice": "Regularly over 9 h can mean poor sleep quality."
+    }
+   ]
+  },
+  {
+   "metric": "sleep_hours",
+   "unit": "h",
+   "sex": null,
+   "age_min": 65,
+   "age_max": null,
+   "knowledge": "sleep-duration",
+   "bands": [
+    {
+     "below": 5,
+     "level": 2,
+     "label": "very short",
+     "advice": "Make tonight an early night."
+    },
+    {
+     "below": 7,
+     "level": 1,
+     "label": "short",
+     "advice": "Aim for 7–8 h."
+    },
+    {
+     "below": 8.01,
+     "level": 0,
+     "label": "recommended",
+     "advice": "Good amount."
+    },
+    {
+     "below": null,
+     "level": 1,
+     "label": "long",
+     "advice": "Long sleep in later life can signal poor quality."
+    }
+   ]
+  },
+  {
+   "metric": "sleep_hours",
+   "unit": "h",
+   "sex": null,
+   "age_min": 13,
+   "age_max": 17,
+   "knowledge": "sleep-duration",
+   "bands": [
+    {
+     "below": 7,
+     "level": 2,
+     "label": "very short",
+     "advice": "Teenagers need 8–10 h."
+    },
+    {
+     "below": 8,
+     "level": 1,
+     "label": "short",
+     "advice": "Aim for 8–10 h."
+    },
+    {
+     "below": 10.01,
+     "level": 0,
+     "label": "recommended",
+     "advice": "Good amount."
+    },
+    {
+     "below": null,
+     "level": 1,
+     "label": "long",
+     "advice": "Very long sleep can signal poor quality."
+    }
+   ]
+  },
+  {
+   "metric": "steps",
+   "unit": "steps",
+   "sex": null,
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "steps",
+   "bands": [
+    {
+     "below": 2500,
+     "level": 2,
+     "label": "very low",
+     "advice": "Add short walks: 10 minutes after each meal adds about 3,000 steps."
+    },
+    {
+     "below": 5000,
+     "level": 1,
+     "label": "low",
+     "advice": "Add a 20–30 minute walk."
+    },
+    {
+     "below": 8000,
+     "level": 0,
+     "label": "moderate",
+     "advice": "Good; benefits keep rising toward 8,000–10,000."
+    },
+    {
+     "below": null,
+     "level": 0,
+     "label": "active",
+     "advice": "Great."
+    }
+   ]
+  },
+  {
+   "metric": "bmi",
+   "unit": "kg/m²",
+   "sex": null,
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "bmi",
+   "bands": [
+    {
+     "below": 18.5,
+     "level": 1,
+     "label": "underweight (WHO)",
+     "advice": "Eat enough protein and energy; check with a doctor if weight is falling."
+    },
+    {
+     "below": 25,
+     "level": 0,
+     "label": "normal (WHO)",
+     "advice": "Healthy range."
+    },
+    {
+     "below": 30,
+     "level": 1,
+     "label": "overweight (WHO)",
+     "advice": "Waist size tells more; aim for 0.5–1% loss a week if losing."
+    },
+    {
+     "below": 35,
+     "level": 2,
+     "label": "obese class I (WHO)",
+     "advice": "Weight loss of 5–10% improves blood pressure, glucose and liver fat."
+    },
+    {
+     "below": null,
+     "level": 3,
+     "label": "obese class II+ (WHO)",
+     "advice": "Talk to a doctor about a weight plan."
+    }
+   ]
+  },
+  {
+   "metric": "bmi_china",
+   "unit": "kg/m²",
+   "sex": null,
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "bmi",
+   "bands": [
+    {
+     "below": 18.5,
+     "level": 1,
+     "label": "underweight (China)",
+     "advice": "Eat enough protein and energy."
+    },
+    {
+     "below": 24,
+     "level": 0,
+     "label": "normal (China)",
+     "advice": "Healthy range."
+    },
+    {
+     "below": 28,
+     "level": 1,
+     "label": "overweight (China)",
+     "advice": "Check waist size; modest weight loss helps."
+    },
+    {
+     "below": null,
+     "level": 2,
+     "label": "obese (China)",
+     "advice": "A 5–10% weight loss brings clear health gains."
+    }
+   ]
+  },
+  {
+   "metric": "body_fat",
+   "unit": "%",
+   "sex": "male",
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "body-fat",
+   "bands": [
+    {
+     "below": 6,
+     "level": 1,
+     "label": "very low",
+     "advice": "Below essential levels is risky."
+    },
+    {
+     "below": 14,
+     "level": 0,
+     "label": "athletic",
+     "advice": "Athletic range."
+    },
+    {
+     "below": 18,
+     "level": 0,
+     "label": "fit",
+     "advice": "Fit range."
+    },
+    {
+     "below": 25,
+     "level": 0,
+     "label": "average",
+     "advice": "Average range."
+    },
+    {
+     "below": null,
+     "level": 2,
+     "label": "high",
+     "advice": "Strength training plus a modest deficit lowers it."
+    }
+   ]
+  },
+  {
+   "metric": "body_fat",
+   "unit": "%",
+   "sex": "female",
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "body-fat",
+   "bands": [
+    {
+     "below": 14,
+     "level": 1,
+     "label": "very low",
+     "advice": "Very low fat can stop periods and weaken bones."
+    },
+    {
+     "below": 21,
+     "level": 0,
+     "label": "athletic",
+     "advice": "Athletic range."
+    },
+    {
+     "below": 25,
+     "level": 0,
+     "label": "fit",
+     "advice": "Fit range."
+    },
+    {
+     "below": 32,
+     "level": 0,
+     "label": "average",
+     "advice": "Average range."
+    },
+    {
+     "below": null,
+     "level": 2,
+     "label": "high",
+     "advice": "Strength training plus a modest deficit lowers it."
+    }
+   ]
+  },
+  {
+   "metric": "waist",
+   "unit": "cm",
+   "sex": "male",
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "waist",
+   "bands": [
+    {
+     "below": 90,
+     "level": 0,
+     "label": "normal (China)",
+     "advice": "Below the central-obesity line."
+    },
+    {
+     "below": null,
+     "level": 2,
+     "label": "central obesity (China, ≥90)",
+     "advice": "Abdominal fat raises metabolic risk; more activity and fewer refined carbs help."
+    }
+   ]
+  },
+  {
+   "metric": "waist",
+   "unit": "cm",
+   "sex": "female",
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "waist",
+   "bands": [
+    {
+     "below": 85,
+     "level": 0,
+     "label": "normal (China)",
+     "advice": "Below the central-obesity line."
+    },
+    {
+     "below": null,
+     "level": 2,
+     "label": "central obesity (China, ≥85)",
+     "advice": "Abdominal fat raises metabolic risk; more activity and fewer refined carbs help."
+    }
+   ]
+  },
+  {
+   "metric": "glucose_fasting",
+   "unit": "mmol/L",
+   "sex": null,
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "glucose-fasting",
+   "bands": [
+    {
+     "below": 3.9,
+     "level": 3,
+     "label": "low",
+     "advice": "Eat fast sugar now if symptomatic; frequent lows need a doctor."
+    },
+    {
+     "below": 5.6,
+     "level": 0,
+     "label": "normal",
+     "advice": "Normal fasting glucose."
+    },
+    {
+     "below": 6.1,
+     "level": 1,
+     "label": "high-normal (ADA prediabetes)",
+     "advice": "Walk after meals, cut sugary drinks; recheck yearly."
+    },
+    {
+     "below": 7.0,
+     "level": 2,
+     "label": "impaired fasting glucose",
+     "advice": "Prediabetes range: confirm with HbA1c and see a doctor."
+    },
+    {
+     "below": null,
+     "level": 3,
+     "label": "diabetes range",
+     "advice": "See a doctor to confirm with a repeat test."
+    }
+   ]
+  },
+  {
+   "metric": "glucose_post_meal",
+   "unit": "mmol/L",
+   "sex": null,
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "glucose-post-meal",
+   "bands": [
+    {
+     "below": 3.9,
+     "level": 3,
+     "label": "low",
+     "advice": "Treat a low with 15 g fast sugar."
+    },
+    {
+     "below": 7.8,
+     "level": 0,
+     "label": "normal",
+     "advice": "Normal after-meal level."
+    },
+    {
+     "below": 11.1,
+     "level": 2,
+     "label": "impaired glucose tolerance",
+     "advice": "Walk after meals, fewer refined carbs; get HbA1c checked."
+    },
+    {
+     "below": null,
+     "level": 3,
+     "label": "diabetes range",
+     "advice": "See a doctor."
+    }
+   ]
+  },
+  {
+   "metric": "glucose_random",
+   "unit": "mmol/L",
+   "sex": null,
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "glucose-fasting",
+   "bands": [
+    {
+     "below": 3.0,
+     "level": 4,
+     "label": "severely low",
+     "advice": "Take fast sugar now; if confused or unable to swallow, call emergency services."
+    },
+    {
+     "below": 3.9,
+     "level": 3,
+     "label": "low",
+     "advice": "Take 15 g fast sugar and recheck in 15 minutes."
+    },
+    {
+     "below": 7.8,
+     "level": 0,
+     "label": "normal",
+     "advice": "Normal."
+    },
+    {
+     "below": 11.1,
+     "level": 1,
+     "label": "elevated",
+     "advice": "Recheck fasting or 2 h after a meal."
+    },
+    {
+     "below": null,
+     "level": 3,
+     "label": "high",
+     "advice": "See a doctor, the same day if very thirsty, unwell or above 16.7."
+    }
+   ]
+  },
+  {
+   "metric": "hba1c",
+   "unit": "%",
+   "sex": null,
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "hba1c",
+   "bands": [
+    {
+     "below": 5.7,
+     "level": 0,
+     "label": "normal",
+     "advice": "Normal."
+    },
+    {
+     "below": 6.5,
+     "level": 2,
+     "label": "prediabetes",
+     "advice": "5–7% weight loss and 150 min/week activity can reverse it."
+    },
+    {
+     "below": null,
+     "level": 3,
+     "label": "diabetes range",
+     "advice": "See a doctor."
+    }
+   ]
+  },
+  {
+   "metric": "ldl",
+   "unit": "mmol/L",
+   "sex": null,
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "ldl",
+   "bands": [
+    {
+     "below": 2.6,
+     "level": 0,
+     "label": "optimal",
+     "advice": "Optimal."
+    },
+    {
+     "below": 3.4,
+     "level": 0,
+     "label": "near optimal",
+     "advice": "Fine for most people without heart disease."
+    },
+    {
+     "below": 4.1,
+     "level": 1,
+     "label": "borderline high",
+     "advice": "Less saturated fat, more fibre; recheck in a year."
+    },
+    {
+     "below": 4.9,
+     "level": 2,
+     "label": "high",
+     "advice": "Discuss with a doctor."
+    },
+    {
+     "below": null,
+     "level": 3,
+     "label": "very high",
+     "advice": "See a doctor; possible familial hypercholesterolaemia."
+    }
+   ]
+  },
+  {
+   "metric": "hdl",
+   "unit": "mmol/L",
+   "sex": "male",
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "hdl-tg",
+   "bands": [
+    {
+     "below": 1.0,
+     "level": 1,
+     "label": "low",
+     "advice": "Exercise, weight loss and not smoking raise HDL."
+    },
+    {
+     "below": null,
+     "level": 0,
+     "label": "normal",
+     "advice": "Normal."
+    }
+   ]
+  },
+  {
+   "metric": "hdl",
+   "unit": "mmol/L",
+   "sex": "female",
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "hdl-tg",
+   "bands": [
+    {
+     "below": 1.3,
+     "level": 1,
+     "label": "low",
+     "advice": "Exercise, weight loss and not smoking raise HDL."
+    },
+    {
+     "below": null,
+     "level": 0,
+     "label": "normal",
+     "advice": "Normal."
+    }
+   ]
+  },
+  {
+   "metric": "triglycerides",
+   "unit": "mmol/L",
+   "sex": null,
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "hdl-tg",
+   "bands": [
+    {
+     "below": 1.7,
+     "level": 0,
+     "label": "normal",
+     "advice": "Normal."
+    },
+    {
+     "below": 2.3,
+     "level": 1,
+     "label": "borderline high",
+     "advice": "Cut sugar, refined carbs and alcohol."
+    },
+    {
+     "below": 5.6,
+     "level": 2,
+     "label": "high",
+     "advice": "Lifestyle changes and a doctor's review."
+    },
+    {
+     "below": null,
+     "level": 3,
+     "label": "very high",
+     "advice": "See a doctor: pancreatitis risk."
+    }
+   ]
+  },
+  {
+   "metric": "total_cholesterol",
+   "unit": "mmol/L",
+   "sex": null,
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "ldl",
+   "bands": [
+    {
+     "below": 5.2,
+     "level": 0,
+     "label": "desirable",
+     "advice": "Desirable."
+    },
+    {
+     "below": 6.2,
+     "level": 1,
+     "label": "borderline high",
+     "advice": "Check the LDL value; adjust diet."
+    },
+    {
+     "below": null,
+     "level": 2,
+     "label": "high",
+     "advice": "Discuss with a doctor."
+    }
+   ]
+  },
+  {
+   "metric": "uric_acid",
+   "unit": "µmol/L",
+   "sex": "male",
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "uric-acid",
+   "bands": [
+    {
+     "below": 420,
+     "level": 0,
+     "label": "normal",
+     "advice": "Normal."
+    },
+    {
+     "below": 480,
+     "level": 2,
+     "label": "high (hyperuricaemia)",
+     "advice": "Cut beer, sugary drinks and organ meats; drink more water."
+    },
+    {
+     "below": null,
+     "level": 2,
+     "label": "high (hyperuricaemia)",
+     "advice": "See a doctor, especially with joint pain."
+    }
+   ]
+  },
+  {
+   "metric": "uric_acid",
+   "unit": "µmol/L",
+   "sex": "female",
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "uric-acid",
+   "bands": [
+    {
+     "below": 360,
+     "level": 0,
+     "label": "normal",
+     "advice": "Normal."
+    },
+    {
+     "below": 420,
+     "level": 1,
+     "label": "upper normal",
+     "advice": "Limit sugary drinks and alcohol."
+    },
+    {
+     "below": null,
+     "level": 2,
+     "label": "high (hyperuricaemia)",
+     "advice": "Cut beer, sugary drinks and organ meats; see a doctor with joint pain."
+    }
+   ]
+  },
+  {
+   "metric": "hrv_change_pct",
+   "unit": "% vs baseline",
+   "sex": null,
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "hrv-reading",
+   "bands": [
+    {
+     "below": -25,
+     "level": 2,
+     "label": "well below baseline",
+     "advice": "Take an easy day: walk, mobility, early night."
+    },
+    {
+     "below": -10,
+     "level": 1,
+     "label": "below baseline",
+     "advice": "Train moderately and prioritise sleep."
+    },
+    {
+     "below": 10,
+     "level": 0,
+     "label": "at baseline",
+     "advice": "Normal day-to-day range."
+    },
+    {
+     "below": null,
+     "level": 0,
+     "label": "above baseline",
+     "advice": "Good recovery; a hard session is fine."
+    }
+   ]
+  },
+  {
+   "metric": "rhr_change",
+   "unit": "bpm vs baseline",
+   "sex": null,
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "rhr-trend",
+   "bands": [
+    {
+     "below": -3,
+     "level": 0,
+     "label": "below baseline",
+     "advice": "Good recovery sign."
+    },
+    {
+     "below": 3,
+     "level": 0,
+     "label": "at baseline",
+     "advice": "Normal."
+    },
+    {
+     "below": 6,
+     "level": 1,
+     "label": "raised",
+     "advice": "Often short sleep, alcohol, heat or stress; keep today lighter."
+    },
+    {
+     "below": null,
+     "level": 2,
+     "label": "well above baseline",
+     "advice": "Can come before illness; rest and watch temperature."
+    }
+   ]
+  },
+  {
+   "metric": "wrist_temp_delta",
+   "unit": "°C vs baseline",
+   "sex": null,
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "wrist-temp",
+   "bands": [
+    {
+     "below": -1.0,
+     "level": 1,
+     "label": "below baseline",
+     "advice": "Usually a cold room or loose band."
+    },
+    {
+     "below": 0.5,
+     "level": 0,
+     "label": "normal",
+     "advice": "Normal."
+    },
+    {
+     "below": 1.0,
+     "level": 1,
+     "label": "raised",
+     "advice": "Alcohol, a warm room, illness or the luteal phase; watch tomorrow."
+    },
+    {
+     "below": null,
+     "level": 2,
+     "label": "high",
+     "advice": "With a raised resting heart rate this often means fever: rest and check temperature."
+    }
+   ]
+  },
+  {
+   "metric": "body_temp",
+   "unit": "°C",
+   "sex": null,
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "body-temp",
+   "bands": [
+    {
+     "below": 35,
+     "level": 4,
+     "label": "hypothermia",
+     "advice": "Warm up and seek emergency care."
+    },
+    {
+     "below": 36,
+     "level": 1,
+     "label": "low",
+     "advice": "Remeasure; often a cold environment."
+    },
+    {
+     "below": 37.3,
+     "level": 0,
+     "label": "normal",
+     "advice": "Normal."
+    },
+    {
+     "below": 38.1,
+     "level": 1,
+     "label": "low-grade fever",
+     "advice": "Rest and drink fluids."
+    },
+    {
+     "below": 39.1,
+     "level": 2,
+     "label": "fever",
+     "advice": "Rest, fluids, fever reducer if uncomfortable."
+    },
+    {
+     "below": 41,
+     "level": 3,
+     "label": "high fever",
+     "advice": "See a doctor today."
+    },
+    {
+     "below": null,
+     "level": 4,
+     "label": "hyperpyrexia",
+     "advice": "Emergency: call for help."
+    }
+   ]
+  },
+  {
+   "metric": "caffeine_mg",
+   "unit": "mg",
+   "sex": null,
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "caffeine",
+   "bands": [
+    {
+     "below": 400.01,
+     "level": 0,
+     "label": "within the safe limit",
+     "advice": "Keep caffeine 8+ hours before bed."
+    },
+    {
+     "below": null,
+     "level": 1,
+     "label": "above 400 mg",
+     "advice": "Above the daily limit for adults; switch to water or decaf."
+    }
+   ]
+  },
+  {
+   "metric": "weekly_activity_min",
+   "unit": "min/week",
+   "sex": null,
+   "age_min": null,
+   "age_max": null,
+   "knowledge": "who-activity",
+   "bands": [
+    {
+     "below": 75,
+     "level": 2,
+     "label": "very low",
+     "advice": "Start with 10–15 minute brisk walks most days."
+    },
+    {
+     "below": 150,
+     "level": 1,
+     "label": "below target",
+     "advice": "Build toward 150 minutes a week."
+    },
+    {
+     "below": 300,
+     "level": 0,
+     "label": "meets WHO target",
+     "advice": "Good."
+    },
+    {
+     "below": null,
+     "level": 0,
+     "label": "above WHO target",
+     "advice": "Great."
+    }
+   ]
+  },
+  {
+   "metric": "vo2max",
+   "unit": "mL/kg/min",
+   "sex": "male",
+   "age_min": null,
+   "age_max": 29,
+   "knowledge": "vo2max",
+   "bands": [
+    {
+     "below": 33.0,
+     "level": 2,
+     "label": "very poor",
+     "advice": "Raise it with zone-2 cardio 3×/week plus one interval session."
+    },
+    {
+     "below": 36.5,
+     "level": 1,
+     "label": "poor",
+     "advice": "2–4 easy aerobic sessions a week lift it within 8–12 weeks."
+    },
+    {
+     "below": 42.5,
+     "level": 0,
+     "label": "fair",
+     "advice": "Add one interval session a week to move up."
+    },
+    {
+     "below": 46.5,
+     "level": 0,
+     "label": "good",
+     "advice": "Above average; keep a mix of easy volume and intervals."
+    },
+    {
+     "below": 52.5,
+     "level": 0,
+     "label": "excellent",
+     "advice": "Very good fitness."
+    },
+    {
+     "below": null,
+     "level": 0,
+     "label": "superior",
+     "advice": "Top fitness for your age."
+    }
+   ]
+  },
+  {
+   "metric": "vo2max",
+   "unit": "mL/kg/min",
+   "sex": "male",
+   "age_min": 30,
+   "age_max": 39,
+   "knowledge": "vo2max",
+   "bands": [
+    {
+     "below": 31.5,
+     "level": 2,
+     "label": "very poor",
+     "advice": "Raise it with zone-2 cardio 3×/week plus one interval session."
+    },
+    {
+     "below": 35.5,
+     "level": 1,
+     "label": "poor",
+     "advice": "2–4 easy aerobic sessions a week lift it within 8–12 weeks."
+    },
+    {
+     "below": 41.0,
+     "level": 0,
+     "label": "fair",
+     "advice": "Add one interval session a week to move up."
+    },
+    {
+     "below": 45.0,
+     "level": 0,
+     "label": "good",
+     "advice": "Above average; keep a mix of easy volume and intervals."
+    },
+    {
+     "below": 49.5,
+     "level": 0,
+     "label": "excellent",
+     "advice": "Very good fitness."
+    },
+    {
+     "below": null,
+     "level": 0,
+     "label": "superior",
+     "advice": "Top fitness for your age."
+    }
+   ]
+  },
+  {
+   "metric": "vo2max",
+   "unit": "mL/kg/min",
+   "sex": "male",
+   "age_min": 40,
+   "age_max": 49,
+   "knowledge": "vo2max",
+   "bands": [
+    {
+     "below": 30.2,
+     "level": 2,
+     "label": "very poor",
+     "advice": "Raise it with zone-2 cardio 3×/week plus one interval session."
+    },
+    {
+     "below": 33.6,
+     "level": 1,
+     "label": "poor",
+     "advice": "2–4 easy aerobic sessions a week lift it within 8–12 weeks."
+    },
+    {
+     "below": 39.0,
+     "level": 0,
+     "label": "fair",
+     "advice": "Add one interval session a week to move up."
+    },
+    {
+     "below": 43.8,
+     "level": 0,
+     "label": "good",
+     "advice": "Above average; keep a mix of easy volume and intervals."
+    },
+    {
+     "below": 48.1,
+     "level": 0,
+     "label": "excellent",
+     "advice": "Very good fitness."
+    },
+    {
+     "below": null,
+     "level": 0,
+     "label": "superior",
+     "advice": "Top fitness for your age."
+    }
+   ]
+  },
+  {
+   "metric": "vo2max",
+   "unit": "mL/kg/min",
+   "sex": "male",
+   "age_min": 50,
+   "age_max": 59,
+   "knowledge": "vo2max",
+   "bands": [
+    {
+     "below": 26.1,
+     "level": 2,
+     "label": "very poor",
+     "advice": "Raise it with zone-2 cardio 3×/week plus one interval session."
+    },
+    {
+     "below": 31.0,
+     "level": 1,
+     "label": "poor",
+     "advice": "2–4 easy aerobic sessions a week lift it within 8–12 weeks."
+    },
+    {
+     "below": 35.8,
+     "level": 0,
+     "label": "fair",
+     "advice": "Add one interval session a week to move up."
+    },
+    {
+     "below": 41.0,
+     "level": 0,
+     "label": "good",
+     "advice": "Above average; keep a mix of easy volume and intervals."
+    },
+    {
+     "below": 45.4,
+     "level": 0,
+     "label": "excellent",
+     "advice": "Very good fitness."
+    },
+    {
+     "below": null,
+     "level": 0,
+     "label": "superior",
+     "advice": "Top fitness for your age."
+    }
+   ]
+  },
+  {
+   "metric": "vo2max",
+   "unit": "mL/kg/min",
+   "sex": "male",
+   "age_min": 60,
+   "age_max": null,
+   "knowledge": "vo2max",
+   "bands": [
+    {
+     "below": 20.5,
+     "level": 2,
+     "label": "very poor",
+     "advice": "Raise it with zone-2 cardio 3×/week plus one interval session."
+    },
+    {
+     "below": 26.1,
+     "level": 1,
+     "label": "poor",
+     "advice": "2–4 easy aerobic sessions a week lift it within 8–12 weeks."
+    },
+    {
+     "below": 32.3,
+     "level": 0,
+     "label": "fair",
+     "advice": "Add one interval session a week to move up."
+    },
+    {
+     "below": 36.5,
+     "level": 0,
+     "label": "good",
+     "advice": "Above average; keep a mix of easy volume and intervals."
+    },
+    {
+     "below": 44.3,
+     "level": 0,
+     "label": "excellent",
+     "advice": "Very good fitness."
+    },
+    {
+     "below": null,
+     "level": 0,
+     "label": "superior",
+     "advice": "Top fitness for your age."
+    }
+   ]
+  },
+  {
+   "metric": "vo2max",
+   "unit": "mL/kg/min",
+   "sex": "female",
+   "age_min": null,
+   "age_max": 29,
+   "knowledge": "vo2max",
+   "bands": [
+    {
+     "below": 23.6,
+     "level": 2,
+     "label": "very poor",
+     "advice": "Raise it with zone-2 cardio 3×/week plus one interval session."
+    },
+    {
+     "below": 29.0,
+     "level": 1,
+     "label": "poor",
+     "advice": "2–4 easy aerobic sessions a week lift it within 8–12 weeks."
+    },
+    {
+     "below": 33.0,
+     "level": 0,
+     "label": "fair",
+     "advice": "Add one interval session a week to move up."
+    },
+    {
+     "below": 37.0,
+     "level": 0,
+     "label": "good",
+     "advice": "Above average; keep a mix of easy volume and intervals."
+    },
+    {
+     "below": 41.1,
+     "level": 0,
+     "label": "excellent",
+     "advice": "Very good fitness."
+    },
+    {
+     "below": null,
+     "level": 0,
+     "label": "superior",
+     "advice": "Top fitness for your age."
+    }
+   ]
+  },
+  {
+   "metric": "vo2max",
+   "unit": "mL/kg/min",
+   "sex": "female",
+   "age_min": 30,
+   "age_max": 39,
+   "knowledge": "vo2max",
+   "bands": [
+    {
+     "below": 22.8,
+     "level": 2,
+     "label": "very poor",
+     "advice": "Raise it with zone-2 cardio 3×/week plus one interval session."
+    },
+    {
+     "below": 27.0,
+     "level": 1,
+     "label": "poor",
+     "advice": "2–4 easy aerobic sessions a week lift it within 8–12 weeks."
+    },
+    {
+     "below": 31.5,
+     "level": 0,
+     "label": "fair",
+     "advice": "Add one interval session a week to move up."
+    },
+    {
+     "below": 35.7,
+     "level": 0,
+     "label": "good",
+     "advice": "Above average; keep a mix of easy volume and intervals."
+    },
+    {
+     "below": 40.1,
+     "level": 0,
+     "label": "excellent",
+     "advice": "Very good fitness."
+    },
+    {
+     "below": null,
+     "level": 0,
+     "label": "superior",
+     "advice": "Top fitness for your age."
+    }
+   ]
+  },
+  {
+   "metric": "vo2max",
+   "unit": "mL/kg/min",
+   "sex": "female",
+   "age_min": 40,
+   "age_max": 49,
+   "knowledge": "vo2max",
+   "bands": [
+    {
+     "below": 21.0,
+     "level": 2,
+     "label": "very poor",
+     "advice": "Raise it with zone-2 cardio 3×/week plus one interval session."
+    },
+    {
+     "below": 24.5,
+     "level": 1,
+     "label": "poor",
+     "advice": "2–4 easy aerobic sessions a week lift it within 8–12 weeks."
+    },
+    {
+     "below": 29.0,
+     "level": 0,
+     "label": "fair",
+     "advice": "Add one interval session a week to move up."
+    },
+    {
+     "below": 32.9,
+     "level": 0,
+     "label": "good",
+     "advice": "Above average; keep a mix of easy volume and intervals."
+    },
+    {
+     "below": 37.0,
+     "level": 0,
+     "label": "excellent",
+     "advice": "Very good fitness."
+    },
+    {
+     "below": null,
+     "level": 0,
+     "label": "superior",
+     "advice": "Top fitness for your age."
+    }
+   ]
+  },
+  {
+   "metric": "vo2max",
+   "unit": "mL/kg/min",
+   "sex": "female",
+   "age_min": 50,
+   "age_max": 59,
+   "knowledge": "vo2max",
+   "bands": [
+    {
+     "below": 20.2,
+     "level": 2,
+     "label": "very poor",
+     "advice": "Raise it with zone-2 cardio 3×/week plus one interval session."
+    },
+    {
+     "below": 22.8,
+     "level": 1,
+     "label": "poor",
+     "advice": "2–4 easy aerobic sessions a week lift it within 8–12 weeks."
+    },
+    {
+     "below": 27.0,
+     "level": 0,
+     "label": "fair",
+     "advice": "Add one interval session a week to move up."
+    },
+    {
+     "below": 31.5,
+     "level": 0,
+     "label": "good",
+     "advice": "Above average; keep a mix of easy volume and intervals."
+    },
+    {
+     "below": 35.8,
+     "level": 0,
+     "label": "excellent",
+     "advice": "Very good fitness."
+    },
+    {
+     "below": null,
+     "level": 0,
+     "label": "superior",
+     "advice": "Top fitness for your age."
+    }
+   ]
+  },
+  {
+   "metric": "vo2max",
+   "unit": "mL/kg/min",
+   "sex": "female",
+   "age_min": 60,
+   "age_max": null,
+   "knowledge": "vo2max",
+   "bands": [
+    {
+     "below": 17.5,
+     "level": 2,
+     "label": "very poor",
+     "advice": "Raise it with zone-2 cardio 3×/week plus one interval session."
+    },
+    {
+     "below": 20.2,
+     "level": 1,
+     "label": "poor",
+     "advice": "2–4 easy aerobic sessions a week lift it within 8–12 weeks."
+    },
+    {
+     "below": 24.5,
+     "level": 0,
+     "label": "fair",
+     "advice": "Add one interval session a week to move up."
+    },
+    {
+     "below": 30.3,
+     "level": 0,
+     "label": "good",
+     "advice": "Above average; keep a mix of easy volume and intervals."
+    },
+    {
+     "below": 31.5,
+     "level": 0,
+     "label": "excellent",
+     "advice": "Very good fitness."
+    },
+    {
+     "below": null,
+     "level": 0,
+     "label": "superior",
+     "advice": "Top fitness for your age."
+    }
+   ]
+  }
+ ]
+}
