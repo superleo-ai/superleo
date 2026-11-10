@@ -37,20 +37,22 @@ func TestATypedTurnIsAnsweredWhileTheQueenIsStillBusy(t *testing.T) {
 	}
 }
 
-// With a queen engine whose session is busy with the first turn, the queen's
-// own model stands in for it at once instead of the turn waiting for it.
-func TestABusyQueenEngineIsStoodInForAtOnce(t *testing.T) {
+// With a queen engine whose session is busy with the first turn, the engine
+// answers this one too, at once, in a session of its own — not SuperLeo's
+// model under a note saying the engine could not take it.
+func TestABusyQueenEngineAnswersInASessionOfItsOwn(t *testing.T) {
 	h := newEngineHarness(t, fakeClaudeTurn, 0)
 	const conv = "hive-console-web"
 	end := busyWith(h.a, "call-1", conv)
 	defer end()
 
 	id := h.a.SendChat(conv, "现在 hive 里有哪些成员？", nil)
-	if name, _ := h.ev.wait(t, id); name != "chat:done" {
-		t.Fatalf("ended with %s", name)
+	name, done := h.ev.wait(t, id)
+	if name != "chat:done" || done["engine"] != "claude" {
+		t.Fatalf("%s %v", name, done)
 	}
-	if got := h.owned(); len(got) != 1 || got[0].standIn != "claude" {
-		t.Fatalf("not stood in for the engine: %v", got)
+	if got := h.owned(); len(got) != 0 {
+		t.Fatalf("SuperLeo's model stood in: %v", got)
 	}
 }
 

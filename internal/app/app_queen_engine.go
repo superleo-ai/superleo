@@ -269,6 +269,10 @@ func (a *App) routeToEngine(requestID, sessionID, engine, message string, busy b
 	handOn := func(failed, reason string) {
 		reason = cliClip(strings.TrimSpace(reason), 300)
 		reasons = append(reasons, engineLabel(failed)+": "+reason)
+		// Said on screen as a passing status line, and nowhere else until
+		// now: "Codex 没能接这一条" had no reason anyone could look up.
+		slog.Warn("queen engine: could not take the turn", "engine", failed, "reason", reason,
+			"session", sessionID, "turn", requestID, "next", firstNonEmpty(strings.Join(rest, ","), "none"))
 		for len(rest) > 0 {
 			next := rest[0]
 			rest = rest[1:]
@@ -474,7 +478,11 @@ func (a *App) routeToEngine(requestID, sessionID, engine, message string, busy b
 			a.CancelCLIRun(run.ID)
 		}
 	}
-	attempt(engine)
+	// Started off the caller: getting an engine going (its kit, its MCP
+	// servers, the CLI itself) took 31s on a Mac just awake, and SendChat
+	// waited for all of it — long enough for a phone to send the message
+	// again. The turn is tracked above, so Stop already reaches it.
+	go attempt(engine)
 }
 
 // queenNowSuperLeo is queenEngineNow while SuperLeo's own agent answers in

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"sort"
@@ -1122,20 +1123,24 @@ func (a *App) sendChat(sessionID, message string, imagePaths []string, own bool)
 }
 
 // startTurn runs a turn now: with the queen's engine, when one is set and this
-// is a person talking to her, and with this app's model otherwise. An engine
-// session takes one turn at a time, so while the conversation is busy this
-// app's model stands in for the engine rather than the turn waiting for it.
+// is a person talking to her, and with this app's model otherwise.
+//
+// An engine session takes one turn at a time, so while the conversation is
+// still answering the engine starts a session of its own for this turn,
+// handed the conversation so far. It used to be SuperLeo's own model that
+// answered then, under "Codex 没能接这一条" — which read as Codex failing
+// when it had only been busy, and happened whenever a message came while the
+// last was still being answered (a phone resending a slow send, two bank
+// texts pasted in a row). SuperLeo's model still answers when the engine
+// cannot.
 func (a *App) startTurn(requestID, sessionID, message string, imagePaths []string, own bool) {
 	if !own {
 		if engine := a.queenEngineFor(sessionID, imagePaths); engine != "" {
 			busy := a.sessionBusy(sessionID)
-			if busy && a.hasModel() {
-				a.ownTurn(requestID, sessionID, message, imagePaths, engine)
-				return
+			if busy {
+				slog.Info("queen engine: conversation still answering; this turn gets a session of its own",
+					"session", sessionID, "engine", engine, "turn", requestID)
 			}
-			// Free, or busy with no model of its own to stand in: the
-			// engine, in a session of its own when the conversation's is
-			// still answering.
 			a.routeToEngine(requestID, sessionID, engine, message, busy)
 			return
 		}
