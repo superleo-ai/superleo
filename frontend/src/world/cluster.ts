@@ -12,6 +12,7 @@ import type { CodingRun } from "../canvas/tiles";
 import type { AttentionItem } from "../canvas/attention";
 import type { Member } from "../components/HiveMeter";
 import { translate } from "../lib/i18n";
+import { isFolded, onFold } from "./fold";
 import { boardLine, touchesNoted, type AgendaEntry } from "./agenda";
 import { along, movesOf, tripTime, turn, type Stand } from "./travel";
 import { getQueenName, queenTitle } from "../lib/queenName";
@@ -490,6 +491,17 @@ export const cluster: District<WorldData> = {
     g.add(services);
     let mcpSig = "";
     let mcpLabels: Label[] = [];
+    // Folded, the servers go back into the hub: only the big plug stays, and
+    // its pill says how many there are.
+    let mcpFolded = isFolded("mcp");
+    let mcpCount = { ok: 0, all: 0 };
+    const showMcp = () => {
+      services.visible = !mcpFolded;
+      mcpLabels.forEach((l) => l.show(!mcpFolded));
+      const line = translate("{ok}/{all} connected", mcpCount);
+      hubLab.set("MCP", mcpFolded ? `${line} · ${translate("folded")}` : line, "idle");
+    };
+    onFold((k, on) => { if (k === "mcp") { mcpFolded = on; showMcp(); } });
     // The icons turn slowly and bob, as icons do.
     ctx.tick((_, t) => {
       if (ctx.reduced) return;
@@ -1603,7 +1615,8 @@ export const cluster: District<WorldData> = {
             mcpLabels.push(ctx.label(boxNode, translate("Desktop apps"), d.desktop.ok ? translate("{count} tools", { count: d.desktop.tools }) : d.desktop.note, 3.6));
           }
         }
-        hubLab.set("MCP", translate("{ok}/{all} connected", { ok: d.mcp.filter((m) => m.ok).length, all: d.mcp.length }), "idle");
+        mcpCount = { ok: d.mcp.filter((m) => m.ok).length, all: d.mcp.length };
+        showMcp();
 
         // Dashboards on the wall.
         wallScreens.forEach((w, i) => {

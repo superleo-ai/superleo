@@ -935,6 +935,42 @@ export namespace app {
 		    return a;
 		}
 	}
+	export class ChatPage {
+	    turns: backend.ChatTurn[];
+	    start: number;
+	    total: number;
+	    more: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new ChatPage(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.turns = this.convertValues(source["turns"], backend.ChatTurn);
+	        this.start = source["start"];
+	        this.total = source["total"];
+	        this.more = source["more"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class CodingSession {
 	    machine?: string;
 	    cli: string;
@@ -4342,13 +4378,13 @@ export namespace backend {
 	    embed_model: string;
 	    tts_base_url: string;
 	    tts_key: string;
+	    tts_model: string;
+	    tts_voice: string;
 	    stt_base_url: string;
 	    stt_key: string;
 	    stt_model: string;
 	    stt_api: string;
 	    stt_prompt: string;
-	    tts_model: string;
-	    tts_voice: string;
 	    search_base_url: string;
 	    search_key: string;
 	    search_model: string;
@@ -4412,13 +4448,13 @@ export namespace backend {
 	        this.embed_model = source["embed_model"];
 	        this.tts_base_url = source["tts_base_url"];
 	        this.tts_key = source["tts_key"];
+	        this.tts_model = source["tts_model"];
+	        this.tts_voice = source["tts_voice"];
 	        this.stt_base_url = source["stt_base_url"];
 	        this.stt_key = source["stt_key"];
 	        this.stt_model = source["stt_model"];
 	        this.stt_api = source["stt_api"];
 	        this.stt_prompt = source["stt_prompt"];
-	        this.tts_model = source["tts_model"];
-	        this.tts_voice = source["tts_voice"];
 	        this.search_base_url = source["search_base_url"];
 	        this.search_key = source["search_key"];
 	        this.search_model = source["search_model"];
@@ -4532,11 +4568,11 @@ export namespace backend {
 	    done: boolean;
 	    running: boolean;
 	    state?: string;
+	    stop?: string;
+	    final?: string;
 	    resumes?: number;
 	    resumedAt?: string;
 	    interruptedAt?: string;
-	    stop?: string;
-	    final?: string;
 	    maxSegments: number;
 	    segments: SegmentStat[];
 	    rounds: RoundStat[];
@@ -4566,15 +4602,14 @@ export namespace backend {
 	        this.model = source["model"];
 	        this.startedAt = source["startedAt"];
 	        this.endedAt = source["endedAt"];
-	        this.state = source["state"];
-	        this.resumes = source["resumes"];
-	        this.resumedAt = source["resumedAt"];
-	        this.interruptedAt = source["interruptedAt"];
 	        this.done = source["done"];
 	        this.running = source["running"];
 	        this.state = source["state"];
 	        this.stop = source["stop"];
 	        this.final = source["final"];
+	        this.resumes = source["resumes"];
+	        this.resumedAt = source["resumedAt"];
+	        this.interruptedAt = source["interruptedAt"];
 	        this.maxSegments = source["maxSegments"];
 	        this.segments = this.convertValues(source["segments"], SegmentStat);
 	        this.rounds = this.convertValues(source["rounds"], RoundStat);
@@ -4621,10 +4656,10 @@ export namespace backend {
 	    running: boolean;
 	    done: boolean;
 	    state?: string;
+	    stop?: string;
 	    resumes?: number;
 	    resumedAt?: string;
 	    interruptedAt?: string;
-	    stop?: string;
 	    segments: number;
 	    maxSegments: number;
 	    segmentOpen: boolean;
@@ -4650,14 +4685,13 @@ export namespace backend {
 	        this.model = source["model"];
 	        this.startedAt = source["startedAt"];
 	        this.endedAt = source["endedAt"];
-	        this.state = source["state"];
-	        this.resumes = source["resumes"];
-	        this.resumedAt = source["resumedAt"];
-	        this.interruptedAt = source["interruptedAt"];
 	        this.running = source["running"];
 	        this.done = source["done"];
 	        this.state = source["state"];
 	        this.stop = source["stop"];
+	        this.resumes = source["resumes"];
+	        this.resumedAt = source["resumedAt"];
+	        this.interruptedAt = source["interruptedAt"];
 	        this.segments = source["segments"];
 	        this.maxSegments = source["maxSegments"];
 	        this.segmentOpen = source["segmentOpen"];

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowRightIcon, ChevronDownIcon, ChevronRightIcon, XIcon, Maximize2Icon, PlayIcon, PauseIcon, Trash2Icon, SquareIcon, SendIcon, RefreshCwIcon, SearchIcon, ZapIcon } from "lucide-react";
+import { ArrowRightIcon, ChevronDownIcon, ChevronRightIcon, ChevronsDownUpIcon, ChevronsUpDownIcon, XIcon, Maximize2Icon, PlayIcon, PauseIcon, Trash2Icon, SquareIcon, SendIcon, RefreshCwIcon, SearchIcon, ZapIcon } from "lucide-react";
 import {
   CLIRunDetail, InstallMCPServer, InstallSkill, SearchMCPServers, SearchSkills,
   CancelCLIRun, DeleteDashboard, DeleteStandingAgent, ForgetLife, HiveTaskDetail, MemoryRecall, PauseStandingAgent,
@@ -12,6 +12,7 @@ import { queenNamed, queenRef, useQueenName } from "../lib/queenName";
 import { toast } from "../lib/toasts";
 import { PATHS, attentionPath, taskPath } from "../lib/routes";
 import { focusInWorld } from "./bus";
+import { useFolded } from "./fold";
 import Talk from "./Talk";
 import CLISessions from "./CLISessions";
 import WorkerKitCard from "./WorkerKit";
@@ -46,6 +47,7 @@ export default function Inspector({ picked, data, onClose, open, openDash, full,
 }) {
   const { t } = useI18n();
   const queen = useQueenName();
+  const [mcpFolded, setMcpFolded] = useFolded("mcp");
   const [busy, setBusy] = useState("");
   const [text, setText] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -239,7 +241,16 @@ export default function Inspector({ picked, data, onClose, open, openDash, full,
     case "mcphub":
       kind = "MCP servers";
       rows.push(["Connected", `${data.mcp.filter((m) => m.ok).length} of ${data.mcp.length}`]);
-      body = <McpShop servers={data.mcp} />;
+      body = (
+        <>
+          <div className="wi-acts">
+            <button onClick={() => setMcpFolded(!mcpFolded)}>
+              {mcpFolded ? <ChevronsUpDownIcon size={14} /> : <ChevronsDownUpIcon size={14} />}{t(mcpFolded ? "Expand" : "Collapse")}
+            </button>
+          </div>
+          <McpShop servers={data.mcp} />
+        </>
+      );
       break;
     case "skill":
       kind = "Skill";

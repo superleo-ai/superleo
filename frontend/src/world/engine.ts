@@ -13,6 +13,12 @@ import { C, flower, glide, hash01, lamp, mat, plot, rbox, spark, tree, woodFence
 
 export type Picked = { district: string; id: string; kind: string; title: string };
 
+/** Whether `o` is drawn: it and every parent visible. A hidden thing is not picked. */
+function shown(o: THREE.Object3D | null): boolean {
+  for (; o; o = o.parent) if (!o.visible) return false;
+  return true;
+}
+
 export interface Label {
   set(name: string, status?: string, state?: "work" | "idle" | "wait" | "bad"): void;
   show(on: boolean): void;
@@ -620,7 +626,7 @@ export class WorldEngine<D> {
       v.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
       ray.setFromCamera(v, this.camera);
       this.prune();
-      const hit = ray.intersectObjects(this.pickables, true).find((h) => h.object.userData.pick);
+      const hit = ray.intersectObjects(this.pickables, true).find((h) => h.object.userData.pick && shown(h.object));
       if (!hit) { this.select(null); this.onPick(null); return; }
       this.select(hit.object.userData.pickRoot ?? hit.object);
       this.onPick(hit.object.userData.pick as Picked);
@@ -638,7 +644,7 @@ export class WorldEngine<D> {
       v.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
       ray.setFromCamera(v, this.camera);
       if (this.pickables.length > 200) this.prune();
-      el.style.cursor = ray.intersectObjects(this.pickables, true).some((h) => h.object.userData.pick) ? "pointer" : "";
+      el.style.cursor = ray.intersectObjects(this.pickables, true).some((h) => h.object.userData.pick && shown(h.object)) ? "pointer" : "";
     });
   }
 

@@ -110,6 +110,10 @@ export function CLIRuns() {
   return window['go']['app']['App']['CLIRuns']();
 }
 
+export function Call(arg1, arg2) {
+  return window['go']['app']['App']['Call'](arg1, arg2);
+}
+
 export function CallTool(arg1, arg2, arg3, arg4) {
   return window['go']['app']['App']['CallTool'](arg1, arg2, arg3, arg4);
 }
@@ -136,6 +140,10 @@ export function CancelScheduledRun(arg1) {
 
 export function ChatHistory(arg1) {
   return window['go']['app']['App']['ChatHistory'](arg1);
+}
+
+export function ChatHistoryPage(arg1, arg2, arg3) {
+  return window['go']['app']['App']['ChatHistoryPage'](arg1, arg2, arg3);
 }
 
 export function ChatSessions() {
@@ -972,6 +980,26 @@ export function Upcoming() {
 
 export function WakeStandingAgent(arg1, arg2) {
   return window['go']['app']['App']['WakeStandingAgent'](arg1, arg2);
+}
+
+export function WellbeingDays(arg1) {
+  return window['go']['app']['App']['WellbeingDays'](arg1);
+}
+
+export function WellbeingReport(arg1) {
+  return window['go']['app']['App']['WellbeingReport'](arg1);
+}
+
+export function WellbeingStatus() {
+  return window['go']['app']['App']['WellbeingStatus']();
+}
+
+export function WellbeingToday() {
+  return window['go']['app']['App']['WellbeingToday']();
+}
+
+export function WellbeingTrend(arg1, arg2) {
+  return window['go']['app']['App']['WellbeingTrend'](arg1, arg2);
 }
 
 export function WorkerKit(arg1) {
