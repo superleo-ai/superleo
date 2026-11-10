@@ -9,7 +9,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/liliang-cn/agent-go/v3 v3.80.3
 	github.com/liliang-cn/agentexec v0.6.0
-	github.com/liliang-cn/cortexdb/v2 v2.145.0
+	github.com/liliang-cn/cortexdb/v2 v2.149.1
 	github.com/modelcontextprotocol/go-sdk v1.7.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/router-for-me/CLIProxyAPI/v6 v6.10.9
