@@ -399,6 +399,11 @@ func (a *App) startCLIRun(o cliStart) (CLIRun, error) {
 			}
 		}
 	}
+	if agent == "codex" {
+		// Live web search: by default codex reads the web from a cache, and a
+		// price or a headline it looks up comes back hours old.
+		req.ExtraArgs = append(req.ExtraArgs, "-c", `web_search="live"`)
+	}
 	sess := provider.NewSession()
 	spec, err := sess.BuildCommand(context.Background(), req)
 	if err != nil {
