@@ -96,6 +96,7 @@ type cliRun struct {
 	Session string     `json:"session"`
 	Remote  string     `json:"remote"`
 	Paused  string     `json:"paused"`
+	Queen   bool       `json:"queen"` // the queen thinking through this CLI: one chat turn
 	State   string     `json:"state"`
 	Started time.Time  `json:"started"`
 	Tools   int        `json:"tools"`

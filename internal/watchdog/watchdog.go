@@ -268,7 +268,10 @@ func (w *Watchdog) gather(ctx context.Context) ([]item, bool) {
 			d = r
 		}
 		g := first[r.Thread]
-		if r.Thread == "" {
+		// The queen's turns all go into her one thread, but each is its own
+		// question: judged by what it was asked and timed from when it was,
+		// not by whatever the thread's first turn said weeks ago.
+		if r.Thread == "" || r.Queen {
 			g = r
 		}
 		it := item{Kind: "cli", ID: r.ID, Key: "cli:" + firstNonEmpty(r.Thread, r.ID), Goal: firstNonEmpty(g.Prompt, r.Prompt),
@@ -540,6 +543,9 @@ func (w *Watchdog) escalate(text string) {
 func label(it item) string {
 	switch it.Kind {
 	case "cli":
+		if it.run != nil && it.run.Queen {
+			return "蜂后的回答「" + trunc(it.Goal, 24) + "」"
+		}
 		return "编码任务「" + trunc(it.Goal, 24) + "」"
 	case "long":
 		return "长任务「" + trunc(it.Goal, 24) + "」"

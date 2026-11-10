@@ -596,6 +596,31 @@ func TestFollowUpRunJudgedByThreadsFirstPrompt(t *testing.T) {
 	}
 }
 
+// The queen's turns share her one thread; each is judged by its own question,
+// from its own start, never by the thread's first turn.
+func TestQueenTurnJudgedByItsOwnPrompt(t *testing.T) {
+	r := newRig(t)
+	old := cliRunning("q1", t0.Add(-24*time.Hour))
+	old.State, old.Prompt, old.Queen = "done", "你好", true
+	cur := cliRunning("q2", t0, cliEvent{At: t0, Kind: "tool", Tool: "mcp__finance__quote"})
+	cur.Thread, cur.Prompt, cur.Queen = old.Thread, "OKLO 现在多少钱", true
+	r.api.on("CLIRuns", []cliRun{cur, old})
+	r.api.on("CLIRunDetail", cur)
+	var goals []string
+	r.w.Judge = judgeFn(func(g string) { goals = append(goals, g) })
+	r.tick(time.Minute)
+	if len(goals) != 0 {
+		t.Fatalf("a one-minute-old turn was judged: %v", goals)
+	}
+	r.tick(r.w.Cfg.DriftAfter())
+	if len(goals) != 1 || goals[0] != "OKLO 现在多少钱" {
+		t.Fatalf("goals = %v", goals)
+	}
+	if got := label(item{Kind: "cli", Goal: "OKLO 现在多少钱", run: &cur}); !strings.Contains(got, "蜂后") {
+		t.Fatalf("label = %q", got)
+	}
+}
+
 type judgeFn func(goal string)
 
 func (f judgeFn) Verdict(_ context.Context, goal string, _ []string) (string, string, error) {
