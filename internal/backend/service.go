@@ -1072,9 +1072,9 @@ const answerLanguageRule = `Answer in Chinese — short and natural; never Engli
 // investingRule is how a question about the markets or the person's money is
 // answered, by her own agent or an outside engine. Asked whether to buy after
 // a US market drop, the queen once said she could not know the person's
-// positions — which are in noted — and gave general principles and a line that
+// positions — now in finance — and gave general principles and a line that
 // she is not their advisor.
-const investingRule = `A question about the markets or the person's money (buy or sell, a drop, a position) is answered from their data, never with general principles: first read their holdings (list_holdings: in finance when it is connected, else in noted) and today's prices and news — never say you cannot know their positions. Say what they hold in what is asked about, its weight and gain or loss, what moved and why, and what buying more would do to that weight; then your view in plain words, with the reason and what would change it. No line that you are not their advisor: the person knows the decision is theirs.`
+const investingRule = `A question about the markets or the person's money (buy or sell, a drop, a position) is answered from their data, never with general principles: first read their holdings (list_holdings in finance) and today's prices and news — never say you cannot know their positions. Say what they hold in what is asked about, its weight and gain or loss, what moved and why, and what buying more would do to that weight; then your view in plain words, with the reason and what would change it. No line that you are not their advisor: the person knows the decision is theirs.`
 
 // queenChineseName is the hive's word for its queen in Chinese. A CLI left to
 // translate "queen" calls itself by the word for a monarch, which SuperLeo
@@ -1573,7 +1573,7 @@ func (s *Service) refreshEagerTools() {
 
 var eagerNotedTools = []string{
 	"mcp_noted_get_overview", "mcp_noted_list_events", "mcp_noted_list_tasks",
-	"mcp_noted_list_holdings", "mcp_noted_create_event", "mcp_noted_create_task",
+	"mcp_noted_create_event", "mcp_noted_create_task",
 	"mcp_noted_complete_task", "mcp_noted_update_task", "mcp_noted_search_notes",
 	"mcp_noted_create_note", "mcp_noted_log_time",
 }

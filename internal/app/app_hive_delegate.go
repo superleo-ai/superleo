@@ -247,7 +247,7 @@ func (a *App) addDelegateTool(inner *agent.Service, rosters string) {
 	}
 	inner.AddToolWithMetadata(backend.DelegateToolName,
 		"Have workers do the work that needs tools, and get their reports back: noted (calendar, to-dos, notes, goals,"+
-			" time, holdings), web search and pages, files and shell, CortexDB research, reports, checks."+
+			" time), finance (holdings, quotes, news), web search and pages, files and shell, CortexDB research, reports, checks."+
 			"\n\nEach task stands alone — the worker sees nothing of this conversation — so put in it everything needed:"+
 			" what to do, absolute dates and times, ids, what to report. Several independent tasks in one call run at the"+
 			" same time on different workers, idle ones first; split a request that has independent parts. Set needs to"+

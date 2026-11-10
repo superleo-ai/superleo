@@ -194,9 +194,10 @@ func TestNotedReadRPCs(t *testing.T) {
 		t.Errorf("NotedTimeEntries: %d %s", code, body)
 	}
 
+	// Holdings are finance's, never noted's: without finance there are none.
 	code, body = rpc(t, srv, "NotedHoldings", `[]`)
-	if code != http.StatusOK || !strings.Contains(string(body), `"symbol":"VOO"`) {
-		t.Errorf("NotedHoldings: %d %s", code, body)
+	if code != http.StatusServiceUnavailable || !strings.Contains(string(body), "finance is not configured") {
+		t.Errorf("NotedHoldings without finance: %d %s", code, body)
 	}
 
 	// The reads are not button presses: nothing in the approvals log.
@@ -207,7 +208,7 @@ func TestNotedReadRPCs(t *testing.T) {
 	// Wrong token on the server side: a 502, not a 503.
 	t.Setenv("NOTED_TOKEN", "wrong")
 	app.actionsV.Close()
-	code, _ = rpc(t, srv, "NotedHoldings", `[]`)
+	code, _ = rpc(t, srv, "NotedToday", `[]`)
 	if code != http.StatusBadGateway {
 		t.Errorf("rejected token: status %d, want 502", code)
 	}

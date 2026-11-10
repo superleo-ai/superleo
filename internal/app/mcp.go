@@ -326,7 +326,7 @@ func newMCPServer(app *App, version, caller, instructions string) *mcp.Server {
 func ptr[T any](v T) *T { return &v }
 
 const mcpInstructions = `SuperLeo is a personal assistant with its own tools, memory and data (to-dos,
-calendar, notes, holdings through noted). superleo_ask talks to it as the person
+calendar, notes through noted, holdings through finance). superleo_ask talks to it as the person
 would in the app and returns its answer and conversation id; pass the id back
 to continue. superleo_conversations and superleo_chat_history read what was said.
 

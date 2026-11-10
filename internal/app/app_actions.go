@@ -128,11 +128,10 @@ func (a *App) NotedTimeEntries() (any, error) {
 	})
 }
 
-// NotedHoldings is every investment with its position (list_holdings),
-// from finance when it is connected and from noted before that. The name
-// stays: the phone calls it.
+// NotedHoldings is every investment with its position (list_holdings in
+// finance). The name stays: the phone calls it.
 func (a *App) NotedHoldings() (any, error) {
-	return a.mcpRead(backend.HoldingsServer(), "list_holdings", map[string]any{})
+	return a.mcpRead(backend.FinanceServer, "list_holdings", map[string]any{})
 }
 
 // notedRead runs one of the fixed reads. An unconfigured noted answers 503,
