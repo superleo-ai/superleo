@@ -3,6 +3,7 @@ import "../world/world.css";
 import "./embed.css";
 import { WorldEngine, type EngineOptions, type Picked } from "../world/engine";
 import { cluster, lensOf, type WorldData } from "../world/cluster";
+import { toggleFold } from "../world/fold";
 import { setQueenName } from "../lib/queenName";
 import { LANGUAGES, Language, setLanguage } from "../lib/i18n";
 import { PROTOCOL, normalize, parse, type EmbedMessage, type HostMessage } from "./protocol";
@@ -119,6 +120,7 @@ function start() {
   }
   e.pickHandler((p: Picked | null) => {
     if (quiet) return;
+    if (p?.kind === "mcphub") toggleFold("mcp");
     send(p ? { type: "pick", kind: p.kind, id: p.id, title: p.title } : { type: "pick", id: null });
   });
   e.look(lens.x, lens.z, lens.zoom, "cluster", true);

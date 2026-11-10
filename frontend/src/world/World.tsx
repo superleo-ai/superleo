@@ -22,6 +22,7 @@ import { holoLines } from "./holoLines";
 import { Response } from "@/components/ai-elements/response";
 import { RefreshCwIcon, XIcon } from "lucide-react";
 import "./world.css";
+import { toggleFold } from "./fold";
 
 const HOLO_KEY = "superleo-world-holo";
 
@@ -147,6 +148,7 @@ export default function World({ view, onFlipTheme }: { view: ViewKey; onFlipThem
     const e = new WorldEngine<WorldData>(host.current);
     e.add(cluster);
     e.pickHandler((p) => {
+      if (p?.kind === "mcphub") toggleFold("mcp");
       setPicked(p);
       worldBus.publish(p ? { kind: p.kind, id: p.id } : null);
     });
