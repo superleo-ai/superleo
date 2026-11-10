@@ -1581,7 +1581,7 @@ var eagerNotedTools = []string{
 // eagerFinanceTools are finance's everyday tools: the portfolio, a quote,
 // the news and recording a trade.
 var eagerFinanceTools = []string{
-	"mcp_finance_list_holdings", "mcp_finance_portfolio_summary", "mcp_finance_quote",
+	"mcp_finance_list_holdings", "mcp_finance_portfolio_summary", "mcp_finance_quote", "mcp_finance_topics",
 	"mcp_finance_news", "mcp_finance_record_trade",
 }
 
