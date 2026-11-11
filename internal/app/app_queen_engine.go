@@ -585,7 +585,10 @@ func (a *App) queenKitFor(engine string, s *backend.Settings) (*QueenKit, error)
 			kit.Env[k] = v
 		}
 	}
-	for _, name := range backend.QueenEngineServers {
+	for _, name := range backend.QueenEngineServers() {
+		if _, taken := kit.Servers[name]; taken {
+			continue // the hive's own server keeps its name
+		}
 		entry, env, why, ok := backend.EngineMCPServerWhy(name, remote)
 		if !ok {
 			// A server this instance does not have is ordinary; any other

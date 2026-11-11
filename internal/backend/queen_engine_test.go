@@ -3,6 +3,7 @@ package backend
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -120,5 +121,23 @@ func TestEveryQueenAnswersMoneyQuestionsFromTheirData(t *testing.T) {
 		if !strings.Contains(prompt, investingRule) {
 			t.Errorf("%s: no rule for money questions in\n%s", name, prompt)
 		}
+	}
+}
+
+// Every server configured here goes to an engine thinking for the queen, one
+// connected later too; none is named twice.
+func TestTheQueenEngineIsHandedEveryConfiguredServer(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("SUPERLEO_HOME", home)
+	cfg := `{"mcpServers":{"noted":{"type":"http","url":"https://noted.example/mcp"},"edumind":{"command":"edumind-mcp"},"haify":{"command":"haify-mcp"}}}`
+	if err := os.WriteFile(filepath.Join(home, "mcpServers.json"), []byte(cfg), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	got := QueenEngineServers()
+	if want := []string{"edumind", "haify", "noted"}; !slices.Equal(got, want) {
+		t.Fatalf("servers %v, want %v", got, want)
+	}
+	if _, _, ok := EngineMCPServer("edumind", false); !ok {
+		t.Fatal("edumind was not handed over")
 	}
 }

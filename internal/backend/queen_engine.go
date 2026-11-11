@@ -9,11 +9,35 @@ import (
 	"strings"
 )
 
-// QueenEngineServers are this instance's own MCP servers that an agent CLI
-// thinking for the queen is handed too, when they are configured here: the
-// person's data (noted), their health (vita) and the shared brain (cortexdb).
-// The rest stay SuperLeo's.
-var QueenEngineServers = []string{NotedServer, VitaServer, FinanceServer, "cortexdb"}
+// QueenEngineServers are this instance's MCP servers that an agent CLI
+// thinking for the queen is handed too: every one configured here. A server
+// the person connects is one they want the queen to use, whichever engine
+// answers; a fixed list once left a newly connected one (edumind) out, and the
+// queen could only say its tools were missing.
+func QueenEngineServers() []string {
+	seen := map[string]bool{}
+	var out []string
+	for _, src := range MCPConfigSources() {
+		b, err := os.ReadFile(src)
+		if err != nil {
+			continue
+		}
+		var f struct {
+			MCPServers map[string]json.RawMessage `json:"mcpServers"`
+		}
+		if json.Unmarshal(b, &f) != nil {
+			continue
+		}
+		for name := range f.MCPServers {
+			if name != "" && !seen[name] {
+				seen[name] = true
+				out = append(out, name)
+			}
+		}
+	}
+	slices.Sort(out)
+	return out
+}
 
 // EngineMCPServer is one of this instance's MCP servers as an agent CLI is
 // handed it, in the shape Claude's --mcp-config reads. The entry keeps its
