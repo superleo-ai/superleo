@@ -145,7 +145,10 @@ export default function World({ view, onFlipTheme }: { view: ViewKey; onFlipThem
 
   useEffect(() => {
     if (!host.current) return;
-    const e = new WorldEngine<WorldData>(host.current);
+    // Idle, the world draws 30 frames a second, not the screen's 60 or 120:
+    // every frame moves each label in the page, and at full rate that kept
+    // the page busy enough that typing in the chat bar lagged.
+    const e = new WorldEngine<WorldData>(host.current, { idleFps: 30 });
     e.add(cluster);
     e.pickHandler((p) => {
       if (p?.kind === "mcphub") toggleFold("mcp");
