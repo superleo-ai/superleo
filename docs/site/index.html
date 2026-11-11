@@ -190,7 +190,9 @@
           <span lang="en">You choose the model behind it. Any service with an OpenAI-compatible API works, including models you run yourself.</span>
         </p>
       </div>
-      <video src="/media/iphone.mp4" poster="/media/iphone.jpg" autoplay muted loop playsinline width="360" height="782"
+      <video lang="zh" src="/media/iphone.mp4" poster="/media/iphone.jpg" autoplay muted loop playsinline width="360" height="782"
+        aria-label="SuperLeo on iPhone"></video>
+      <video lang="en" src="/media/iphone-en.mp4" poster="/media/iphone-en.jpg" autoplay muted loop playsinline width="360" height="782"
         aria-label="SuperLeo on iPhone"></video>
     </div>
   </div>
@@ -212,7 +214,9 @@
     document.documentElement.dataset.lang = l;
     document.documentElement.lang = l === 'en' ? 'en' : 'zh-CN';
     var u = new URL(location.href); u.searchParams.set('lang', l); history.replaceState(null, '', u);
+    document.querySelectorAll('.uses video').forEach(function (v) { if (v.lang === l) { var p = v.play(); if (p && p.catch) p.catch(function () {}); } });
   }
+  document.querySelectorAll('.uses video').forEach(function (v) { if (v.lang === document.documentElement.dataset.lang) { var p = v.play(); if (p && p.catch) p.catch(function () {}); } });
   // Mark the visitor's own platform in the download list.
   (function () {
     var ua = navigator.userAgent, os =
