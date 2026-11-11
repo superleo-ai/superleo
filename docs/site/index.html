@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SuperLeo</title>
+<meta name="description" content="SuperLeo is an AI assistant you install on your own computer. Download it for Mac and Windows, and pair your iPhone or Apple Watch with it.">
+<meta property="og:title" content="SuperLeo">
+<meta property="og:description" content="An AI assistant you install on your own computer.">
+<meta property="og:image" content="https://superleo.app/media/world.jpg">
+<link rel="icon" href="/media/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/media/apple-touch-icon.png">
+<script>
+  (function () {
+    var q = new URLSearchParams(location.search).get('lang');
+    var l = q || ((navigator.language || '').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en');
+    l = l === 'en' ? 'en' : 'zh';
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l === 'en' ? 'en' : 'zh-CN';
+  })();
+</script>
+<style>
+  @font-face { font-family: Geist; src: url(/fonts/geist.woff2) format("woff2"); font-weight: 100 900; font-display: swap; }
+  @font-face { font-family: "Geist Mono"; src: url(/fonts/geist-mono.woff2) format("woff2"); font-weight: 100 900; font-display: swap; }
+  :root {
+    --ground: #F6F8F9; --paper: #FFFFFF; --ink: #0E1A22; --muted: #5A6872;
+    --hair: #D9E0E4; --tick: #B9C4CB; --signal: #1F5BFF;
+  }
+  * { box-sizing: border-box; }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { margin: 0; background: var(--ground); color: var(--ink);
+    font: 17px/1.7 Geist, -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased; }
+  html[lang="en"] body { line-height: 1.6; }
+  a { color: inherit; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; border-radius: 4px; }
+
+  .col { max-width: 680px; margin: 0 auto; padding: 0 max(20px, env(safe-area-inset-left)); }
+  .wide { max-width: 1120px; margin: 0 auto; padding: 0 max(20px, env(safe-area-inset-left)); }
+
+  header { display: flex; align-items: center; justify-content: space-between; height: 72px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; text-decoration: none; font-size: 16px; }
+  .brand img { width: 26px; height: 26px; border-radius: 6px; }
+  .top { display: flex; align-items: center; gap: 20px; font-size: 15px; color: var(--muted); }
+  .top a { text-decoration: none; }
+  .top a:hover { color: var(--ink); }
+  .lang { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  .lang:hover { color: var(--ink); }
+
+  .intro { padding-top: 72px; padding-bottom: 56px; }
+  h1 { font-size: clamp(44px, 8vw, 76px); line-height: 1; letter-spacing: -.035em; font-weight: 600; margin: 0 0 22px; }
+  .tagline { font-size: clamp(21px, 3vw, 26px); line-height: 1.35; letter-spacing: -.01em; margin: 0 0 26px; font-weight: 500; }
+  .intro p.why { color: var(--muted); margin: 0 0 32px; }
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 22px; font-size: 16px; }
+  .btn { display: inline-block; background: var(--ink); color: #fff; text-decoration: none; padding: 12px 22px; border-radius: 8px; font-weight: 550; }
+  .btn:hover { background: #22323D; }
+
+  /* The one bold thing: the hive itself, measured like an instrument. */
+  .scope { position: relative; margin: 0 0 12px; }
+  .scope video { display: block; width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--hair); background: var(--paper); }
+  .ruler { height: 18px; margin-top: 10px; position: relative;
+    background:
+      repeating-linear-gradient(90deg, var(--ink) 0 1px, transparent 1px 100px) 0 0 / 100% 18px no-repeat,
+      repeating-linear-gradient(90deg, var(--tick) 0 1px, transparent 1px 10px) 0 10px / 100% 8px no-repeat; }
+  .ruler::after { content: ""; position: absolute; left: 0; right: 0; top: 17px; border-top: 1px solid var(--tick); }
+  .caption { color: var(--muted); font-size: 14px; margin: 10px 0 0; }
+
+  section { padding: 96px 0 0; }
+  h2 { font-size: 30px; line-height: 1.2; letter-spacing: -.02em; font-weight: 600; margin: 0 0 14px; }
+  section > .col > p { margin: 0 0 18px; }
+  .lead { color: var(--muted); margin: 0 0 28px; }
+
+  .dl { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); }
+  .dl li { display: grid; grid-template-columns: 1fr auto; gap: 4px 20px; align-items: center; padding: 20px 0 20px 0; border-bottom: 1px solid var(--hair); position: relative; }
+  .dl li.you { padding-left: 16px; }
+  .dl li.you::before { content: ""; position: absolute; left: 0; top: 20px; bottom: 20px; width: 2px; background: var(--signal); }
+  .dl .what strong { display: block; font-size: 19px; font-weight: 600; }
+  .dl .what > span { color: var(--muted); font-size: 15px; }
+  .dl .get { text-decoration: none; font-weight: 550; font-size: 15px; padding: 9px 16px; border: 1px solid var(--ink); border-radius: 8px; white-space: nowrap; }
+  .dl .get:hover { background: var(--ink); color: #fff; }
+  .dl li.you .get { background: var(--signal); border-color: var(--signal); color: #fff; }
+  .dl .later { color: var(--muted); font-size: 15px; }
+  .file { font-family: "Geist Mono", ui-monospace, Menlo, monospace; font-size: 13px; color: var(--muted); }
+  .more { font-size: 15px; color: var(--muted); margin-top: 18px; }
+
+  .uses { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 56px; align-items: start; }
+  .uses p { margin: 0 0 18px; }
+  .uses video { display: block; width: 100%; height: auto; border-radius: 28px; border: 1px solid var(--hair); background: var(--paper); }
+  @media (max-width: 760px) {
+    .uses { grid-template-columns: 1fr; gap: 32px; }
+    .uses video { max-width: 260px; }
+    .dl li { grid-template-columns: 1fr; }
+    .dl .get, .dl .later { justify-self: start; margin-top: 8px; }
+  }
+
+  footer { margin-top: 120px; border-top: 1px solid var(--hair); padding: 26px 0 48px; font-size: 14px; color: var(--muted); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 24px; }
+  footer nav { display: flex; flex-wrap: wrap; gap: 20px; }
+  footer a { text-decoration: none; }
+  footer a:hover { color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="wide">
+  <header>
+    <a class="brand" href="/"><img src="/media/apple-touch-icon.png" alt=""><span>SuperLeo</span></a>
+    <div class="top">
+      <a href="https://github.com/superleo-ai/superleo">GitHub</a>
+      <button class="lang" type="button" onclick="setLang(document.documentElement.dataset.lang === 'zh' ? 'en' : 'zh')"><span lang="zh">English</span><span lang="en">中文</span></button>
+    </div>
+  </header>
+</div>
+
+<div class="col intro">
+  <h1>SuperLeo</h1>
+  <p class="tagline">
+    <span lang="zh">一个装在自己电脑上的 AI 助手。</span>
+    <span lang="en">An AI assistant you install on your own computer.</span>
+  </p>
+  <p class="why">
+    <span lang="zh">我想要一个能记住我的日程、能替我跑腿的助手，但不想把这些交给别人的服务器。所以写了 SuperLeo。它装在你自己的电脑上，手机和手表连回这台电脑，对话和记录都留在你这里。代码是开源的，哪里不放心可以直接去看。</span>
+    <span lang="en">I wanted an assistant that keeps track of my schedule and runs errands for me, without handing all of that to someone else's servers. So I wrote SuperLeo. It lives on your own computer, your phone and watch connect back to it, and your conversations and records stay with you. The code is open, so you can read exactly what it does.</span>
+  </p>
+  <div class="actions">
+    <a class="btn" href="#download"><span lang="zh">下载</span><span lang="en">Download</span></a>
+    <a href="https://github.com/superleo-ai/superleo"><span lang="zh">在 GitHub 上看源代码</span><span lang="en">Read the source on GitHub</span></a>
+  </div>
+</div>
+
+<div class="wide">
+  <figure class="scope" style="margin:0">
+    <video src="/media/world.mp4" poster="/media/world.jpg" autoplay muted loop playsinline width="900" height="570"
+      aria-label="SuperLeo desktop app showing the queen and her workers"></video>
+    <div class="ruler" aria-hidden="true"></div>
+    <figcaption class="caption">
+      <span lang="zh">桌面版的主界面。中间是蜂后，每台装了 SuperLeo 的机器都是她手下的一个工人。</span>
+      <span lang="en">The desktop app. The queen sits in the middle, and every machine running SuperLeo is one of her workers.</span>
+    </figcaption>
+  </figure>
+</div>
+
+<section id="download">
+  <div class="col">
+    <h2><span lang="zh">下载</span><span lang="en">Download</span></h2>
+    <p class="lead">
+      <span lang="zh">先在电脑上装桌面版。装好以后在设置里生成一个配对码，用手机扫一下就连上了。</span>
+      <span lang="en">Start with the desktop app. Once it is running, make a pairing code in its settings and scan it with your phone.</span>
+    </p>
+    <ul class="dl">
+      <li data-os="mac">
+        <div class="what"><strong>Mac</strong><span lang="zh">已经过 Apple 签名和公证，双击就能打开。</span><span lang="en">Signed and notarized by Apple, so it opens with a double-click.</span> <span class="file">SuperLeo.dmg</span></div>
+        <a class="get" href="https://github.com/superleo-ai/superleo/releases/latest/download/SuperLeo.dmg"><span lang="zh">下载</span><span lang="en">Download</span></a>
+      </li>
+      <li data-os="win">
+        <div class="what"><strong>Windows</strong><span lang="zh">运行安装程序，按提示装好即可。</span><span lang="en">Run the installer and follow the steps.</span> <span class="file">SuperLeo-Setup.exe</span></div>
+        <a class="get" href="https://github.com/superleo-ai/superleo/releases/latest/download/SuperLeo-Setup.exe"><span lang="zh">下载</span><span lang="en">Download</span></a>
+      </li>
+      <li data-os="ios">
+        <div class="what"><strong><span lang="zh">iPhone、iPad 和 Apple Watch</span><span lang="en">iPhone, iPad and Apple Watch</span></strong><span lang="zh">在 App Store 安装，再和你的电脑配对。</span><span lang="en">Install it from the App Store, then pair it with your computer.</span></div>
+        <a class="get" href="https://apps.apple.com/app/id6822576688">App Store</a>
+      </li>
+      <li data-os="android">
+        <div class="what"><strong>Android</strong><span lang="zh">还在做，做好了会放在这里。</span><span lang="en">Still being built. It will be here when it is ready.</span></div>
+        <span class="later"><span lang="zh">暂未发布</span><span lang="en">Not yet</span></span>
+      </li>
+    </ul>
+    <p class="more">
+      <span lang="zh">想装在 Linux 服务器上，或者要找旧版本，可以去</span><span lang="en">For Linux servers and older versions, see</span>
+      <a href="https://github.com/superleo-ai/superleo/releases/latest">GitHub Releases</a><span lang="zh">。</span><span lang="en">.</span>
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <h2><span lang="zh">平时怎么用</span><span lang="en">How I use it</span></h2>
+    <div class="uses">
+      <div>
+        <p>
+          <span lang="zh">早上它把今天的日程和待办整理好推到手机上。临时想起一件事，对着手表说一句，它会记下来，到时间提醒我。</span>
+          <span lang="en">In the morning it sends today's schedule and to-dos to my phone. When something comes to mind, I say it to my watch, and it reminds me at the right time.</span>
+        </p>
+        <p>
+          <span lang="zh">要查资料、改代码、看行情这类花时间的事，我交代给它，它会分给合适的机器去做，做完了告诉我结果。需要我确认的事，它会先问我。</span>
+          <span lang="en">Slower jobs, like looking things up, changing code or checking the markets, I hand to it, and it gives them to whichever machine suits them best and reports back. Anything that needs my approval, it asks first.</span>
+        </p>
+        <p>
+          <span lang="zh">背后用哪家的模型由你自己决定，兼容 OpenAI 接口的服务都可以接，也可以接你自己跑的模型。</span>
+          <span lang="en">You choose the model behind it. Any service with an OpenAI-compatible API works, including models you run yourself.</span>
+        </p>
+      </div>
+      <video src="/media/iphone.mp4" poster="/media/iphone.jpg" autoplay muted loop playsinline width="360" height="782"
+        aria-label="SuperLeo on iPhone"></video>
+    </div>
+  </div>
+</section>
+
+<div class="wide">
+  <footer>
+    <span>© 2026 SuperLeo</span>
+    <nav>
+      <a href="/privacy/"><span lang="zh">隐私政策</span><span lang="en">Privacy</span></a>
+      <a href="https://github.com/superleo-ai/superleo/issues"><span lang="zh">问题反馈</span><span lang="en">Report an issue</span></a>
+      <a href="https://x.com/superleo_ai">X</a>
+    </nav>
+  </footer>
+</div>
+
+<script>
+  function setLang(l) {
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l === 'en' ? 'en' : 'zh-CN';
+    var u = new URL(location.href); u.searchParams.set('lang', l); history.replaceState(null, '', u);
+  }
+  // Mark the visitor's own platform in the download list.
+  (function () {
+    var ua = navigator.userAgent, os =
+      /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ? 'ios' :
+      /Android/.test(ua) ? 'android' : /Mac/.test(ua) ? 'mac' : /Windows/.test(ua) ? 'win' : '';
+    var li = os && document.querySelector('.dl li[data-os="' + os + '"]');
+    if (li && li.querySelector('.get')) li.classList.add('you');
+  })();
+</script>
+</body>
+</html>
