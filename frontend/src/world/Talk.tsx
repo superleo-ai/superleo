@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useStickToBottom } from "../lib/useStickToBottom";
-import { HistoryIcon, SendIcon } from "lucide-react";
-import { AskIn, ChatHistory, CLIRunDetail, FollowUpCLIRun, SendChat, StandingReports, StartCLIRun, TurnTraces, WakeStandingAgent } from "../../wailsjs/go/app/App";
+import { HistoryIcon, SendIcon, SquareIcon } from "lucide-react";
+import { AskIn, CancelChat, CancelCLIRun, ChatHistory, CLIRunDetail, FollowUpCLIRun, SendChat, StandingReports, StartCLIRun, TurnTraces, WakeStandingAgent } from "../../wailsjs/go/app/App";
 import { EventsOn } from "../../wailsjs/runtime";
 import { loadQueenSession, queenSession } from "../lib/queenConsole";
 import { useI18n } from "../lib/i18n";
@@ -287,6 +287,13 @@ export default function Talk({ who, placeholder }: { who: Talker; placeholder: s
     }
   };
 
+  // A turn this card can stop: the queen's (its request), or a CLI run.
+  const stoppable = () => (who.kind === "queen" && !!live.current) || (who.kind === "cli" && !!threads.get(key)?.run);
+  const stop = () => {
+    if (who.kind === "queen" && live.current) void CancelChat(live.current);
+    else if (who.kind === "cli") { const run = threads.get(key)?.run; if (run) void CancelCLIRun(run); }
+  };
+
   // The inspector is a narrow column: the compact card, as under a bubble.
   // Where the whole of this conversation is kept.
   const [, bump] = useState(0);
@@ -319,7 +326,9 @@ export default function Talk({ who, placeholder }: { who: Talker; placeholder: s
         <input value={text} onChange={(e) => setText(e.target.value)} placeholder={t(placeholder)}
           onCompositionStart={ime.handlers.onCompositionStart} onCompositionEnd={ime.handlers.onCompositionEnd}
           onKeyDown={(e) => { if (e.key === "Enter" && ime.composing(e)) e.preventDefault(); }} autoFocus />
-        <button type="submit" disabled={!text.trim() || !!busy} title={t("Send")}><SendIcon size={14} /></button>
+        {busy && stoppable()
+          ? <button type="button" onClick={stop} title={t("Stop")} aria-label={t("Stop")} data-testid="talk-stop"><SquareIcon size={11} fill="currentColor" /></button>
+          : <button type="submit" disabled={!text.trim() || !!busy} title={t("Send")}><SendIcon size={14} /></button>}
       </form>
     </div>
   );

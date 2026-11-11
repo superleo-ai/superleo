@@ -3,8 +3,8 @@ import { useStickToBottom } from "../lib/useStickToBottom";
 import { useAttachments } from "../lib/useAttachments";
 import AttachmentChips from "../components/AttachmentChips";
 import { SentMessage } from "../components/SentFiles";
-import { ArrowUpIcon, MessageSquareIcon, PlusIcon, MinusIcon, ChevronDownIcon, PaperclipIcon } from "lucide-react";
-import { ChatHistory, HiveRetire, HiveSpawn, SendChat } from "../../wailsjs/go/app/App";
+import { ArrowUpIcon, SquareIcon, MessageSquareIcon, PlusIcon, MinusIcon, ChevronDownIcon, PaperclipIcon } from "lucide-react";
+import { CancelChat, ChatHistory, HiveRetire, HiveSpawn, SendChat } from "../../wailsjs/go/app/App";
 import { earlyError, requestSetup, useReady } from "../lib/ready";
 import { engineByline, visibleAnswer } from "../lib/format";
 import { Response } from "@/components/ai-elements/response";
@@ -316,7 +316,10 @@ export default function Command({ view, onConversation, onTyping, hosts }: {
               mentions.onKeyDown(e);
             }} />
           <button type="button" className="wc-clip" onClick={attach.pick} disabled={attach.importing || cutOff} title={t("Attach")} data-testid="wc-attach"><PaperclipIcon size={15} /></button>
-          <button type="submit" disabled={cutOff || !text.trim() && attach.paths.length === 0} title={t("Send")}><ArrowUpIcon size={16} /></button>
+          {/* While the queen answers and nothing new is typed, the button stops her. */}
+          {pending.length > 0 && !text.trim() && attach.paths.length === 0
+            ? <button type="button" onClick={() => pending.forEach((p) => void CancelChat(p.id))} title={t("Stop")} aria-label={t("Stop")} data-testid="wc-stop"><SquareIcon size={12} fill="currentColor" /></button>
+            : <button type="submit" disabled={cutOff || !text.trim() && attach.paths.length === 0} title={t("Send")}><ArrowUpIcon size={16} /></button>}
         </form>
       </div>
     </div>
