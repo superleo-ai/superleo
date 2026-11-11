@@ -46,20 +46,23 @@ function start() {
   };
 }
 
+// One function for every render: React resubscribes whenever subscribe
+// changes, and an inline one made each render unsubscribe the last listener
+// (stopping the poll) and subscribe again (starting it, which asks at once);
+// the answer re-rendered, and the window asked thousands of times a second.
+function subscribe(fn: () => void) {
+  listeners.add(fn);
+  if (listeners.size === 1) start();
+  return () => {
+    listeners.delete(fn);
+    if (listeners.size === 0) { stop?.(); stop = null; }
+  };
+}
+const snapshot = () => current;
+
 /** One poll and one subscription shared by everything on screen. */
 export function useMembership(): { m: Membership | null; recheck: () => Promise<void> } {
-  const m = useSyncExternalStore(
-    (fn) => {
-      listeners.add(fn);
-      if (listeners.size === 1) start();
-      return () => {
-        listeners.delete(fn);
-        if (listeners.size === 0) { stop?.(); stop = null; }
-      };
-    },
-    () => current,
-    () => current,
-  );
+  const m = useSyncExternalStore(subscribe, snapshot, snapshot);
   return { m, recheck };
 }
 
