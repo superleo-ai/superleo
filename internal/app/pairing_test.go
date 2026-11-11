@@ -162,3 +162,27 @@ func TestDevicesSurviveARestart(t *testing.T) {
 		t.Fatal("a paired device was forgotten across a restart")
 	}
 }
+
+// A demo instance's standing code pairs any number of phones, at any time;
+// without the variable no such code exists.
+func TestAStandingCodePairsAgainAndAgain(t *testing.T) {
+	t.Setenv("SUPERLEO_STANDING_PAIR_CODE", "424242")
+	h, c, _ := pairingServer(t)
+	c.devices.standing = standingCode()
+	clock := time.Now()
+	c.devices.now = func() time.Time { return clock }
+	for i := range 2 {
+		clock = clock.Add(pairCodeTTL * 10)
+		if rec := call(h, http.MethodPost, pairClaimPath, "", `{"code":"424242"}`); rec.Code != http.StatusOK {
+			t.Fatalf("claim %d of the standing code refused: %d", i, rec.Code)
+		}
+	}
+	t.Setenv("SUPERLEO_STANDING_PAIR_CODE", "4242")
+	if standingCode() != "" {
+		t.Fatal("a code the apps cannot type became a standing code")
+	}
+	c.devices.standing = ""
+	if rec := call(h, http.MethodPost, pairClaimPath, "", `{"code":"424242"}`); rec.Code != http.StatusUnauthorized {
+		t.Fatalf("without the variable the code still pairs: %d", rec.Code)
+	}
+}

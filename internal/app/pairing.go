@@ -75,6 +75,10 @@ type deviceStore struct {
 	devices []Device
 	codes   map[string]time.Time // code -> expiry
 	misses  int
+	// standing is a code that never expires and can be claimed again and
+	// again. Only a demo instance sets one (SUPERLEO_STANDING_PAIR_CODE), so
+	// that App Review can pair long after a five-minute code would be gone.
+	standing string
 	now     func() time.Time
 }
 
@@ -92,7 +96,7 @@ func openDevices(path string) (*deviceStore, error) {
 	if s, ok := deviceStores[path]; ok {
 		return s, nil
 	}
-	s := &deviceStore{path: path, codes: map[string]time.Time{}, now: time.Now}
+	s := &deviceStore{path: path, codes: map[string]time.Time{}, now: time.Now, standing: standingCode()}
 	if b, err := os.ReadFile(path); err == nil {
 		if err := json.Unmarshal(b, &s.devices); err != nil {
 			return nil, fmt.Errorf("%s is not readable as a device list: %w", path, err)
@@ -102,6 +106,21 @@ func openDevices(path string) (*deviceStore, error) {
 	}
 	deviceStores[path] = s
 	return s, nil
+}
+
+// standingCode is SUPERLEO_STANDING_PAIR_CODE when it is six digits, the only
+// shape the apps let a person type; anything else is no standing code at all.
+func standingCode() string {
+	c := strings.TrimSpace(os.Getenv("SUPERLEO_STANDING_PAIR_CODE"))
+	if len(c) != 6 {
+		return ""
+	}
+	for _, r := range c {
+		if r < '0' || r > '9' {
+			return ""
+		}
+	}
+	return c
 }
 
 func devicesPath() string { return filepath.Join(backend.DataDir(), devicesFile) }
@@ -161,6 +180,9 @@ func (s *deviceStore) claim(code, name string) (Device, string, bool, error) {
 	now := s.now()
 	code = strings.TrimSpace(code)
 	exp, found := s.codes[code]
+	if s.standing != "" && subtle.ConstantTimeCompare([]byte(code), []byte(s.standing)) == 1 {
+		found, exp = true, now.Add(time.Minute)
+	}
 	if !found || now.After(exp) {
 		s.misses++
 		if s.misses >= maxClaimMisses {
