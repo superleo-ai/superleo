@@ -22,3 +22,7 @@ Your own AI assistant. Talk to it from your phone, your computer or a browser. I
 3. **Talk to it.** Ask questions, give it to-dos, set reminders and alarms, or ask it to get something done on one of your machines.
 
 The iPhone app is coming to the App Store.
+
+## Want it set up for you?
+
+I set up a private SuperLeo hive on your own servers or Mac, from $500. If your AI agent setup is broken, I fix it for $199 flat. DM [@superleo_ai](https://x.com/superleo_ai) on X.
