@@ -494,3 +494,32 @@ func TestSuperLeoStandsInForAHermesThatFailedAtItsProvider(t *testing.T) {
 		t.Fatalf("own %v", own)
 	}
 }
+
+func TestCodexWaitsForTheServersThisAppHasRunning(t *testing.T) {
+	kit := &QueenKit{
+		Servers: map[string]any{
+			"edumind": map[string]any{"type": "http", "url": "https://edu.example/mcp"},
+			"broken":  map[string]any{"type": "http", "url": "https://down.example/mcp"},
+		},
+		Required: []string{"edumind"},
+	}
+	req := &agentexec.Request{}
+	if err := codexQueen(req, kit, false, ""); err != nil {
+		t.Fatal(err)
+	}
+	var edu, broken string
+	for _, a := range req.ExtraArgs {
+		switch {
+		case strings.HasPrefix(a, "mcp_servers.edumind="):
+			edu = a
+		case strings.HasPrefix(a, "mcp_servers.broken="):
+			broken = a
+		}
+	}
+	if !strings.Contains(edu, "required = true") || !strings.Contains(edu, "startup_timeout_sec = 20") {
+		t.Fatalf("edumind %q", edu)
+	}
+	if broken == "" || strings.Contains(broken, "required") {
+		t.Fatalf("broken %q", broken)
+	}
+}

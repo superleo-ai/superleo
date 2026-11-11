@@ -183,6 +183,10 @@ func codexQueen(req *agentexec.Request, kit *QueenKit, _ bool, _ string) error {
 		if unasked[name] {
 			c["default_tools_approval_mode"] = "approve"
 		}
+		if slices.Contains(kit.Required, name) {
+			c["required"] = true
+			c["startup_timeout_sec"] = 20
+		}
 		args = append(args, "-c", "mcp_servers."+tomlKey(name)+"="+tomlValue(c))
 	}
 	req.ExtraArgs = append(req.ExtraArgs, args...)

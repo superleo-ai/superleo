@@ -71,6 +71,12 @@ type QueenKit struct {
 	// Args go on Claude's command line as they are: queenLeanArgs. Every
 	// other CLI's flags are its adapter's, on the machine it runs on.
 	Args []string `json:"args,omitempty"`
+	// Required are the servers the CLI waits for before the turn starts:
+	// those running in this app. Codex starts its servers alongside the
+	// turn, and one slower than the first model call (edumind, over the
+	// internet) was missing from it; a server that is down anyway is left
+	// optional, so it cannot fail every turn.
+	Required []string `json:"required,omitempty"`
 }
 
 // queenLeanArgs keep the person's own Claude Code out of a queen run: no
@@ -585,6 +591,10 @@ func (a *App) queenKitFor(engine string, s *backend.Settings) (*QueenKit, error)
 			kit.Env[k] = v
 		}
 	}
+	running := map[string]bool{}
+	for _, st := range a.MCP() {
+		running[st.Name] = st.Running
+	}
 	for _, name := range backend.QueenEngineServers() {
 		if _, taken := kit.Servers[name]; taken {
 			continue // the hive's own server keeps its name
@@ -601,6 +611,9 @@ func (a *App) queenKitFor(engine string, s *backend.Settings) (*QueenKit, error)
 		kit.Servers[name] = entry
 		for k, v := range env {
 			kit.Env[k] = v
+		}
+		if running[name] {
+			kit.Required = append(kit.Required, name)
 		}
 	}
 	return kit, nil
