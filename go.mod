@@ -5,9 +5,10 @@ go 1.26.0
 require (
 	github.com/BurntSushi/toml v1.6.0
 	github.com/JohannesKaufmann/html-to-markdown/v2 v2.5.2
+	github.com/beevik/etree v1.8.1
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
-	github.com/liliang-cn/agent-go/v3 v3.81.0
+	github.com/liliang-cn/agent-go/v3 v3.82.0
 	github.com/liliang-cn/agentexec v0.6.0
 	github.com/liliang-cn/cortexdb/v2 v2.149.1
 	github.com/modelcontextprotocol/go-sdk v1.7.0
@@ -34,7 +35,6 @@ require (
 	github.com/andybalholm/brotli v1.2.0 // indirect
 	github.com/andybalholm/cascadia v1.3.4 // indirect
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de // indirect
-	github.com/beevik/etree v1.8.1 // indirect
 	github.com/bep/debounce v1.2.1 // indirect
 	github.com/bits-and-blooms/bitset v1.24.4 // indirect
 	github.com/blevesearch/bleve/v2 v2.6.1 // indirect
