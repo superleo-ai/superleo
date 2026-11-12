@@ -1,0 +1,79 @@
+#!/bin/sh
+# docpy — the Python the document skills run on.
+#
+#   docpy                    print the interpreter's path, building it first if needed
+#   docpy script.py args...  run a script with it
+#
+# The skills need PyMuPDF and python-pptx. A machine may have none
+# of them, or no usable Python at all (Debian ships python3 without venv), so
+# nothing is assumed: the environment is built once, beside the skills folder,
+# with uv, and uv is installed first when it is missing. uv brings its own Python.
+# Progress goes to stderr; stdout carries only what was asked for.
+set -eu
+
+ROOT=$(cd "$(dirname "$0")" && pwd)
+# Beside the skills folder, not in it: that folder is searched for skills and
+# rewritten at every start, and an environment is neither.
+VENV="$(dirname "$ROOT")/doc-env"
+PACKAGES="pymupdf python-pptx"
+STAMP="$VENV/.docpy-3"
+PY="$VENV/bin/python"
+
+say() { echo "docpy: $*" >&2; }
+
+find_uv() {
+	if command -v uv >/dev/null 2>&1; then command -v uv; return 0; fi
+	for c in "$HOME/.local/bin/uv" "$HOME/.cargo/bin/uv" /opt/homebrew/bin/uv /usr/local/bin/uv; do
+		if [ -x "$c" ]; then echo "$c"; return 0; fi
+	done
+	return 1
+}
+
+build() {
+	UV=$(find_uv || true)
+	if [ -z "$UV" ]; then
+		say "uv not found; installing it to ~/.local/bin (https://astral.sh/uv)"
+		if command -v curl >/dev/null 2>&1; then
+			curl -LsSf https://astral.sh/uv/install.sh | sh >&2
+		elif command -v wget >/dev/null 2>&1; then
+			wget -qO- https://astral.sh/uv/install.sh | sh >&2
+		else
+			say "neither curl nor wget is here, so uv cannot be fetched."
+			say "Install uv by hand (https://docs.astral.sh/uv/getting-started/installation/) and run this again."
+			exit 1
+		fi
+		UV=$(find_uv || true)
+		if [ -z "$UV" ]; then
+			say "uv was installed but is not where it was expected (~/.local/bin/uv)."
+			exit 1
+		fi
+	fi
+	say "building the Python environment in $VENV (once; about a minute)"
+	rm -rf "$VENV"
+	"$UV" venv "$VENV" --python 3.12 >&2
+	# shellcheck disable=SC2086
+	VIRTUAL_ENV="$VENV" "$UV" pip install --quiet $PACKAGES >&2
+	touch "$STAMP"
+	say "ready"
+}
+
+if [ ! -f "$STAMP" ] || [ ! -x "$PY" ]; then
+	# Two runs starting at once must not build over each other.
+	LOCK="$VENV.lock"
+	waited=0
+	while ! mkdir "$LOCK" 2>/dev/null; do
+		waited=$((waited + 1))
+		if [ "$waited" -gt 300 ]; then rmdir "$LOCK" 2>/dev/null || true; fi
+		sleep 1
+	done
+	trap 'rmdir "$LOCK" 2>/dev/null || true' EXIT
+	if [ ! -f "$STAMP" ] || [ ! -x "$PY" ]; then build; fi
+	rmdir "$LOCK" 2>/dev/null || true
+	trap - EXIT
+fi
+
+if [ "$#" -eq 0 ]; then
+	echo "$PY"
+	exit 0
+fi
+exec "$PY" "$@"

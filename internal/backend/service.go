@@ -305,7 +305,8 @@ func NewService(s *Settings) (*Service, error) {
 		WithLLM(brain).
 		WithSandbox(sb).
 		WithAutonomy(agent.AutonomyProfile{MaxRounds: s.MaxRounds, Scratchpad: true}).
-		WithSkills().
+		// The person's skills, then the ones in the binary (builtin_skills.go).
+		WithSkills(agent.WithSkillsPaths(builtinSkillPaths(cfg.SkillsPaths())...)).
 		// A plan that outlives the process. Without it a long task that is
 		// interrupted comes back having forgotten what it was doing — which is
 		// the moment the plan is the only thing worth keeping. Each task gets
