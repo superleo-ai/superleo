@@ -69,6 +69,11 @@ func outcome(answer string, runErr error) (ok bool, errMsg string) {
 }
 
 func main() {
+	// The document tools by hand; see doc.go. Before the flags: it takes none
+	// of the agent's.
+	if len(os.Args) > 1 && os.Args[1] == "doc" {
+		os.Exit(runDoc(os.Args[2:]))
+	}
 	var (
 		asJSON  = flag.Bool("json", false, "print one JSON object (answer, tools, timing) instead of the answer")
 		session = flag.String("session", "", "conversation to continue; default is a fresh one per run")

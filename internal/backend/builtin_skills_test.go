@@ -21,7 +21,10 @@ func TestBuiltinSkillsAreWrittenOut(t *testing.T) {
 	if root != filepath.Join(home, "builtin-skills") {
 		t.Fatalf("installed to %q", root)
 	}
-	for _, name := range []string{"file-check", "pdf", "ppt"} {
+	// The skills whose hands are still scripts beside them; docx and xlsx are
+	// instructions for tools compiled into the binary.
+	scripted := map[string]bool{"file-check": true, "pdf": true, "ppt": true}
+	for _, name := range []string{"file-check", "pdf", "ppt", "docx", "xlsx"} {
 		raw, err := os.ReadFile(filepath.Join(root, name, "SKILL.md"))
 		if err != nil {
 			t.Fatalf("%s: %v", name, err)
@@ -30,8 +33,20 @@ func TestBuiltinSkillsAreWrittenOut(t *testing.T) {
 		if strings.Contains(text, builtinSkillsRootToken) {
 			t.Errorf("%s: the folder token was left in the instructions", name)
 		}
-		if !strings.Contains(text, filepath.ToSlash(root)+"/docpy") {
+		if scripted[name] && !strings.Contains(text, filepath.ToSlash(root)+"/docpy") {
 			t.Errorf("%s: the instructions do not give the path of docpy", name)
+		}
+		if !scripted[name] {
+			// Nothing to run but the tool: no interpreter, no script, no install.
+			for _, word := range []string{"docpy", "python3", "pip install", "uv "} {
+				if strings.Contains(text, word) {
+					t.Errorf("%s: a skill for a built-in tool tells the model to use %q", name, word)
+				}
+			}
+			tool := map[string]string{"docx": "word_document", "xlsx": "excel_workbook"}[name]
+			if !strings.Contains(text, "`"+tool+"`") {
+				t.Errorf("%s: the instructions do not name the %s tool", name, tool)
+			}
 		}
 		// Every script the instructions name is there to be run.
 		for _, word := range strings.Fields(text) {
@@ -95,6 +110,12 @@ func TestBuiltinSkillsAreFoundByTheRequestsTheyAreFor(t *testing.T) {
 		"把这两份合同合并成一个文件再加水印":                                                   "pdf",
 		"Make a slide deck about our Q3 results":                              "ppt",
 		"导出成 Excel 之后帮我核对一下生成的文件有没有改错":                                        "file-check",
+		"写一份 10 页左右的项目方案，要有目录和表格，存成 uploads/doctest/plan.docx":                "docx",
+		"把合同里的两处条款改掉，用修订模式，让我能看到改了哪里":                                         "docx",
+		"做一个 2026 年月度预算表，要有公式、合计、条件格式和图表，存成 budget-2026.xlsx":                 "xlsx",
+		"把 uploads/xlsxtest/sales-raw.csv 清洗一下，去重、统一日期格式，再出一张汇总表":             "xlsx",
+		"Write a project proposal as a Word document":                         "docx",
+		"Build an Excel budget workbook with formulas":                        "xlsx",
 	}
 	for query, want := range cases {
 		got, err := svc.ResolveForModelScored(context.Background(), query, nil, skills.DefaultSkillMinScore)

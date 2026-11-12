@@ -37,21 +37,26 @@ import (
 //     is, printed back, compared with the file it was made from. It is the
 //     skill behind agent-go's "check the file you produced" step, which knows
 //     nothing about formats.
-//   - A format gets a skill of its own (pdf, ppt) when making it well takes
-//     more than a few lines of script. Each has a script that makes or changes
-//     the file and a checker that reads it back, and its SKILL.md runs read →
-//     make → check → report.
-//   - Every checker ends "RESULT: OK" or "RESULT: N problem(s)" with exit
-//     status 0 or 1, and prints one "PROBLEM:" line per fault. file-check
-//     hands a file to its format's checker when there is one.
+//   - A format gets a skill of its own when making it well takes more than a
+//     few lines. Each has something that makes or changes the file and a
+//     checker that reads it back, and its SKILL.md runs read → make → check →
+//     report.
+//   - Every checker ends "RESULT: OK" or "RESULT: N problem(s)" and prints one
+//     "PROBLEM:" line per fault.
+//
+// Where the hands are differs, and is changing. docx and xlsx are tools
+// compiled into this binary (internal/office, registered in
+// office_tools.go): their skills are instructions only. pdf, ppt and
+// file-check still run Python scripts shipped beside their SKILL.md, through
+// builtinskills/docpy, which builds an environment with uv on first use. That
+// is a second runtime to fetch and keep working, it has no answer on a clean
+// Windows machine, and it is against the rule that what SuperLeo depends on
+// is a native binary — so those three are to move into internal/office the
+// same way, and docpy goes when the last of them has.
 //
 // A skill of the same name in <data>/skills wins: agent-go keeps the first one
 // it finds and the built-in folder is searched last (see builtinSkillPaths).
 //
-// The scripts are Python. Nothing here assumes the machine has the libraries,
-// or Python at all: every SKILL.md starts with builtinskills/docpy, which
-// builds the environment with uv and installs uv when that is missing too.
-
 //go:embed all:builtinskills
 var builtinSkillsFS embed.FS
 

@@ -39,7 +39,9 @@ except ImportError:
     sys.exit("python-pptx is missing. Run this through docpy (see the skill), which installs it.")
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "lib"))
 from deck_build import plain  # noqa: E402
+import render  # noqa: E402
 
 EMU_IN = 914400.0
 
@@ -55,25 +57,7 @@ def load_fitz():
 
 
 def find_soffice():
-    """A LibreOffice that actually runs.
-
-    Being on PATH is not enough: Homebrew leaves its `soffice` wrapper behind
-    when the app is deleted, and the wrapper then fails on every call.
-    """
-    candidates = [shutil.which("soffice"), shutil.which("libreoffice"),
-                  "/Applications/LibreOffice.app/Contents/MacOS/soffice",
-                  "/usr/local/bin/soffice", "/usr/bin/soffice",
-                  "C:/Program Files/LibreOffice/program/soffice.exe"]
-    for path in candidates:
-        if not path or not os.path.exists(path):
-            continue
-        try:
-            done = subprocess.run([path, "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
-            if done.returncode == 0:
-                return path
-        except Exception:
-            continue
-    return None
+    return render.find_soffice()
 
 
 # --- drawing a slide from its shapes ---------------------------------------
@@ -537,14 +521,11 @@ def render_check(path, slide_count, png_dir):
         return preview(path, png_dir)
     tmp = tempfile.mkdtemp(prefix="deckcheck-")
     try:
-        # Its own profile folder: a LibreOffice the user has open would
-        # otherwise swallow the command and convert nothing.
-        profile = "-env:UserInstallation=file://" + os.path.join(tmp, "profile").replace("\\", "/")
-        proc = subprocess.run([soffice, profile, "--headless", "--convert-to", "pdf", "--outdir", tmp, path],
-                              stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=240)
-        pdf = os.path.join(tmp, os.path.splitext(os.path.basename(path))[0] + ".pdf")
-        if not os.path.exists(pdf):
-            msg = "LibreOffice could not convert the deck: " + proc.stdout.decode("utf-8", "replace").strip()[-200:]
+        # The shared converter: its own profile folder, and the machine's
+        # fonts handed to it (lib/render.py says why).
+        pdf = render.office_to_pdf(path, tmp)
+        if pdf is None:
+            msg = "LibreOffice could not convert the deck"
             print("PROBLEM: " + msg)
             return [msg]
         doc = fitz.open(pdf)

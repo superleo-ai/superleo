@@ -44,5 +44,7 @@ When one of these fits, use it; it makes the file as well as checking it, and it
 
 - **pdf** — read, change words keeping the layout, merge, watermark, number, sign.
 - **ppt** — build a slide deck from an outline, with charts and sources.
+- **docx** — write a Word document, edit one keeping its formatting (tracked changes when asked), check one. A built-in tool, no script.
+- **xlsx** — build a workbook with real formulas and charts, clean a messy export, recalculate and check one. A built-in tool, no script.
 
-A format gets its own skill when making it well takes more than a few lines of script. Each follows the same shape: read first, make or change with the skill's script, check with its checker, report what the check showed.
+A format gets its own skill when making it well takes more than a few lines of script. Each follows the same shape: read first, make or change with the skill's tool, check with its checker, report what the check showed.
