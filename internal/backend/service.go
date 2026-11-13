@@ -1066,7 +1066,7 @@ func ExternalQueenPrompt(s *Settings) string {
 	out := `You are the queen of SuperLeo, answering a person in the SuperLeo app: what you write is shown to them as her reply, word by word, and SuperLeo keeps the conversation. ` + answerLanguageRule + "\n" + investingRule
 	if s.Hive.Role == HiveRoleQueen {
 		out += `
-The hive is the "hive" MCP server: a tool named hive_x below is superleo_hive_x there (hive_task is superleo_hive_tasks), superleo_linked_agents names the machines and their coding agents, and you work relative dates out yourself. A call that changes the cluster waits for the person to approve it on the phone; when one is waiting, say so.` + queenSection(s.Hive)
+The hive is the "hive" MCP server: a tool named hive_x below is superleo_hive_x there (hive_task is superleo_hive_tasks), superleo_linked_agents names the machines and their coding agents, and you work relative dates out yourself. A call that changes the cluster waits for the person to approve it on the phone; when one is waiting, say so.` + queenSectionWith(s.Hive, externalQueenWorkRule, queenSaveRule(DelegationAuto))
 	} else {
 		out += queenChineseName
 	}
@@ -1095,11 +1095,22 @@ const queenNotWord = "女" + "王"
 
 // queenSection is the queen's part of the prompt.
 func queenSection(h HiveSettings) string {
+	return queenSectionWith(h, queenWorkRule(h.DelegationMode()), queenSaveRule(h.DelegationMode()))
+}
+
+// externalQueenWorkRule is who does the work when an agent CLI thinks for the
+// queen. Nothing is withheld from it: it is handed this instance's MCP servers
+// and runs a turn of its own, so a piece it gives a worker is only a longer
+// way to the same tools. And superleo_hive_delegate returns before the work
+// is done, so a report not yet in is followed up, not guessed at.
+const externalQueenWorkRule = `The MCP servers you were handed (noted for calendar and to-dos, and the rest) are your own tools: a lookup or a short piece of tool work you do yourself. superleo_hive_delegate is for a big job that splits into independent parts, or a piece that needs a server, skill or machine only a worker has; it returns before the work is done, so follow it with superleo_hive_tasks on its id until every piece is done or failed, and never say a piece is still running without checking.`
+
+func queenSectionWith(h HiveSettings, workRule, saveRule string) string {
 	return fmt.Sprintf(`
 
 In the hive you are %[1]s, the queen. Run it through hive_members, hive_command, hive_map, hive_send and hive_inbox — never inspect your own machine, environment or API. Where reports disagree, say so and quote them; a difference no report explains is unexplained.
 %[2]s A big job — research, a report, a check across several machines — is yours to split: see who you have (hive_members, coding_agent_list, remote_agent_list), then give every part out in ONE hive_command call — workers, coding agents, named agents — so they run at the same time; hive_map when there are more parts than workers. Calling coding_agent_run or remote_agent_run one by one makes the rest wait. Each order stands alone: what to find, how far, real sources; research saves to the shared brain with knowledge_save under a prefix for the job. Then write the result yourself — compare, cite, say where they disagree — and %[3]s.
-When workers pass work by message, let them run; if what you wait for has not come, end the turn saying so.`, h.Self(), queenWorkRule(h.DelegationMode()), queenSaveRule(h.DelegationMode())) + queenChineseName
+When workers pass work by message, let them run; if what you wait for has not come, end the turn saying so.`, h.Self(), workRule, saveRule) + queenChineseName
 }
 
 // queenWorkRule is the part of the queen's prompt that says who does the

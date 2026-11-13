@@ -12,10 +12,15 @@ import (
 func TestAnOutsideQueenReadsTheQueensOwnPrompt(t *testing.T) {
 	s := &Settings{QueenName: "小蜂", Hive: HiveSettings{Role: HiveRoleQueen, Name: "q"}}
 	got := ExternalQueenPrompt(s)
-	for _, part := range []string{queenSection(s.Hive), queenNameSection(s), answerLanguageRule, investingRule, "superleo_hive_x"} {
+	for _, part := range []string{queenNameSection(s), answerLanguageRule, investingRule, "superleo_hive_x", "In the hive", externalQueenWorkRule} {
 		if part == "" || !strings.Contains(got, part) {
 			t.Fatalf("missing %q in\n%s", part, got)
 		}
+	}
+	// An engine holds the servers it was handed: it is not told they are
+	// withheld, which sent every lookup the long way round through a worker.
+	if strings.Contains(got, queenWorkRule(DelegationMax)) {
+		t.Fatalf("an engine was told its work tools are withheld:\n%s", got)
 	}
 	// The queen's own agent reads the very same section.
 	if hiveSection(s.Hive) != queenSection(s.Hive) {
