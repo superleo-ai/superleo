@@ -102,6 +102,14 @@ func (s *Service) registerInstallTools() {
 				if !strings.Contains(err.Error(), "saved, but it did not") {
 					return errResult(err.Error()), nil
 				}
+				// Waiting only on a credential, it stays saved for the person
+				// to fill in. Broken otherwise: kept, it would fail again at
+				// every start, and the run should move on to the next one.
+				if !strings.Contains(err.Error(), " not set") {
+					if rerr := RemoveMCPServer(name); rerr == nil {
+						note = err.Error() + " — removed again. Try the next candidate the search offered, or another way."
+					}
+				}
 			}
 			tools := 0
 			if svc.MCP != nil {
