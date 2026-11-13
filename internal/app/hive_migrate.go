@@ -160,6 +160,11 @@ func (a *App) RetireOldNode() (OldNodeInfo, error) {
 			continue
 		}
 		launchctlOK("bootout", fmt.Sprintf("gui/%d/%s", os.Getuid(), sv.label))
+		// bootout returns before the job is gone; the join right after
+		// would see it loaded and wait for the next start.
+		for i := 0; i < 50 && serviceLoaded(sv); i++ {
+			time.Sleep(100 * time.Millisecond)
+		}
 		if err := os.Remove(sv.launchdPlist()); err != nil && !os.IsNotExist(err) {
 			return a.OldNodeStatus(), err
 		}
