@@ -297,6 +297,14 @@ func (a *App) startCLIRun(o cliStart) (CLIRun, error) {
 		o.Agent, o.Prompt = name, prompt
 		return a.startRemoteCLIRun(o, host)
 	}
+	// A dotted name is another machine's CLI: when that machine is not
+	// linked, say so, rather than judge it by this machine's settings.
+	if name, host, ok := splitRemoteCLI(agent); ok {
+		if _, linked := a.remoteCLIs()[host]; linked {
+			return CLIRun{}, fmt.Errorf("%s does not offer %s", host, name)
+		}
+		return CLIRun{}, fmt.Errorf("%s is not connected right now", host)
+	}
 	provider, ext, err := a.cliProvider(agent)
 	if err != nil {
 		return CLIRun{}, err
