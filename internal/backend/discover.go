@@ -40,6 +40,9 @@ type MCPCandidate struct {
 	RequiredEnv []string `json:"required_env,omitempty"`
 	// RemoteURL is set for servers that are hosted rather than run locally.
 	RemoteURL string `json:"remote_url,omitempty"`
+	// RemoteType is how the hosted server is spoken to, as the registry
+	// names it: "streamable-http" or "sse".
+	RemoteType string `json:"remote_type,omitempty"`
 }
 
 // registryArg is one argument the registry says a runtime or package takes.
@@ -154,6 +157,7 @@ func SearchMCPServers(ctx context.Context, query string, limit int) ([]MCPCandid
 		for _, remote := range srv.Remotes {
 			if remote.URL != "" {
 				candidate.RemoteURL = remote.URL
+				candidate.RemoteType = remote.Type
 				break
 			}
 		}

@@ -547,6 +547,9 @@ func NewService(s *Settings) (*Service, error) {
 	if !s.DisableSelfInstall {
 		out.registerInstallTools()
 		out.registerURLInstallTools()
+		// A tool search also answers with what could be installed
+		// (discover_offer.go).
+		svc.SetInstallableSearch(out.installableFinder().search)
 	}
 
 	// --- CortexDB data-import + graphrag query + connector tools (best-effort). ---

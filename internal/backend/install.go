@@ -32,7 +32,7 @@ func (s *Service) registerInstallTools() {
 	// may look for a capability on its own and only needs approval to install.
 	svc.AddTool(
 		"search_mcp_servers",
-		"Search the official registry for installable MCP servers. Call it first whenever the task needs a capability you do not have, then hand the command/args from the result to add_mcp_server verbatim to install it. The required_env in a result lists the environment variables that server needs; ask the user for any you are missing before installing.",
+		"Search the official registry for installable MCP servers. Call it first whenever the task needs a capability you do not have, then hand the command/args from the result to add_mcp_server verbatim to install it (for a result with only remote_url, hand that as url and remote_type as transport). The required_env in a result lists the environment variables that server needs; ask the user for any you are missing before installing.",
 		map[string]interface{}{
 			"type": "object",
 			"properties": map[string]interface{}{
@@ -70,29 +70,36 @@ func (s *Service) registerInstallTools() {
 	// --- add_mcp_server ---
 	svc.AddToolWithMetadata(
 		"add_mcp_server",
-		"Install/add an MCP server (call it when the user asks in conversation for some MCP tool). It starts immediately over stdio and is written to ~/.superleo/mcpServers.json, so it survives a restart.",
+		"Install/add an MCP server (call it when the user asks in conversation for some MCP tool). Give command and args for one that runs on this machine over stdio, or url for one that is hosted. It starts or connects immediately and is written to ~/.superleo/mcpServers.json, so it survives a restart.",
 		map[string]interface{}{
 			"type": "object",
 			"properties": map[string]interface{}{
-				"name":    map[string]interface{}{"type": "string", "description": "Server name, e.g. filesystem"},
-				"command": map[string]interface{}{"type": "string", "description": "Command to launch it, e.g. npx"},
-				"args":    map[string]interface{}{"type": "array", "items": map[string]interface{}{"type": "string"}, "description": "Command arguments, e.g. ['-y','@modelcontextprotocol/server-filesystem','/path']"},
-				"env":     map[string]interface{}{"type": "object", "description": "Environment variables (optional)"},
+				"name":      map[string]interface{}{"type": "string", "description": "Server name, e.g. filesystem"},
+				"command":   map[string]interface{}{"type": "string", "description": "Command to launch it, e.g. npx"},
+				"args":      map[string]interface{}{"type": "array", "items": map[string]interface{}{"type": "string"}, "description": "Command arguments, e.g. ['-y','@modelcontextprotocol/server-filesystem','/path']"},
+				"env":       map[string]interface{}{"type": "object", "description": "Environment variables (optional)"},
+				"url":       map[string]interface{}{"type": "string", "description": "For a hosted server, in place of command: its http(s) URL"},
+				"transport": map[string]interface{}{"type": "string", "description": "With url: streamable-http (the default) or sse"},
 			},
-			"required": []string{"name", "command"},
+			"required": []string{"name"},
 		},
 		func(ctx context.Context, a map[string]interface{}) (interface{}, error) {
 			name := sanitizeName(argStr(a, "name"))
 			command := strings.TrimSpace(argStr(a, "command"))
-			if name == "" || command == "" {
-				return errResult("name and command are required"), nil
+			rawURL := strings.TrimSpace(argStr(a, "url"))
+			if name == "" || (command == "" && rawURL == "") {
+				return errResult("name and either command or url are required"), nil
 			}
-			args := argStrSlice(a, "args")
-			env := argStrMap(a, "env")
 			started, note := true, "Started and written to the config."
-			if err := s.InstallMCPServer(ctx, name, command, args, env); err != nil {
+			var err error
+			if command != "" {
+				err = s.InstallMCPServer(ctx, name, command, argStrSlice(a, "args"), argStrMap(a, "env"))
+			} else {
+				err = s.InstallMCPURLServer(ctx, name, argStr(a, "transport"), rawURL, nil)
+			}
+			if err != nil {
 				started, note = false, err.Error()
-				if !strings.Contains(err.Error(), "did not start") {
+				if !strings.Contains(err.Error(), "saved, but it did not") {
 					return errResult(err.Error()), nil
 				}
 			}
