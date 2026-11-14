@@ -249,11 +249,14 @@ func TestWorkProgressReachesTheBoardThroughTheRunner(t *testing.T) {
 	if k.State != TaskDone || k.Dir != TaskOut || k.Worker != "w0" || k.Tools != 2 {
 		t.Fatalf("%+v", k)
 	}
-	writing := 0
+	// Counted as entries into the phase: the live text is published too, at
+	// most every liveEvery, and each of those snapshots still reads writing.
+	writing, last := 0, ""
 	for _, e := range seen() {
-		if e.Phase == PhaseWriting {
+		if e.Phase == PhaseWriting && last != PhaseWriting {
 			writing++
 		}
+		last = e.Phase
 	}
 	if writing != 1 {
 		t.Fatalf("%d writing events for a stream of partials", writing)
