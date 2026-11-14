@@ -208,11 +208,17 @@ func (b *BrowserBridge) Start() error {
 // Stop closes the listener and every connection; for tests.
 func (b *BrowserBridge) Stop() {
 	b.mu.Lock()
-	srv := b.srv
+	srv, ln := b.srv, b.ln
 	b.srv, b.ln = nil, nil
 	b.mu.Unlock()
 	if srv != nil {
 		_ = srv.Close()
+	}
+	// The server only closes a listener its Serve has reached; stopped
+	// sooner, the port stayed taken for a moment and the Start that followed
+	// moved to another one, which the extension's saved address did not have.
+	if ln != nil {
+		_ = ln.Close()
 	}
 }
 
