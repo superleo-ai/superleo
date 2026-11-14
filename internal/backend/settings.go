@@ -282,6 +282,11 @@ type Settings struct {
 	// starting it open to whoever finds the bot.
 	TelegramAllowedChats []int64 `json:"telegram_allowed_chats"`
 
+	// QuietHours is when a pushed notice nobody timed waits for the morning
+	// (outbox.go): "HH:MM-HH:MM" in this machine's time, "off" for never,
+	// empty for DefaultQuietHours.
+	QuietHours string `json:"quiet_hours"`
+
 	// Channels is where notices go and where messages come in from: Telegram,
 	// Feishu, WeCom, DingTalk, Slack, Bark, generic webhooks (channel.go). The
 	// four fields above mirror its first webhook and first Telegram channel

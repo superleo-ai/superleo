@@ -132,6 +132,20 @@ type Subscriber func(ctx context.Context, n Notice)
 type Notices struct {
 	mu   sync.RWMutex
 	subs map[string]Subscriber
+	// outbox paces what goes to the away surfaces (outbox.go); nil sends
+	// everything at once.
+	outbox *Outbox
+}
+
+// PaceWith puts an outbox in front of the surfaces that leave the machine.
+func (p *Notices) PaceWith(o *Outbox) {
+	if p == nil || o == nil {
+		return
+	}
+	p.mu.Lock()
+	p.outbox = o
+	p.mu.Unlock()
+	o.Attach(func(ctx context.Context, n Notice) { p.raise(ctx, n, true) })
 }
 
 // NewNotices builds a publisher with the webhook already subscribed, since
@@ -189,10 +203,25 @@ func (p *Notices) Raise(ctx context.Context, n Notice) {
 		n.At = time.Now().Format(time.RFC3339)
 	}
 
+	p.raise(ctx, n, false)
+}
+
+// raise hands a notice to the surfaces. One that waited in the outbox
+// (released) goes only to the away surfaces, the others having drawn it when
+// it was raised; one the outbox takes now goes to all but those.
+func (p *Notices) raise(ctx context.Context, n Notice, released bool) {
+	p.mu.RLock()
+	outbox := p.outbox
+	p.mu.RUnlock()
+	held := !released && outbox.Take(n)
+
 	p.mu.RLock()
 	subs := make([]Subscriber, 0, len(p.subs))
 	names := make([]string, 0, len(p.subs))
 	for name, sub := range p.subs {
+		if (held && awaySurfaces[name]) || (released && !awaySurfaces[name]) {
+			continue
+		}
 		subs = append(subs, sub)
 		names = append(names, name)
 	}

@@ -559,6 +559,9 @@ func (a *App) rebuild() {
 	// And the phones: a notice marked Push becomes a notification on every
 	// paired phone that registered for them (postnotify.go).
 	svc.Notices().Subscribe("apns", a.apnsNoticeSink())
+	// What leaves for the phones and the webhook is paced: held through the
+	// quiet hours and bunched when it comes in bursts (backend/outbox.go).
+	svc.Notices().PaceWith(backend.OpenOutbox())
 	// The character on the window, and the two calls that let a turn use it.
 	// Also per rebuild: these are registered on the agent, and a new agent
 	// starts with none of them.

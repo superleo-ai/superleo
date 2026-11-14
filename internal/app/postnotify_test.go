@@ -485,6 +485,9 @@ func TestWithoutAPNsEverythingElseStillWorks(t *testing.T) {
 // marks its notice for pushing.
 func TestNotifyUserReachesThePhones(t *testing.T) {
 	noAPNs(t)
+	// Whatever the hour the test runs at: this is about reaching the phone,
+	// not about when (backend/outbox_test.go).
+	t.Setenv("SUPERLEO_QUIET_HOURS", "off")
 	a, _ := gateTestApp(t, "true", false)
 	subs := strings.Join(a.svc.Notices().Subscribers(), ",")
 	if !strings.Contains(subs, "apns") {

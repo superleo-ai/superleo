@@ -226,6 +226,7 @@ func (a *App) notices() *backend.Notices {
 	p.SetEmitter(a.emit)
 	p.Subscribe("inbox", backend.OpenInbox().Sink())
 	p.Subscribe("apns", a.apnsNoticeSink())
+	p.PaceWith(backend.OpenOutbox())
 	return p
 }
 

@@ -228,6 +228,8 @@ func selfKeys() []SelfKey {
 		{Key: "bees.*.watch", Section: "bees", Tier: ap, Virtual: true, Desc: `One bee's scope, what it watches: a list, e.g. ["pods in namespace superleo"]; null clears it.`},
 
 		// --- notifications ---
+		{Key: "quiet_hours", Section: "notifications", Tier: w, Desc: `When a pushed notice nobody timed (an interim message, a note from an integration) waits for the morning instead of reaching the phone: "HH:MM-HH:MM", "off", or "" for 23:00-07:00. Reminders, alarms, alerts, failures and scheduled runs are never held.`,
+			check: func(c *Settings) error { _, _, _, err := ParseQuietHours(c.QuietHours); return err }},
 		{Key: "webhook_url", Section: "notifications", Tier: w, Desc: "Where a notice is POSTed (mirrors the first webhook channel). Blank turns it off."},
 		{Key: "channels.*.enabled", Section: "notifications", Tier: w, Desc: "Switch one notification channel on or off, by its id."},
 		{Key: "channels.*.events", Section: "notifications", Tier: w, Desc: `What one channel is sent: a list of "reminder", "schedule", "needs_you", "failed".`,
