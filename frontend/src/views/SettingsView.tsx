@@ -7,6 +7,7 @@ import {
 import { translate, useI18n } from "../lib/i18n";
 import LanguageSettings from "../components/LanguageSettings";
 import PairPhoneCard from "../components/PairPhoneCard";
+import PhoneReachCard from "../components/PhoneReachCard";
 import LinkSuperLeoCard from "../components/LinkSuperLeoCard";
 import LocalHiveCard from "../components/LocalHiveCard";
 import QueenEngineCard from "../components/QueenEngineCard";
@@ -727,6 +728,9 @@ export default function SettingsView({ onSaved, theme, onTheme, accent, onAccent
           {section === "notify" && (
             <>
               <PairPhoneCard />
+              <PhoneReachCard relay={s.phone_relay ?? ""} urls={s.phone_urls ?? []}
+                saved={[orig?.phone_relay, orig?.phone_urls]}
+                onChange={(p) => setS((prev) => (prev ? Object.assign(new backend.Settings(prev), p) : prev))} />
 
               <ChannelsCard />
             </>

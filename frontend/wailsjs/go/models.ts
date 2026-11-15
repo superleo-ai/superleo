@@ -2311,6 +2311,9 @@ export namespace app {
 	    urls: string[];
 	    fp?: string;
 	    relayed: boolean;
+	    relay?: string;
+	    running?: boolean;
+	    relay_env?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new PhoneLinkInfo(source);
@@ -2321,6 +2324,9 @@ export namespace app {
 	        this.urls = source["urls"];
 	        this.fp = source["fp"];
 	        this.relayed = source["relayed"];
+	        this.relay = source["relay"];
+	        this.running = source["running"];
+	        this.relay_env = source["relay_env"];
 	    }
 	}
 	export class PostNotificationRequest {
@@ -4426,6 +4432,8 @@ export namespace backend {
 	    remote_agents: RemoteAgents;
 	    action_mcp_servers?: string[];
 	    apns: APNsSettings;
+	    phone_relay?: string;
+	    phone_urls?: string[];
 	    queen_name?: string;
 	    queen_aliases?: string[];
 	    agent_link: AgentLinkSettings;
@@ -4496,6 +4504,8 @@ export namespace backend {
 	        this.remote_agents = this.convertValues(source["remote_agents"], RemoteAgents);
 	        this.action_mcp_servers = source["action_mcp_servers"];
 	        this.apns = this.convertValues(source["apns"], APNsSettings);
+	        this.phone_relay = source["phone_relay"];
+	        this.phone_urls = source["phone_urls"];
 	        this.queen_name = source["queen_name"];
 	        this.queen_aliases = source["queen_aliases"];
 	        this.agent_link = this.convertValues(source["agent_link"], AgentLinkSettings);
