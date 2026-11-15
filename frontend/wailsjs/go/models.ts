@@ -2455,6 +2455,7 @@ export namespace app {
 	    allowed?: string[];
 	    env?: Record<string, string>;
 	    args?: string[];
+	    required?: string[];
 	
 	    static createFrom(source: any = {}) {
 	        return new QueenKit(source);
@@ -2467,6 +2468,7 @@ export namespace app {
 	        this.allowed = source["allowed"];
 	        this.env = source["env"];
 	        this.args = source["args"];
+	        this.required = source["required"];
 	    }
 	}
 	export class QueenRunRequest {
@@ -4425,6 +4427,7 @@ export namespace backend {
 	    webhook_secret: string;
 	    telegram_bot_token: string;
 	    telegram_allowed_chats: number[];
+	    quiet_hours: string;
 	    channels: Channel[];
 	    external_agents: ExternalAgents;
 	    onboarded?: boolean;
@@ -4497,6 +4500,7 @@ export namespace backend {
 	        this.webhook_secret = source["webhook_secret"];
 	        this.telegram_bot_token = source["telegram_bot_token"];
 	        this.telegram_allowed_chats = source["telegram_allowed_chats"];
+	        this.quiet_hours = source["quiet_hours"];
 	        this.channels = this.convertValues(source["channels"], Channel);
 	        this.external_agents = this.convertValues(source["external_agents"], ExternalAgents);
 	        this.onboarded = source["onboarded"];
