@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SuperLeo · 在外面也能连 · Reach your desktop from anywhere</title>
+<meta name="description" content="How the SuperLeo phone app reaches your desktop when it is not on the same network: directly on the same Wi-Fi, through an end-to-end encrypted relay elsewhere, or through a relay or tunnel of your own.">
+<link rel="icon" href="/media/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/media/apple-touch-icon.png">
+<script>
+  (function () {
+    var q = new URLSearchParams(location.search).get('lang');
+    var l = q || ((navigator.language || '').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en');
+    l = l === 'en' ? 'en' : 'zh';
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l === 'en' ? 'en' : 'zh-CN';
+  })();
+</script>
+<style>
+  @font-face { font-family: Geist; src: url(/fonts/geist.woff2) format("woff2"); font-weight: 100 900; font-display: swap; }
+  @font-face { font-family: "Geist Mono"; src: url(/fonts/geist-mono.woff2) format("woff2"); font-weight: 100 900; font-display: swap; }
+  :root {
+    --ground: #F6F8F9; --paper: #FFFFFF; --ink: #0E1A22; --muted: #5A6872;
+    --hair: #D9E0E4; --tick: #B9C4CB; --signal: #1F5BFF;
+  }
+  * { box-sizing: border-box; }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  body { margin: 0; background: var(--ground); color: var(--ink);
+    font: 17px/1.7 Geist, -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased; }
+  html[lang="en"] body { line-height: 1.6; }
+  a { color: inherit; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; border-radius: 4px; }
+
+  .col { max-width: 680px; margin: 0 auto; padding: 0 max(20px, env(safe-area-inset-left)); }
+  .wide { max-width: 1120px; margin: 0 auto; padding: 0 max(20px, env(safe-area-inset-left)); }
+
+  header { display: flex; align-items: center; justify-content: space-between; height: 72px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; text-decoration: none; font-size: 16px; }
+  .brand img { width: 26px; height: 26px; border-radius: 6px; }
+  .top { display: flex; align-items: center; gap: 20px; font-size: 15px; color: var(--muted); }
+  .top a { text-decoration: none; }
+  .top a:hover { color: var(--ink); }
+  .lang { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  .lang:hover { color: var(--ink); }
+
+  .intro { padding-top: 64px; }
+  h1 { font-size: clamp(36px, 6vw, 56px); line-height: 1.05; letter-spacing: -.03em; font-weight: 600; margin: 0 0 18px; }
+  .lead { color: var(--muted); margin: 0; }
+
+  section { padding: 64px 0 0; }
+  h2 { font-size: 26px; line-height: 1.2; letter-spacing: -.02em; font-weight: 600; margin: 0 0 14px; }
+  h3 { font-size: 18px; font-weight: 600; margin: 28px 0 6px; }
+  p { margin: 0 0 16px; }
+  code { font-family: "Geist Mono", ui-monospace, Menlo, monospace; font-size: .86em; background: var(--paper); border: 1px solid var(--hair); border-radius: 4px; padding: 1px 5px; overflow-wrap: anywhere; }
+  pre { font-family: "Geist Mono", ui-monospace, Menlo, monospace; font-size: 13px; line-height: 1.6; background: var(--paper); border: 1px solid var(--hair); border-radius: 6px; padding: 12px 14px; margin: 0 0 16px; overflow-x: auto; }
+
+  /* The three ways a phone gets through, as a measured list. */
+  .ways { list-style: none; margin: 0 0 8px; padding: 0; border-top: 1px solid var(--ink); }
+  .ways li { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 4px 24px; padding: 18px 0; border-bottom: 1px solid var(--hair); }
+  .ways .k { font-weight: 600; }
+  .ways .v { color: var(--muted); }
+  .ways .v strong { color: var(--ink); font-weight: 550; }
+  @media (max-width: 600px) { .ways li { grid-template-columns: 1fr; } }
+
+  .no { border-left: 2px solid var(--ink); padding: 2px 0 2px 16px; margin: 24px 0 0; }
+
+  footer { margin-top: 120px; border-top: 1px solid var(--hair); padding: 26px 0 48px; font-size: 14px; color: var(--muted); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 24px; }
+  footer nav { display: flex; flex-wrap: wrap; gap: 20px; }
+  footer a { text-decoration: none; }
+  footer a:hover { color: var(--ink); }
+</style>
+<script defer data-domain="superleo.app" src="https://stats.superleo.cn/js/script.js"></script>
+</head>
+<body>
+<div class="wide">
+  <header>
+    <a class="brand" href="/"><img src="/media/apple-touch-icon.png" alt=""><span>SuperLeo</span></a>
+    <div class="top">
+      <a href="https://github.com/superleo-ai/superleo">GitHub</a>
+      <button class="lang" type="button" onclick="setLang(document.documentElement.dataset.lang === 'zh' ? 'en' : 'zh')"><span lang="zh">English</span><span lang="en">中文</span></button>
+    </div>
+  </header>
+</div>
+
+<div class="col intro">
+  <h1><span lang="zh">在外面也能连</span><span lang="en">Reach your desktop from anywhere</span></h1>
+  <p class="lead">
+    <span lang="zh">SuperLeo 装在你的电脑上，手机连回这台电脑。这一页说明手机是怎么连过去的，以及怎么换成你自己的方式。</span>
+    <span lang="en">SuperLeo runs on your computer, and your phone connects back to it. This page explains how the phone gets there, and how to use a way of your own instead.</span>
+  </p>
+</div>
+
+<section>
+  <div class="col">
+    <h2><span lang="zh">怎么连过去</span><span lang="en">How the phone gets there</span></h2>
+    <ul class="ways">
+      <li>
+        <span class="k"><span lang="zh">同一个 Wi-Fi</span><span lang="en">Same Wi-Fi</span></span>
+        <span class="v"><span lang="zh">手机直接连电脑，不经过任何别的机器。</span><span lang="en">The phone connects to the computer directly. Nothing else is involved.</span></span>
+      </li>
+      <li>
+        <span class="k"><span lang="zh">在别的地方</span><span lang="en">Anywhere else</span></span>
+        <span class="v"><span lang="zh">经过 <strong>relay.superleo.app</strong> 中转。不用注册。</span><span lang="en">Through <strong>relay.superleo.app</strong>. No sign-up.</span></span>
+      </li>
+      <li>
+        <span class="k"><span lang="zh">你自己的方式</span><span lang="en">Your own way</span></span>
+        <span class="v"><span lang="zh">自己跑一个中转，或者用你已有的隧道。见下文。</span><span lang="en">Run a relay yourself, or use a tunnel you already have. See below.</span></span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <h2><span lang="zh">中转看不到内容</span><span lang="en">The relay cannot read anything</span></h2>
+    <p>
+      <span lang="zh">配对时，手机从二维码里拿到电脑证书的指纹。之后每次连接，加密都是在手机和电脑之间完成的，手机只认这张证书。中转只按地址把加密后的数据转给对应的电脑，看不到内容，也不保存。</span>
+      <span lang="en">When you pair, the phone takes the fingerprint of the computer's certificate from the QR code. Every connection after that is encrypted between the phone and the computer, and the phone accepts only that certificate. The relay forwards the encrypted bytes to the right computer by name. It cannot read them and does not store them.</span>
+    </p>
+    <p>
+      <span lang="zh">每台电脑在中转上的地址是用它自己的密钥算出来的，形如 <code>https://&lt;id&gt;.relay.superleo.app:43443</code>，<code>&lt;id&gt;</code> 是 16 个字符。电脑连上中转时用同一把密钥签名，证明这个地址属于它，所以不需要账号。</span>
+      <span lang="en">Each computer's address at the relay is derived from its own key and looks like <code>https://&lt;id&gt;.relay.superleo.app:43443</code>, where <code>&lt;id&gt;</code> is 16 characters. When the computer connects to the relay it signs with that key to prove the address is its own, so no account is needed.</span>
+    </p>
+    <p>
+      <span lang="zh">桌面版的「设置 › 通知中心 › 在外面也能连」里能看到这台电脑的中转地址，以及它现在有没有连上中转。</span>
+      <span lang="en">The desktop app shows this computer's relay address, and whether it is linked to the relay, under Settings › Notifications › Away from home.</span>
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <h2><span lang="zh">换成你自己的方式</span><span lang="en">Use your own provider</span></h2>
+    <p>
+      <span lang="zh">在同一个设置里可以选：SuperLeo 中转、自己的中转、或者仅局域网。另外可以加上你自己的地址，手机会依次尝试：先局域网，再你自己的地址，最后中转。</span>
+      <span lang="en">The same settings let you choose the SuperLeo relay, your own relay, or the local network only. You can also add addresses of your own. The phone tries them in order: the local network first, then your own addresses, then the relay.</span>
+    </p>
+
+    <h3><span lang="zh">自己跑一个中转</span><span lang="en">Run the relay yourself</span></h3>
+    <p>
+      <span lang="zh">中转是开源的，代码在 <a href="https://github.com/superleo-ai/superleo/tree/main/cmd/superleo-relay">cmd/superleo-relay</a>。准备一个域名，加一条泛解析 <code>*.relay.example.com</code> 指向你的服务器，然后运行：</span>
+      <span lang="en">The relay is open source, in <a href="https://github.com/superleo-ai/superleo/tree/main/cmd/superleo-relay">cmd/superleo-relay</a>. Point a wildcard DNS record, <code>*.relay.example.com</code>, at your server and run:</span>
+    </p>
+    <pre>superleo-relay -addr :43443 -domain relay.example.com</pre>
+    <p>
+      <span lang="zh">在桌面版选「自己的中转」，填 <code>relay.example.com:43443</code>。中转需要域名，不能只用 IP 地址，因为每台电脑都在它下面有一个自己的子域名。</span>
+      <span lang="en">In the desktop app choose My own relay and enter <code>relay.example.com:43443</code>. A relay needs a domain name, not just an IP address, because each computer gets a subdomain of its own under it.</span>
+    </p>
+
+    <h3><span lang="zh">用你已有的隧道</span><span lang="en">Use a tunnel you already have</span></h3>
+    <p>
+      <span lang="zh">按 TCP 原样转发的隧道都可以，比如 frp 的 TCP 代理，或者 Tailscale Funnel 的 TCP 转发。把它指向电脑的 <code>43561</code> 端口，再把它给你的地址（例如 <code>https://desk.example.com:7443</code>）加到「自己的地址」里。手机也装了 Tailscale 的话，可以直接加电脑的 Tailscale 地址，例如 <code>https://100.101.102.103:43561</code>。</span>
+      <span lang="en">Any tunnel that passes TCP through unchanged works, such as an frp TCP proxy or Tailscale Funnel's TCP forwarding. Point it at port <code>43561</code> on the computer, and add the address it gives you (for example <code>https://desk.example.com:7443</code>) under Own addresses. If your phone is on Tailscale too, you can add the computer's Tailscale address, for example <code>https://100.101.102.103:43561</code>.</span>
+    </p>
+    <p class="no">
+      <span lang="zh">在中间解开 TLS 的隧道不支持，比如 Cloudflare Tunnel。它能读到经过的内容，手机核对证书指纹时也会失败。</span>
+      <span lang="en">Tunnels that terminate TLS, such as Cloudflare Tunnel, are not supported. They can read the traffic, and the phone's certificate check fails through them.</span>
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <h2><span lang="zh">目前能用到哪里</span><span lang="en">What works today</span></h2>
+    <p>
+      <span lang="zh">桌面版和 Android 版现在就支持自己的中转和自己的地址。iPhone 上，iOS 只为 relay.superleo.app 放行这种按指纹核对的连接，所以用你自己的域名要等之后的 App 更新；在此之前，iPhone 在外面请用 SuperLeo 中转。</span>
+      <span lang="en">The desktop app and Android support your own relay and your own addresses now. On iPhone, iOS allows this kind of fingerprint-checked connection only for relay.superleo.app, so a domain of your own needs a future app update. Until then, use the SuperLeo relay on iPhone when you are away.</span>
+    </p>
+  </div>
+</section>
+
+<div class="wide">
+  <footer>
+    <span>© 2026 SuperLeo</span>
+    <nav>
+      <a href="/"><span lang="zh">首页</span><span lang="en">Home</span></a>
+      <a href="/privacy/"><span lang="zh">隐私政策</span><span lang="en">Privacy</span></a>
+      <a href="https://github.com/superleo-ai/superleo/issues"><span lang="zh">问题反馈</span><span lang="en">Report an issue</span></a>
+    </nav>
+  </footer>
+</div>
+
+<script>
+  function setLang(l) {
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l === 'en' ? 'en' : 'zh-CN';
+    var u = new URL(location.href); u.searchParams.set('lang', l); history.replaceState(null, '', u);
+  }
+</script>
+</body>
+</html>
