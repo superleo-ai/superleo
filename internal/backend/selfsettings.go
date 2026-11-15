@@ -227,6 +227,15 @@ func selfKeys() []SelfKey {
 		{Key: "bees.*.goal", Section: "bees", Tier: ap, Virtual: true, Desc: "One bee's goal, what it keeps true, by the id standing_agents gives (standing_agent_update sets it)."},
 		{Key: "bees.*.watch", Section: "bees", Tier: ap, Virtual: true, Desc: `One bee's scope, what it watches: a list, e.g. ["pods in namespace superleo"]; null clears it.`},
 
+		// --- phone ---
+		// Where a phone's traffic to this desktop goes: an address it is
+		// sent to, so the person's, except going back to the local network.
+		{Key: "phone_relay", Section: "phone", Tier: ap, Desc: `How a paired phone reaches this desktop away from its network: "" our relay (relay.superleo.app), "off" the local network only, or host[:port] of a self-hosted superleo relay. SUPERLEO_RELAY overrides it. Setting "off" needs no approval.`,
+			check:   func(c *Settings) error { return ValidatePhoneRelay(c.PhoneRelay) },
+			narrows: func(raw any) bool { return strings.EqualFold(strings.TrimSpace(toStr(raw)), PhoneRelayOff) }},
+		{Key: "phone_urls", Section: "phone", Tier: ap, Desc: "Extra addresses for a phone to reach this desktop: TCP-passthrough tunnels (frp, Tailscale Funnel) to the phone link's port 43561, each https://host[:port] (a list).",
+			check: func(c *Settings) error { return ValidatePhoneURLs(c.PhoneURLs) }},
+
 		// --- notifications ---
 		{Key: "quiet_hours", Section: "notifications", Tier: w, Desc: `When a pushed notice nobody timed (an interim message, a note from an integration) waits for the morning instead of reaching the phone: "HH:MM-HH:MM", "off", or "" for 23:00-07:00. Reminders, alarms, alerts, failures and scheduled runs are never held.`,
 			check: func(c *Settings) error { _, _, _, err := ParseQuietHours(c.QuietHours); return err }},

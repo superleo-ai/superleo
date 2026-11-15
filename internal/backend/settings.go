@@ -328,6 +328,15 @@ type Settings struct {
 	// push that tells the iOS app its alarms changed. See PushSettings.
 	APNs APNsSettings `json:"apns,omitzero"`
 
+	// PhoneRelay is how a paired phone reaches this desktop away from its
+	// network (app/phonelink.go): "" is our relay, "off" the local network
+	// only, host[:port] a superleo relay run by the person. PhoneURLs are
+	// addresses their own provider gives them, a TCP-passthrough tunnel to
+	// the phone link's port, each https://host[:port]. SUPERLEO_RELAY
+	// overrides PhoneRelay. See phone_settings.go.
+	PhoneRelay string   `json:"phone_relay,omitempty"`
+	PhoneURLs  []string `json:"phone_urls,omitempty"`
+
 	// QueenName is what the person calls the queen, shown by every client and
 	// told to the model; QueenAliases are other names she answers to. Only
 	// what people see changes: the role, the agent and the RPCs stay "queen".

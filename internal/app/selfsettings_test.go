@@ -154,6 +154,7 @@ func TestEveryBoundaryKeyWaitsForApproval(t *testing.T) {
 		"webhook_secret": "sk-NEW-7", "telegram_bot_token": "sk-NEW-8", "telegram_allowed_chats": []any{42},
 		"disable_tool_approval": true, "disable_self_install": false, "tool_approval_decider_url": "https://d.example.invalid",
 		"tool_approval_decider_threshold": 0.5, "action_mcp_servers": []any{"noted"},
+		"phone_relay": "relay.example.invalid:1", "phone_urls": []any{"https://desk.example.invalid"},
 	}
 	for _, k := range backend.SelfKeys() {
 		if k.Tier != backend.TierNeedsApproval {

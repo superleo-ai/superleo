@@ -639,6 +639,9 @@ func (a *App) SaveSettings(s backend.Settings) error {
 	if err := s.Proxy.Validate(); err != nil {
 		return err
 	}
+	if err := s.ValidatePhoneLink(); err != nil {
+		return err
+	}
 	a.mu.Lock()
 	before := a.settings
 	prev := ""
@@ -655,6 +658,9 @@ func (a *App) SaveSettings(s backend.Settings) error {
 	a.mu.Lock()
 	a.settings = &s
 	a.mu.Unlock()
+	if phoneLinkSettingsChanged(before, &s) {
+		go a.restartPhoneLink()
+	}
 	if s.Hive.QueenEngine != prev {
 		// Who answered last was under the old engine; until a turn says
 		// otherwise, the new one is who the queen thinks with.

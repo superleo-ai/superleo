@@ -9,8 +9,10 @@
 // cannot read.
 //
 // It starts when a phone is paired and, after that, whenever the app starts
-// with a paired phone. SUPERLEO_RELAY names another relay (host or host:port),
-// or "off" for the local network only.
+// with a paired phone. The phone_relay setting picks the relay: ours, "off"
+// for the local network only, or the person's own (host or host:port);
+// SUPERLEO_RELAY, when set, overrides it. phone_urls adds addresses of the
+// person's own tunnels to this port. A change to either restarts the link.
 package app
 
 import (
@@ -51,7 +53,8 @@ type phoneLink struct {
 	port   int
 	id     string
 	fp     string
-	relay  string // host:port, empty when off
+	relay  string   // host:port, empty when off
+	extra  []string // phone_urls, https://host[:port]
 	client *relay.Client
 	cancel context.CancelFunc
 	done   chan struct{}
@@ -135,9 +138,13 @@ func certFingerprint(der []byte) string {
 	return base64.RawURLEncoding.EncodeToString(sum[:])
 }
 
-// relayAddr is the relay to use, host:port, or "" for none.
-func relayAddr() string {
+// relayAddr is the relay to use, host:port, or "" for none: SUPERLEO_RELAY
+// when it is set, else the phone_relay setting.
+func relayAddr(setting string) string {
 	v := strings.TrimSpace(os.Getenv("SUPERLEO_RELAY"))
+	if v == "" {
+		v = strings.TrimSpace(setting)
+	}
 	switch {
 	case v == "":
 		v = relay.DefaultHost
@@ -227,6 +234,10 @@ func (a *App) ensurePhoneLink() (*phoneLink, error) {
 	if a.phones != nil {
 		return a.phones, nil
 	}
+	var cfg backend.Settings
+	if a.settings != nil {
+		cfg = *a.settings
+	}
 	ident, err := loadOrCreatePhoneIdentity(phoneIdentityDir())
 	if err != nil {
 		return nil, fmt.Errorf("phone certificate: %w", err)
@@ -246,7 +257,8 @@ func (a *App) ensurePhoneLink() (*phoneLink, error) {
 		port:   tcp.Addr().(*net.TCPAddr).Port,
 		id:     ident.id,
 		fp:     ident.fp,
-		relay:  relayAddr(),
+		relay:  relayAddr(cfg.PhoneRelay),
+		extra:  cfg.PhoneURLsClean(),
 		cancel: cancel,
 		done:   make(chan struct{}),
 	}
@@ -287,6 +299,36 @@ func (a *App) stopPhoneLink() {
 	<-p.done
 }
 
+// phoneLinkSettingsChanged reports a change of what the phone link is
+// started with.
+func phoneLinkSettingsChanged(before, after *backend.Settings) bool {
+	if before == nil || after == nil {
+		return false
+	}
+	return relayAddr(before.PhoneRelay) != relayAddr(after.PhoneRelay) ||
+		strings.Join(before.PhoneURLsClean(), " ") != strings.Join(after.PhoneURLsClean(), " ")
+}
+
+var phoneRestartMu sync.Mutex
+
+// restartPhoneLink starts a running phone link again with the settings as
+// they are now. One not running is left alone: it reads them when it starts.
+func (a *App) restartPhoneLink() {
+	phoneRestartMu.Lock()
+	defer phoneRestartMu.Unlock()
+	a.mu.Lock()
+	running := a.phones != nil
+	a.mu.Unlock()
+	if !running {
+		return
+	}
+	a.stopPhoneLink()
+	if _, err := a.ensurePhoneLink(); err != nil {
+		slog.Warn("phone link", "error", err)
+	}
+	a.emit("phonelink:changed", nil)
+}
+
 // startPhoneLinkIfPaired opens the link at startup for phones paired before.
 func (a *App) startPhoneLinkIfPaired() {
 	if a.isHiveMember() {
@@ -301,17 +343,32 @@ func (a *App) startPhoneLinkIfPaired() {
 	}
 }
 
-// urls are where a phone can reach this computer, the local network first.
+// urls are where a phone can reach this computer: the local network first,
+// then the person's own addresses, then the relay.
 func (p *phoneLink) urls() []string {
-	var out []string
-	for _, ip := range lanAddrs() {
-		out = append(out, "https://"+net.JoinHostPort(ip, fmt.Sprint(p.port)))
+	return phoneURLs(lanAddrs(), p.port, p.extra, p.id, p.relay)
+}
+
+func phoneURLs(lan []string, port int, extra []string, id, relayHostPort string) []string {
+	out := []string{}
+	for _, ip := range lan {
+		out = append(out, "https://"+net.JoinHostPort(ip, fmt.Sprint(port)))
 	}
-	if p.relay != "" {
-		host, port, _ := net.SplitHostPort(p.relay)
-		out = append(out, "https://"+net.JoinHostPort(p.id+"."+host, port))
+	out = append(out, extra...)
+	if u := relayURL(id, relayHostPort); u != "" {
+		out = append(out, u)
 	}
 	return out
+}
+
+// relayURL is where the relay at host:port reaches the computer with this
+// id, or "" for no relay.
+func relayURL(id, relayHostPort string) string {
+	if relayHostPort == "" || id == "" {
+		return ""
+	}
+	host, port, _ := net.SplitHostPort(relayHostPort)
+	return "https://" + net.JoinHostPort(id+"."+host, port)
 }
 
 // pairLink is what the QR code carries.
@@ -379,11 +436,33 @@ func virtualInterface(name string) bool {
 func (a *App) PhoneLinks() PhoneLinkInfo {
 	a.mu.Lock()
 	p := a.phones
-	a.mu.Unlock()
-	if p == nil {
-		return PhoneLinkInfo{URLs: []string{}}
+	var cfg backend.Settings
+	if a.settings != nil {
+		cfg = *a.settings
 	}
-	return PhoneLinkInfo{URLs: p.urls(), Fingerprint: p.fp, Relayed: p.client != nil && p.client.Linked()}
+	a.mu.Unlock()
+	env := strings.TrimSpace(os.Getenv("SUPERLEO_RELAY"))
+	if p == nil {
+		info := PhoneLinkInfo{URLs: []string{}, RelayEnv: env}
+		// Not running yet (no phone paired): the relay address this
+		// computer will have, for the Settings page.
+		if a.ctx != nil && !a.isHiveMember() {
+			if r := relayAddr(cfg.PhoneRelay); r != "" {
+				if ident, err := loadOrCreatePhoneIdentity(phoneIdentityDir()); err == nil {
+					info.Relay = relayURL(ident.id, r)
+				}
+			}
+		}
+		return info
+	}
+	return PhoneLinkInfo{
+		URLs:        p.urls(),
+		Fingerprint: p.fp,
+		Relayed:     p.client != nil && p.client.Linked(),
+		Relay:       relayURL(p.id, p.relay),
+		Running:     true,
+		RelayEnv:    env,
+	}
 }
 
 // PhoneLinkInfo is PhoneLinks' answer.
@@ -391,4 +470,10 @@ type PhoneLinkInfo struct {
 	URLs        []string `json:"urls"`
 	Fingerprint string   `json:"fp,omitempty"`
 	Relayed     bool     `json:"relayed"`
+	// Relay is this computer's address at its relay, "" with none.
+	Relay string `json:"relay,omitempty"`
+	// Running says the link is open (a phone is paired).
+	Running bool `json:"running,omitempty"`
+	// RelayEnv is SUPERLEO_RELAY when set: it overrides phone_relay.
+	RelayEnv string `json:"relay_env,omitempty"`
 }

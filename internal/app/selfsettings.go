@@ -425,6 +425,9 @@ func (a *App) checkSelfChanges(changes []selfChange) error {
 	if err := cfg.Proxy.Validate(); err != nil {
 		return err
 	}
+	if err := cfg.ValidatePhoneLink(); err != nil {
+		return err
+	}
 	if err := backend.ValidateQueenName(cfg.QueenName, cfg.QueenAliases); err != nil {
 		return err
 	}
