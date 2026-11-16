@@ -167,6 +167,7 @@ func (s *Server) phone(c net.Conn, r *bufio.Reader) {
 		c.Close()
 		return
 	}
+	s.logf("relay: phone for %s via %s from %s, hello %d bytes", id, name, c.RemoteAddr(), len(head))
 	s.hold(c, r, head, id, false)
 }
 
@@ -291,17 +292,22 @@ func (s *Server) accept(c net.Conn, r *bufio.Reader, id, sid string) {
 		w.conn.Close()
 		return
 	}
-	pipe(w.conn, w.r, c, r)
+	start := time.Now()
+	up, down := pipe(w.conn, w.r, c, r)
+	s.logf("relay: phone for %s closed after %s, %d bytes up, %d down", id, time.Since(start).Round(time.Millisecond), up+int64(len(w.head)), down)
 }
 
-func pipe(a net.Conn, ar io.Reader, b net.Conn, br io.Reader) {
+// pipe copies both ways until either side ends, and says how much went from
+// a to b and from b to a.
+func pipe(a net.Conn, ar io.Reader, b net.Conn, br io.Reader) (ab, ba int64) {
 	done := make(chan struct{}, 2)
-	go func() { _, _ = io.Copy(b, ar); done <- struct{}{} }()
-	go func() { _, _ = io.Copy(a, br); done <- struct{}{} }()
+	go func() { ab, _ = io.Copy(b, ar); done <- struct{}{} }()
+	go func() { ba, _ = io.Copy(a, br); done <- struct{}{} }()
 	<-done
 	a.Close()
 	b.Close()
 	<-done
+	return ab, ba
 }
 
 // link checks that the computer holds the key id is named after, then keeps
