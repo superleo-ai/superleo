@@ -248,7 +248,8 @@ func (a *App) migrateHiveLink() {
 			slog.Warn("hive: stopping the old node", "error", err)
 		}
 	}
-	if a.isHiveMember() {
+	// A person who left stays out until they join again themselves.
+	if a.isHiveMember() || leftHive() {
 		return
 	}
 	if a.MigrateHiveLink().Joined {

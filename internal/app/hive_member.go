@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -66,6 +67,18 @@ func (m *hiveMember) asLink() *hiveLink {
 func hiveMemberPath() string      { return filepath.Join(backend.DataDir(), hiveMemberFile) }
 func hiveMemberTokenPath() string { return filepath.Join(backend.DataDir(), hiveMemberTokenFile) }
 
+// hiveLeftFile says the person left the hive: the app's start no longer puts
+// this Mac back in from what it had before (migrateHiveLink). Joining by hand
+// removes it.
+const hiveLeftFile = "hive-left"
+
+func hiveLeftPath() string { return filepath.Join(backend.DataDir(), hiveLeftFile) }
+
+func leftHive() bool {
+	_, err := os.Stat(hiveLeftPath())
+	return err == nil
+}
+
 // loadHiveMember reads the membership, or nil when this process is in no hive
 // (nothing saved, or what is saved cannot be used).
 func loadHiveMember() *hiveMember {
@@ -93,7 +106,11 @@ func (m *hiveMember) save() error {
 		return err
 	}
 	raw, _ := json.MarshalIndent(m, "", "  ")
-	return os.WriteFile(hiveMemberPath(), raw, 0o600)
+	if err := os.WriteFile(hiveMemberPath(), raw, 0o600); err != nil {
+		return err
+	}
+	_ = os.Remove(hiveLeftPath())
+	return nil
 }
 
 func clearHiveMember() {
@@ -359,6 +376,9 @@ func (a *App) LeaveHive() (HiveMembership, error) {
 	}
 	a.stopMemberLink()
 	clearHiveMember()
+	if err := os.WriteFile(hiveLeftPath(), []byte(time.Now().UTC().Format(time.RFC3339)+"\n"), 0o600); err != nil {
+		slog.Warn("hive: leaving not remembered", "error", err)
+	}
 	ms.cur.Store(nil)
 	ms.up.Store(false)
 	ms.err.Store("")

@@ -332,6 +332,15 @@ func TestTheOldNodeIsRetiredAndBecomesTheMembership(t *testing.T) {
 	if m := loadHiveMember(); m == nil || m.token != "tok" {
 		t.Fatal("the membership was not kept")
 	}
+
+	// Left by the person: the next start does not put the Mac back in.
+	if _, err := a.LeaveHive(); err != nil {
+		t.Fatal(err)
+	}
+	a.migrateHiveLink()
+	if a.isHiveMember() || loadHiveMember() != nil {
+		t.Fatal("the start put the Mac back in the hive it left")
+	}
 }
 
 // A hive the window was paired with, and nothing to join it by, asks for a code.
