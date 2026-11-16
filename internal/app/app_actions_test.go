@@ -238,3 +238,34 @@ func TestIsReadTool(t *testing.T) {
 		}
 	}
 }
+
+// The overview leaves alarms out; the board gets them from list_events.
+func TestTheDaysAlarmsAreOnTheBoard(t *testing.T) {
+	ev := func(id, title, at, source string) map[string]any {
+		return map[string]any{"id": id, "title": title, "startTime": at, "source": source}
+	}
+	overview := map[string]any{"horizon": "today", "items": []any{
+		ev("e1", "送三宝上学", "2026-11-16T08:00:00+08:00", "event"),
+		ev("e2", "辅导三宝作业", "2026-11-16T19:30:00+08:00", "event"),
+	}, "goals": []any{"g"}}
+	events := map[string]any{"items": []any{
+		ev("e1", "送三宝上学", "2026-11-16T08:00:00+08:00", "event"),
+		ev("a1", "接三宝", "2026-11-16T17:15:00+08:00", "alarm"),
+		ev("e2", "辅导三宝作业", "2026-11-16T19:30:00+08:00", "event"),
+		ev("a2", "上床睡觉", "2026-11-16T21:45:00+08:00", "alarm"),
+	}}
+	got := withTheDaysItems(overview, events).(map[string]any)
+	var titles []string
+	for _, it := range got["items"].([]any) {
+		titles = append(titles, it.(map[string]any)["title"].(string))
+	}
+	if strings.Join(titles, ",") != "送三宝上学,接三宝,辅导三宝作业,上床睡觉" {
+		t.Fatalf("items %v", titles)
+	}
+	if got["goals"] == nil || got["horizon"] != "today" {
+		t.Fatal("the rest of the overview was lost")
+	}
+	if len(overview["items"].([]any)) != 2 {
+		t.Fatal("the overview passed in was changed")
+	}
+}

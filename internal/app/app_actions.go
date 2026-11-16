@@ -105,9 +105,81 @@ func isReadTool(tool string) bool {
 }
 
 // NotedToday is noted's overview for today — events, tasks, the running
-// timer — as noted structures it (get_overview, horizon today).
+// timer — as noted structures it (get_overview, horizon today), with the
+// day's alarms added: the overview leaves them out, and an alarm such as
+// "接三宝 17:15" is as much of the day as an event.
 func (a *App) NotedToday() (any, error) {
-	return a.notedRead("get_overview", map[string]any{"horizon": "today"})
+	out, err := a.notedRead("get_overview", map[string]any{"horizon": "today"})
+	if err != nil {
+		return out, err
+	}
+	now := time.Now()
+	day := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	events, err := a.notedRead("list_events", map[string]any{
+		"from":          day.Format(time.RFC3339),
+		"to":            day.AddDate(0, 0, 1).Format(time.RFC3339),
+		"include_tasks": false,
+	})
+	if err != nil {
+		return out, nil
+	}
+	return withTheDaysItems(out, events), nil
+}
+
+// withTheDaysItems adds to the overview's items what list_events has for the
+// same day and the overview does not, in time order.
+func withTheDaysItems(overview, events any) any {
+	o, ok := overview.(map[string]any)
+	e, ok2 := events.(map[string]any)
+	if !ok || !ok2 {
+		return overview
+	}
+	items, _ := o["items"].([]any)
+	more, _ := e["items"].([]any)
+	key := func(v any) string {
+		m, _ := v.(map[string]any)
+		id, _ := m["id"].(string)
+		at, _ := m["startTime"].(string)
+		return id + "@" + at
+	}
+	seen := map[string]bool{}
+	for _, it := range items {
+		seen[key(it)] = true
+	}
+	added := false
+	for _, it := range more {
+		if k := key(it); !seen[k] {
+			seen[k] = true
+			items = append(items, it)
+			added = true
+		}
+	}
+	if !added {
+		return overview
+	}
+	start := func(v any) string {
+		m, _ := v.(map[string]any)
+		s, _ := m["startTime"].(string)
+		if s == "" {
+			s, _ = m["dueTime"].(string)
+		}
+		return s
+	}
+	sort.SliceStable(items, func(i, j int) bool {
+		a, b := start(items[i]), start(items[j])
+		ta, ea := time.Parse(time.RFC3339, a)
+		tb, eb := time.Parse(time.RFC3339, b)
+		if ea != nil || eb != nil {
+			return ea == nil && eb != nil
+		}
+		return ta.Before(tb)
+	})
+	copied := make(map[string]any, len(o))
+	for k, v := range o {
+		copied[k] = v
+	}
+	copied["items"] = items
+	return copied
 }
 
 // NotedTimeWeek is this week's logged time (Monday 00:00 local until now) by
