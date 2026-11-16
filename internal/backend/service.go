@@ -1593,7 +1593,7 @@ var eagerNotedTools = []string{
 	"mcp_noted_get_overview", "mcp_noted_list_events", "mcp_noted_list_tasks",
 	"mcp_noted_create_event", "mcp_noted_create_task",
 	"mcp_noted_complete_task", "mcp_noted_update_task", "mcp_noted_search_notes",
-	"mcp_noted_create_note", "mcp_noted_log_time",
+	"mcp_noted_create_note",
 }
 
 // eagerFinanceTools are finance's everyday tools: the portfolio, a quote,

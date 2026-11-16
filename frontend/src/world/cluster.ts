@@ -1668,7 +1668,7 @@ export const cluster: District<WorldData> = {
         // noted's board: what today still holds; lit while a noted tool runs.
         notedBusy = d.meter.members.some((m) => m.live && touchesNoted(m.doing))
           || d.hive.tasks.some((x) => x.state === "running" && touchesNoted(x.tool));
-        const left = d.agenda.filter((e) => e.kind !== "timer").length;
+        const left = d.agenda.length;
         show(boardScreen, translate("Today"), left ? translate("{count} left today", { count: left }) : translate("Nothing else today"),
           d.agenda.slice(0, 5).map(boardLine), notedBusy);
         boardLab.set(translate("Today"), left ? String(left) : "", notedBusy ? "work" : "idle");

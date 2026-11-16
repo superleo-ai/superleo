@@ -22,7 +22,7 @@ import { clisOf, sessionLine, type WorldData } from "./cluster";
 import { agendaWhen, type AgendaEntry } from "./agenda";
 import { cliName, haRoles, isCore, isHost, isStandby, kindLabel, unlinkedStatus } from "./hosts";
 
-const KIND: Record<AgendaEntry["kind"], string> = { event: "Event", reminder: "Reminder", todo: "To-do", timer: "Timing" };
+const KIND: Record<AgendaEntry["kind"], string> = { event: "Event", reminder: "Reminder", todo: "To-do" };
 
 const HOST_STATE: Record<string, string> = { live: "Live", lost: "Not answering", configured: "Only in the settings" };
 const SVC_STATE: Record<string, string> = { active: "Running", degraded: "Running, no standby ready", down: "Down" };
@@ -358,7 +358,7 @@ export default function Inspector({ picked, data, onClose, open, openDash, full,
     }
     case "records": {
       kind = "Today";
-      const left = data.agenda.filter((e) => e.kind !== "timer").length;
+      const left = data.agenda.length;
       if (left) rows.push(["Still to come", String(left)]);
       body = (
         <>

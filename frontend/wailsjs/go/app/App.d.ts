@@ -277,10 +277,6 @@ export function NotedRings():Promise<any>;
 
 export function NotedSchedule(arg1:string,arg2:number):Promise<any>;
 
-export function NotedTimeEntries():Promise<any>;
-
-export function NotedTimeWeek():Promise<any>;
-
 export function NotedToday():Promise<any>;
 
 export function NotedUpcoming(arg1:number):Promise<any>;

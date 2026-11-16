@@ -5,7 +5,7 @@ import { translate } from "../lib/i18n";
 
 export interface AgendaEntry {
   id: string;
-  kind: "event" | "reminder" | "todo" | "timer";
+  kind: "event" | "reminder" | "todo";
   title: string;
   /** ISO time it starts; none for a to-do with no time. */
   at?: string;
@@ -19,8 +19,8 @@ const pick = (o: Record<string, unknown>, ...keys: string[]) => {
   return "";
 };
 
-/** Today's still-open noted items in time order: the running timer first,
- *  timed things, then to-dos with no time. What is over is left out. */
+/** Today's still-open noted items in time order: timed things, then to-dos
+ *  with no time. What is over is left out. */
 export function agendaOf(raw: unknown, now = new Date()): AgendaEntry[] {
   if (!raw || typeof raw !== "object") return [];
   const r = raw as Record<string, unknown>;
@@ -44,18 +44,13 @@ export function agendaOf(raw: unknown, now = new Date()): AgendaEntry[] {
     });
   }
   timed.sort((a, b) => (a.allDay !== b.allDay ? (a.allDay ? -1 : 1) : +new Date(a.at ?? 0) - +new Date(b.at ?? 0)));
-  const t = (r.runningTimer ?? r.running_timer ?? r.timer) as Record<string, unknown> | undefined;
-  const timer: AgendaEntry[] = t && typeof t === "object" && pick(t, "title", "activity", "name")
-    ? [{ id: "timer", kind: "timer", title: pick(t, "title", "activity", "name"), at: pick(t, "startTime", "start", "startedAt") || undefined }]
-    : [];
-  return [...timer, ...timed, ...untimed];
+  return [...timed, ...untimed];
 }
 
 const clock = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
 
 /** When, for a row: "09:30", "All day", or nothing. */
 export function agendaWhen(e: AgendaEntry): string {
-  if (e.kind === "timer") return translate("Timing");
   if (e.allDay) return translate("All day");
   return e.at ? clock(e.at) : "";
 }
@@ -63,8 +58,8 @@ export function agendaWhen(e: AgendaEntry): string {
 /** One line of the board: "09:30 Stand-up", "To-do · Groceries". */
 export function boardLine(e: AgendaEntry): string {
   const title = e.title.replace(/\s+/g, " ").slice(0, 22);
-  const tag = e.kind === "timer" ? translate("Timing") : e.kind === "reminder" ? translate("Reminder") : e.kind === "todo" && !e.at ? translate("To-do") : "";
-  const when = e.kind === "timer" || !(e.at || e.allDay) ? "" : agendaWhen(e);
+  const tag = e.kind === "reminder" ? translate("Reminder") : e.kind === "todo" && !e.at ? translate("To-do") : "";
+  const when = !(e.at || e.allDay) ? "" : agendaWhen(e);
   const body = tag ? `${tag} · ${title}` : title;
   return when ? `${when} ${body}` : body;
 }

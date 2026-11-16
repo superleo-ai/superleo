@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -18,8 +17,7 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-// fakeNotedServer is a noted-like MCP server behind a bearer token. Its
-// time_summary echoes the arguments it got so the test can see the range.
+// fakeNotedServer is a noted-like MCP server behind a bearer token.
 func fakeNotedServer(t *testing.T, token string) string {
 	t.Helper()
 	s := mcp.NewServer(&mcp.Implementation{Name: "noted", Version: "test"}, nil)
@@ -33,14 +31,7 @@ func fakeNotedServer(t *testing.T, token string) string {
 		Horizon string `json:"horizon"`
 	}
 	mcp.AddTool(s, &mcp.Tool{Name: "get_overview"}, func(_ context.Context, _ *mcp.CallToolRequest, in overviewIn) (*mcp.CallToolResult, map[string]any, error) {
-		return nil, map[string]any{"horizon": in.Horizon, "events": []any{map[string]any{"kind": "event", "id": "e1"}}, "runningTimer": map[string]any{"title": "写代码"}}, nil
-	})
-	s.AddTool(&mcp.Tool{Name: "time_summary", InputSchema: map[string]any{"type": "object"}}, func(_ context.Context, req *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		// Text JSON only: the fallback path.
-		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: `{"args":` + string(req.Params.Arguments) + `,"rows":[{"label":"写代码","minutes":90}]}`}}}, nil
-	})
-	s.AddTool(&mcp.Tool{Name: "list_time_entries", InputSchema: map[string]any{"type": "object"}}, func(_ context.Context, req *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: `{"args":` + string(req.Params.Arguments) + `,"items":[{"id":"e1","title":"游泳","minutes":30,"day":"2026-10-14","timed":true}]}`}}}, nil
+		return nil, map[string]any{"horizon": in.Horizon, "events": []any{map[string]any{"kind": "event", "id": "e1"}}}, nil
 	})
 	s.AddTool(&mcp.Tool{Name: "list_holdings", InputSchema: map[string]any{"type": "object"}}, func(context.Context, *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: `{"holdings":[{"id":"h1","symbol":"VOO"}]}`}}}, nil
@@ -165,33 +156,8 @@ func TestNotedReadRPCs(t *testing.T) {
 	code, body = rpc(t, srv, "NotedToday", `[]`)
 	var today map[string]any
 	_ = json.Unmarshal(body, &today)
-	if code != http.StatusOK || today["horizon"] != "today" || today["runningTimer"] == nil {
+	if code != http.StatusOK || today["horizon"] != "today" {
 		t.Errorf("NotedToday: %d %s", code, body)
-	}
-
-	code, body = rpc(t, srv, "NotedTimeWeek", `[]`)
-	var week struct {
-		Args map[string]any `json:"args"`
-		Rows []any          `json:"rows"`
-	}
-	_ = json.Unmarshal(body, &week)
-	from, err := time.Parse(time.RFC3339, week.Args["from"].(string))
-	if code != http.StatusOK || err != nil || from.Weekday() != time.Monday || from.Hour() != 0 || week.Args["group_by"] != "title" || len(week.Rows) != 1 {
-		t.Errorf("NotedTimeWeek: %d %s", code, body)
-	}
-	if time.Since(from) > 7*24*time.Hour || from.After(time.Now()) {
-		t.Errorf("week starts %v", from)
-	}
-
-	code, body = rpc(t, srv, "NotedTimeEntries", `[]`)
-	var entries struct {
-		Args  map[string]any   `json:"args"`
-		Items []map[string]any `json:"items"`
-	}
-	_ = json.Unmarshal(body, &entries)
-	efrom, err := time.Parse(time.RFC3339, fmt.Sprint(entries.Args["from"]))
-	if code != http.StatusOK || err != nil || !efrom.Equal(from) || entries.Args["limit"] != float64(200) || len(entries.Items) != 1 || entries.Items[0]["timed"] != true {
-		t.Errorf("NotedTimeEntries: %d %s", code, body)
 	}
 
 	// Holdings are finance's, never noted's: without finance there are none.
@@ -211,20 +177,6 @@ func TestNotedReadRPCs(t *testing.T) {
 	code, _ = rpc(t, srv, "NotedToday", `[]`)
 	if code != http.StatusBadGateway {
 		t.Errorf("rejected token: status %d, want 502", code)
-	}
-}
-
-func TestWeekStart(t *testing.T) {
-	loc := time.FixedZone("CST", 8*3600)
-	for _, c := range []struct{ in, want string }{
-		{"2026-10-13T15:04:00+08:00", "2026-10-12T00:00:00+08:00"}, // Tuesday
-		{"2026-10-12T00:00:00+08:00", "2026-10-12T00:00:00+08:00"}, // Monday
-		{"2026-10-18T23:59:00+08:00", "2026-10-12T00:00:00+08:00"}, // Sunday
-	} {
-		in, _ := time.ParseInLocation(time.RFC3339, c.in, loc)
-		if got := weekStart(in).Format(time.RFC3339); got != c.want {
-			t.Errorf("weekStart(%s) = %s, want %s", c.in, got, c.want)
-		}
 	}
 }
 

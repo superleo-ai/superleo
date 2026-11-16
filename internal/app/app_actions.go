@@ -5,8 +5,8 @@ package app
 // A card / timeline block can carry an action that names one MCP tool call
 // ({"call":{"server":"noted","tool":"complete_task","args":{...}}}). The
 // client runs it through CallTool — no model turn — and the transcript gains a
-// one-line "已完成：…" for it. NotedToday, NotedTimeWeek and NotedHoldings
-// are the fixed reads behind the home tiles; they hand back noted's own
+// one-line "已完成：…" for it. NotedToday and NotedHoldings are the
+// fixed reads behind the home tiles; they hand back noted's own
 // structured result untouched.
 
 import (
@@ -104,8 +104,8 @@ func isReadTool(tool string) bool {
 	return tool == "time_summary" || tool == "weekly_review"
 }
 
-// NotedToday is noted's overview for today — events, tasks, the running
-// timer — as noted structures it (get_overview, horizon today), with the
+// NotedToday is noted's overview for today — events and tasks — as noted
+// structures it (get_overview, horizon today), with the
 // day's alarms added: the overview leaves them out, and an alarm such as
 // "接三宝 17:15" is as much of the day as an event.
 func (a *App) NotedToday() (any, error) {
@@ -182,24 +182,6 @@ func withTheDaysItems(overview, events any) any {
 	return copied
 }
 
-// NotedTimeWeek is this week's logged time (Monday 00:00 local until now) by
-// activity (time_summary, group_by title).
-func (a *App) NotedTimeWeek() (any, error) {
-	return a.notedRead("time_summary", map[string]any{
-		"from":     weekStart(time.Now()).Format(time.RFC3339),
-		"group_by": "title",
-	})
-}
-
-// NotedTimeEntries is this week's time entries one by one, newest first
-// (list_time_entries), so the app can show each under its day.
-func (a *App) NotedTimeEntries() (any, error) {
-	return a.notedRead("list_time_entries", map[string]any{
-		"from":  weekStart(time.Now()).Format(time.RFC3339),
-		"limit": 200,
-	})
-}
-
 // NotedHoldings is every investment with its position (list_holdings in
 // finance). The name stays: the phone calls it.
 func (a *App) NotedHoldings() (any, error) {
@@ -227,15 +209,8 @@ func (a *App) mcpRead(server, tool string, args map[string]any) (any, error) {
 	case res.Structured != nil:
 		return res.Structured, nil
 	}
-	// A plain sentence ("no timer is running") rather than data.
+	// A plain sentence rather than data.
 	return map[string]any{"text": res.Text}, nil
-}
-
-// weekStart is Monday 00:00 of t's week, in t's zone.
-func weekStart(t time.Time) time.Time {
-	d := (int(t.Weekday()) + 6) % 7 // Monday = 0
-	y, m, day := t.Date()
-	return time.Date(y, m, day-d, 0, 0, 0, 0, t.Location())
 }
 
 // chatAction is one button press that did something, kept beside the

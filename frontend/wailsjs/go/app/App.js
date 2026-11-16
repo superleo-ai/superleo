@@ -542,14 +542,6 @@ export function NotedSchedule(arg1, arg2) {
   return window['go']['app']['App']['NotedSchedule'](arg1, arg2);
 }
 
-export function NotedTimeEntries() {
-  return window['go']['app']['App']['NotedTimeEntries']();
-}
-
-export function NotedTimeWeek() {
-  return window['go']['app']['App']['NotedTimeWeek']();
-}
-
 export function NotedToday() {
   return window['go']['app']['App']['NotedToday']();
 }
