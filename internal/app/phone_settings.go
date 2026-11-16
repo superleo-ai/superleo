@@ -80,7 +80,7 @@ var phonePlainKeys = map[string]bool{
 	"memory_backend": true, "shared_memory_endpoint": true, "shared_memory_token": true, "shared_memory_namespace": true,
 	"embed_base_url": true, "embed_key": true, "embed_model": true,
 	"disable_tool_approval": true,
-	"phone_relay": true, "phone_urls": true,
+	"phone_relay":           true, "phone_urls": true,
 }
 
 func phoneSettingsOf(s backend.Settings) PhoneSettingsView {

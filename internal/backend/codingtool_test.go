@@ -137,6 +137,7 @@ func TestCodingToolRefusal(t *testing.T) {
 	for _, out := range []string{
 		"Failed to authenticate. API Error: 401",
 		"Error: not logged in. Please run `kimi login`",
+		"request failed with status 401",
 		`{"error":{"code":429,"message":"Resource has been exhausted","status":"RESOURCE_EXHAUSTED"}}`,
 	} {
 		if _, ok := CodingToolRefusal(out); !ok {
@@ -147,6 +148,8 @@ func TestCodingToolRefusal(t *testing.T) {
 		"ok",
 		"",
 		"Done. I added the test in auth_test.go.",
+		"cwd=/tmp/TestACustomTool4074551401/003",
+		"Fixed the off-by-one on line 401.",
 		strings.Repeat("The login flow calls authenticate() before it renders. ", 20),
 	} {
 		if r, ok := CodingToolRefusal(out); ok {

@@ -325,6 +325,10 @@ const codingRefusalRunes = 600
 // token — "Failed to authenticate", exit 0 — and a text tool has no verdict
 // field to say otherwise, so the words are all there is. The classification
 // is CondenseAgentFailure's; only a short output is judged.
+// httpAuthError is a 401 said as an error ("API Error: 401", "status 401"),
+// not any number with 401 in it: a path or a line number is an answer.
+var httpAuthError = regexp.MustCompile(`\b(error|status|http)\b[^\n]{0,24}\b401\b`)
+
 func CodingToolRefusal(output string) (string, bool) {
 	out := strings.TrimSpace(output)
 	if out == "" || len([]rune(out)) > codingRefusalRunes {
@@ -334,7 +338,7 @@ func CodingToolRefusal(output string) (string, bool) {
 	signIn := strings.Contains(low, "failed to authenticate") || strings.Contains(low, "not logged in") ||
 		strings.Contains(low, "not authenticated") || strings.Contains(low, "please log in") ||
 		strings.Contains(low, "please login") || strings.Contains(low, "invalid api key") ||
-		strings.Contains(low, "unauthorized") || strings.Contains(low, "401")
+		strings.Contains(low, "unauthorized") || httpAuthError.MatchString(low)
 	reason := CondenseAgentFailure(out)
 	switch {
 	case strings.HasPrefix(reason, "rate-limited"), strings.HasPrefix(reason, "this account is not eligible"):
