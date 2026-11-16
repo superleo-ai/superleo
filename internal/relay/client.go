@@ -21,13 +21,36 @@ import (
 // each phone that comes through it to Deliver, as a connection that still has
 // the phone's TLS handshake to run.
 type Client struct {
-	// Addr is the relay, host:port.
+	// Addr is the relay, host:port. Addrs are more ways to reach the same
+	// relays, tried in turn when one cannot be reached: one link is enough,
+	// relays pass phones on to each other.
 	Addr    string
+	Addrs   []string
 	Key     *ecdsa.PrivateKey
 	Deliver func(net.Conn)
 
 	id     string
 	linked atomic.Bool
+	at     atomic.Value // string: the address the link is up on
+}
+
+func (c *Client) addrs() []string {
+	var out []string
+	for _, a := range append([]string{c.Addr}, c.Addrs...) {
+		if a != "" {
+			out = append(out, a)
+		}
+	}
+	return out
+}
+
+// LinkedAt is the address the link is up on, "" when it is down.
+func (c *Client) LinkedAt() string {
+	if !c.linked.Load() {
+		return ""
+	}
+	v, _ := c.at.Load().(string)
+	return v
 }
 
 // Linked reports whether the link is up right now.
@@ -40,13 +63,24 @@ func (c *Client) Run(ctx context.Context) error {
 		return err
 	}
 	c.id = id
-	wait := time.Second
+	addrs := c.addrs()
+	if len(addrs) == 0 {
+		return errors.New("no relay address")
+	}
+	wait, i := time.Second, 0
 	for ctx.Err() == nil {
 		start := time.Now()
-		_ = c.once(ctx)
+		_ = c.once(ctx, addrs[i%len(addrs)])
 		c.linked.Store(false)
 		if time.Since(start) > time.Minute {
 			wait = time.Second
+		} else {
+			// Lost or never up: the next address first. Once round all
+			// of them, wait longer before the next round.
+			i++
+			if i%len(addrs) != 0 {
+				continue
+			}
 		}
 		select {
 		case <-ctx.Done():
@@ -57,13 +91,13 @@ func (c *Client) Run(ctx context.Context) error {
 	return ctx.Err()
 }
 
-func (c *Client) dial(ctx context.Context) (net.Conn, error) {
+func (c *Client) dial(ctx context.Context, addr string) (net.Conn, error) {
 	d := net.Dialer{Timeout: helloWait, KeepAlive: pingEvery}
-	return d.DialContext(ctx, "tcp", c.Addr)
+	return d.DialContext(ctx, "tcp", addr)
 }
 
-func (c *Client) once(ctx context.Context) error {
-	conn, err := c.dial(ctx)
+func (c *Client) once(ctx context.Context, addr string) error {
+	conn, err := c.dial(ctx, addr)
 	if err != nil {
 		return err
 	}
@@ -105,6 +139,7 @@ func (c *Client) once(ctx context.Context) error {
 	if line != "ok" {
 		return fmt.Errorf("relay said %q", line)
 	}
+	c.at.Store(addr)
 	c.linked.Store(true)
 
 	go func() {
@@ -129,14 +164,14 @@ func (c *Client) once(ctx context.Context) error {
 			return err
 		}
 		if sid, ok := strings.CutPrefix(line, "open "); ok {
-			go c.accept(ctx, sid)
+			go c.accept(ctx, addr, sid)
 		}
 	}
 }
 
 // accept dials back for one phone and hands the connection over.
-func (c *Client) accept(ctx context.Context, sid string) {
-	conn, err := c.dial(ctx)
+func (c *Client) accept(ctx context.Context, addr, sid string) {
+	conn, err := c.dial(ctx, addr)
 	if err != nil {
 		return
 	}

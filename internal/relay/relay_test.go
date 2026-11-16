@@ -138,7 +138,7 @@ func TestALinkNeedsTheKeyItsNameComesFrom(t *testing.T) {
 	c.id = victim // claims the other key's name
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
-	if err := c.once(ctx); err == nil {
+	if err := c.once(ctx, addr); err == nil {
 		t.Fatal("link with someone else's name was kept")
 	}
 	if s.Linked(victim) {
@@ -164,5 +164,77 @@ func TestIDsAreDNSLabels(t *testing.T) {
 	id, err := ID(&key.PublicKey)
 	if err != nil || !validID(id) || strings.ToLower(id) != id {
 		t.Fatalf("id %q err %v", id, err)
+	}
+}
+
+func TestEveryDomainNamesTheSameComputer(t *testing.T) {
+	s := &Server{Domains: []string{"gateway.superleo.app", "relay.superleo.app"}}
+	id := "abcdefghijklmnop"
+	for _, name := range []string{id + ".gateway.superleo.app", id + ".relay.superleo.app", strings.ToUpper(id) + ".Gateway.Superleo.App."} {
+		if got, ok := s.idFor(name); !ok || got != id {
+			t.Fatalf("%s: %q %v", name, got, ok)
+		}
+	}
+	for _, name := range []string{id + ".gateway.superleo.cn", "gateway.superleo.app", "x." + id + ".gateway.superleo.app"} {
+		if _, ok := s.idFor(name); ok {
+			t.Fatalf("%s was accepted", name)
+		}
+	}
+}
+
+// Two relays: the computer links to one, its first address being down; a
+// phone that comes in at the other still reaches it.
+func TestAPhoneAtThePeerRelayReachesTheComputer(t *testing.T) {
+	lnA, _ := net.Listen("tcp", "127.0.0.1:0")
+	lnB, _ := net.Listen("tcp", "127.0.0.1:0")
+	t.Cleanup(func() { lnA.Close(); lnB.Close() })
+	quiet := func(string, ...any) {}
+	a := &Server{Domains: []string{"gateway.test"}, Peers: []string{lnB.Addr().String()}, Logf: quiet}
+	b := &Server{Domains: []string{"gateway.test"}, Peers: []string{lnA.Addr().String()}, Logf: quiet}
+	go a.Serve(lnA)
+	go b.Serve(lnB)
+
+	key, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	cert := selfSigned(t, key)
+	ln := &chanListener{ch: make(chan net.Conn), done: make(chan struct{})}
+	defer ln.Close()
+	srv := &http.Server{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		io.WriteString(w, "hello via the peer")
+	})}
+	go srv.Serve(tls.NewListener(ln, &tls.Config{Certificates: []tls.Certificate{cert}}))
+	defer srv.Close()
+
+	dead, _ := net.Listen("tcp", "127.0.0.1:0")
+	deadAddr := dead.Addr().String()
+	dead.Close()
+	c := &Client{Addr: deadAddr, Addrs: []string{lnA.Addr().String()}, Key: key, Deliver: func(conn net.Conn) { ln.ch <- conn }}
+	go c.Run(t.Context())
+	id, _ := ID(&key.PublicKey)
+	waitLinked(t, a, id)
+	if b.Linked(id) || c.LinkedAt() != lnA.Addr().String() {
+		t.Fatalf("linked at %q", c.LinkedAt())
+	}
+
+	phone := &http.Client{Transport: &http.Transport{
+		DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
+			return (&net.Dialer{}).DialContext(ctx, "tcp", lnB.Addr().String())
+		},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}, Timeout: 5 * time.Second}
+	resp, err := phone.Get("https://" + id + ".gateway.test/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	if string(body) != "hello via the peer" {
+		t.Fatalf("got %q", body)
+	}
+
+	// A name linked nowhere is dropped, not bounced between the peers.
+	conn, err := tls.Dial("tcp", lnB.Addr().String(), &tls.Config{InsecureSkipVerify: true, ServerName: "abcdefghijklmnop.gateway.test"})
+	if err == nil {
+		conn.Close()
+		t.Fatal("an unknown name was put through")
 	}
 }

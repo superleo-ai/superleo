@@ -14,26 +14,27 @@ import (
 func TestPhoneURLsOrder(t *testing.T) {
 	got := phoneURLs([]string{"192.168.1.5", "10.0.0.2"}, 43561,
 		[]string{"https://desk.example.com", "https://frp.example.net:7443"},
-		"abcdefghijklmnop", "relay.superleo.app:43443")
+		"abcdefghijklmnop", "gateway.superleo.cn:443", "relay.example.com:43443")
 	want := []string{
 		"https://192.168.1.5:43561",
 		"https://10.0.0.2:43561",
 		"https://desk.example.com",
 		"https://frp.example.net:7443",
-		"https://abcdefghijklmnop.relay.superleo.app:43443",
+		"https://abcdefghijklmnop.gateway.superleo.cn",
+		"https://abcdefghijklmnop.relay.example.com:43443",
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("urls\n got %q\nwant %q", got, want)
 	}
 	// No relay: nothing after the own addresses.
-	if got := phoneURLs(nil, 43561, []string{"https://a.example.com"}, "abcdefghijklmnop", ""); !reflect.DeepEqual(got, []string{"https://a.example.com"}) {
+	if got := phoneURLs(nil, 43561, []string{"https://a.example.com"}, "abcdefghijklmnop"); !reflect.DeepEqual(got, []string{"https://a.example.com"}) {
 		t.Fatalf("relay off: %q", got)
 	}
 }
 
 func TestRelayAddrFromTheSetting(t *testing.T) {
 	t.Setenv("SUPERLEO_RELAY", "")
-	def := relay.DefaultHost + ":" + relay.DefaultPort
+	def := strings.Join(relay.Defaults, ",")
 	for setting, want := range map[string]string{
 		"":                       def,
 		"  ":                     def,
@@ -42,21 +43,24 @@ func TestRelayAddrFromTheSetting(t *testing.T) {
 		"relay.example.com":      "relay.example.com:" + relay.DefaultPort,
 		"relay.example.com:9443": "relay.example.com:9443",
 	} {
-		if got := relayAddr(setting); got != want {
-			t.Errorf("relayAddr(%q) = %q, want %q", setting, got, want)
+		if got := strings.Join(relayAddrs(setting), ","); got != want {
+			t.Errorf("relayAddrs(%q) = %q, want %q", setting, got, want)
 		}
+	}
+	if def != "gateway.superleo.cn:443,gateway.superleo.app:443" {
+		t.Fatalf("default relays %q", def)
 	}
 }
 
 func TestSUPERLEO_RELAYOverridesTheSetting(t *testing.T) {
 	t.Setenv("SUPERLEO_RELAY", "env.example.com:1234")
 	for _, setting := range []string{"", "off", "relay.example.com"} {
-		if got := relayAddr(setting); got != "env.example.com:1234" {
-			t.Errorf("relayAddr(%q) with the env set = %q", setting, got)
+		if got := strings.Join(relayAddrs(setting), ","); got != "env.example.com:1234" {
+			t.Errorf("relayAddrs(%q) with the env set = %q", setting, got)
 		}
 	}
 	t.Setenv("SUPERLEO_RELAY", "off")
-	if got := relayAddr("relay.example.com"); got != "" {
+	if got := relayAddrs("relay.example.com"); len(got) != 0 {
 		t.Errorf("SUPERLEO_RELAY=off left %q", got)
 	}
 }
@@ -71,7 +75,7 @@ func TestPhoneLinkSettingsChanged(t *testing.T) {
 		{backend.Settings{}, false},
 		{backend.Settings{QueenName: "bee"}, false},
 		{backend.Settings{PhoneRelay: "off"}, true},
-		{backend.Settings{PhoneRelay: relay.DefaultHost}, false}, // the same relay, said differently
+		{backend.Settings{PhoneRelay: relay.DefaultHost}, true}, // the old relay is no longer the default
 		{backend.Settings{PhoneURLs: []string{"https://a.example.com"}}, true},
 		{backend.Settings{PhoneURLs: []string{"not a url"}}, false}, // unusable, so nothing changes
 	}

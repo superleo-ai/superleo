@@ -21,11 +21,19 @@ import (
 	"strings"
 )
 
-// DefaultHost is the relay a computer uses when nothing else is set.
+// DefaultHost is the relay's first name, still answered for phones paired
+// with it.
 const DefaultHost = "relay.superleo.app"
 
-// DefaultPort is where the relay listens for phones and computers alike.
+// DefaultPort is where a relay listens for phones and computers alike, when
+// an address names no port.
 const DefaultPort = "43443"
+
+// Defaults are the relays a computer uses when nothing else is set: one
+// name in China and one outside, both on 443, and behind each the same
+// relays (on dell first, qc-jp when it is down), which pass phones on to
+// one another.
+var Defaults = []string{"gateway.superleo.cn:443", "gateway.superleo.app:443"}
 
 const magic = "SAIR1 "
 

@@ -78,6 +78,7 @@ export default function PhoneReachCard({ relay, urls, saved, onChange }: {
 
   const env = info?.relay_env || "";
   const address = info?.relay || "";
+  const addresses: string[] = info?.relays?.length ? info.relays : address ? [address] : [];
   const status = !address
     ? <State tone="off">{mode === "off" ? "Local network only" : "Not running"}</State>
     : !info?.running
@@ -89,7 +90,7 @@ export default function PhoneReachCard({ relay, urls, saved, onChange }: {
   return (
     <Group icon={GlobeIcon} title="Away from home" testId="phone-reach">
       <Row label="Relay address" testId="phone-relay-address"
-        sub={address ? <span className="st-note mono" style={{ overflowWrap: "anywhere" }} data-testid="phone-relay-url">{address}</span> : undefined}>
+        sub={addresses.length ? <span className="st-note mono" style={{ overflowWrap: "anywhere", whiteSpace: "pre-line" }} data-testid="phone-relay-url">{addresses.join("\n")}</span> : undefined}>
         {status}
         {address && (
           <IconBtn icon={copied ? CheckIcon : CopyIcon} label={copied ? "Copied" : "Copy"}

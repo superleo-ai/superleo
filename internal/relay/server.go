@@ -29,6 +29,9 @@ const (
 	linkIdle  = 90 * time.Second
 	pingEvery = 30 * time.Second
 
+	// peerWait is how long a peer has to say whether it holds a computer.
+	peerWait = 3 * time.Second
+
 	maxPendingPerLink = 16
 	maxPending        = 1024
 	maxLinks          = 10000
@@ -36,9 +39,17 @@ const (
 
 // Server is the relay. Domain is the name phones reach computers under:
 // a phone asking for <id>.<Domain> is put through to the computer <id>.
+// Domains are more names for the same computers, so one relay answers
+// under each of them (a new name beside an old one phones still have).
+//
+// Peers are the other relays, host:port, for running more than one: a phone
+// whose computer is linked to a peer and not here is passed on to it, so a
+// computer needs one link and a phone may come in at any of them.
 type Server struct {
-	Domain string
-	Logf   func(format string, args ...any)
+	Domain  string
+	Domains []string
+	Peers   []string
+	Logf    func(format string, args ...any)
 
 	mu      sync.Mutex
 	links   map[string]*link
@@ -134,6 +145,9 @@ func (s *Server) handle(c net.Conn) {
 	switch {
 	case len(f) == 2 && f[0] == "link" && validID(f[1]):
 		s.link(c, r, f[1])
+	case len(f) == 2 && f[0] == "phone" && validID(f[1]):
+		// A phone a peer passes on; its ClientHello follows the line.
+		s.hold(c, r, nil, f[1], true)
 	case len(f) == 3 && f[0] == "accept" && validID(f[1]):
 		s.accept(c, r, f[1], f[2])
 	default:
@@ -148,16 +162,28 @@ func (s *Server) phone(c net.Conn, r *bufio.Reader) {
 		c.Close()
 		return
 	}
-	id, ok := strings.CutSuffix(strings.ToLower(name), "."+s.Domain)
-	if !ok || !validID(id) {
+	id, ok := s.idFor(name)
+	if !ok {
 		c.Close()
 		return
 	}
+	s.hold(c, r, head, id, false)
+}
+
+// hold keeps a phone for its computer until the computer dials back. A phone
+// whose computer is not linked here goes to the peer that has it; one from a
+// peer goes no further, and that peer is told whether it is taken.
+func (s *Server) hold(c net.Conn, r *bufio.Reader, head []byte, id string, fromPeer bool) {
 	sid := randomHex(16)
 	w := &waiting{id: id, conn: c, r: r, head: head}
 
 	s.mu.Lock()
 	l := s.links[id]
+	if l == nil && !fromPeer && len(s.Peers) > 0 {
+		s.mu.Unlock()
+		s.toPeer(c, r, head, id)
+		return
+	}
 	if l == nil || l.held >= maxPendingPerLink || len(s.pending) >= maxPending {
 		s.mu.Unlock()
 		c.Close()
@@ -172,12 +198,66 @@ func (s *Server) phone(c net.Conn, r *bufio.Reader) {
 	})
 	s.mu.Unlock()
 
+	if fromPeer {
+		_ = c.SetWriteDeadline(time.Now().Add(helloWait))
+		if _, err := io.WriteString(c, magic+"held\n"); err != nil {
+			if s.take(sid, id) != nil {
+				c.Close()
+			}
+			return
+		}
+		_ = c.SetWriteDeadline(time.Time{})
+	}
 	if err := l.send("open " + sid); err != nil {
 		if s.take(sid, id) != nil {
 			c.Close()
 		}
 		l.conn.Close()
 	}
+}
+
+// idFor is the computer a phone asked for by name: <id>.<one of the domains>.
+func (s *Server) idFor(name string) (string, bool) {
+	name = strings.ToLower(strings.TrimSuffix(name, "."))
+	for _, d := range append([]string{s.Domain}, s.Domains...) {
+		d = strings.ToLower(strings.Trim(strings.TrimSpace(d), "."))
+		if d == "" {
+			continue
+		}
+		if id, ok := strings.CutSuffix(name, "."+d); ok && validID(id) {
+			return id, true
+		}
+	}
+	return "", false
+}
+
+// toPeer passes a phone to the first peer that holds its computer.
+func (s *Server) toPeer(c net.Conn, r *bufio.Reader, head []byte, id string) {
+	for _, addr := range s.Peers {
+		pc, err := net.DialTimeout("tcp", addr, peerWait)
+		if err != nil {
+			continue
+		}
+		_ = pc.SetDeadline(time.Now().Add(peerWait))
+		pr := bufio.NewReader(pc)
+		if _, err := io.WriteString(pc, magic+"phone "+id+"\n"); err != nil {
+			pc.Close()
+			continue
+		}
+		if line, err := readLine(pr); err != nil || line != magic+"held" {
+			pc.Close()
+			continue
+		}
+		_ = pc.SetDeadline(time.Time{})
+		if _, err := pc.Write(head); err != nil {
+			pc.Close()
+			break
+		}
+		_ = c.SetReadDeadline(time.Time{})
+		pipe(c, r, pc, pr)
+		return
+	}
+	c.Close()
 }
 
 // take removes a held phone, if it is still held and is held for id.
