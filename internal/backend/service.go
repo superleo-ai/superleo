@@ -1074,7 +1074,7 @@ The hive is the "hive" MCP server: a tool named hive_x below is superleo_hive_x 
 }
 
 // answerLanguageRule is how every queen answers, her own agent or not.
-const answerLanguageRule = `Answer in Chinese — short and natural; never English, Japanese or Korean.`
+const answerLanguageRule = `Answer in the language the person writes in (English, Chinese, Spanish, German or French; English when unclear), short and natural.`
 
 // investingRule is how a question about the markets or the person's money is
 // answered, by her own agent or an outside engine. Asked whether to buy after
