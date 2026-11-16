@@ -915,6 +915,19 @@ func (s *Service) OpenWorkspaceFileExternal(path string) error {
 	if !filepath.IsAbs(full) && root != "" {
 		full = filepath.Join(root, path)
 	}
+	full = filepath.Clean(full)
+	// The path can come from a link a model wrote: only a file inside the
+	// workspace opens, and never something `open` would run.
+	if root == "" {
+		return fmt.Errorf("workspace not configured")
+	}
+	if rel, err := filepath.Rel(filepath.Clean(root), full); err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return fmt.Errorf("%s is outside the workspace", filepath.Base(full))
+	}
+	switch strings.ToLower(filepath.Ext(full)) {
+	case ".app", ".command", ".tool", ".terminal", ".pkg", ".mpkg", ".sh", ".workflow", ".scpt":
+		return fmt.Errorf("%s is not opened from a link", filepath.Base(full))
+	}
 	if _, err := os.Stat(full); err != nil {
 		return err
 	}
