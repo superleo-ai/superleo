@@ -88,7 +88,7 @@ export default function DeskStatusBar({ status, loading, codingRuns }: { status:
       <i className="dk-yolo-dot"/>YOLO
     </button>
     <span className="dk-status-spacer"/>
-    {machines > 0 && <span className="dk-status-workers" data-testid="status-machines"><HexagonIcon size={12}/>{t("{count} machines online",{count:machines})}</span>}
+    {machines > 0 && <span className="dk-status-workers" data-testid="status-machines"><HexagonIcon size={12}/>{machines === 1 ? t("1 machine online") : t("{count} machines online",{count:machines})}</span>}
     {workers.list.length > 0 && <span className="dk-status-workers" title={workers.list.map((w) => `${w.name} · ${w.host}`).join("\n")}><HexagonIcon size={12}/>{t("{live}/{total} workers online",{live:workers.up,total:workers.list.length})}</span>}
     <span className="dk-status-runs"><BotIcon size={12}/>{runtime.active + codingRuns > 0 ? t("{count} running",{count:runtime.active+codingRuns}) : t("Idle")}</span>
     <span className="dk-status-tools" title={t("Connected MCP tools")}>MCP {status?.mcp ?? 0} · {t("{count} tools",{count:status?.mcpTools ?? 0})}</span>

@@ -97,7 +97,7 @@ export default function HiveMembershipCard({ onMakeCode }: { onMakeCode: () => v
       {m.joined ? (
         <>
           <Row lead={<Avatar><HexagonIcon size={16} strokeWidth={1.8} /></Avatar>} label={hive} testId="hive-joined"
-            sub={translate("{n} machines online", { n: machines })}>
+            sub={machines === 1 ? translate("1 machine online") : translate("{n} machines online", { n: machines })}>
             <State tone={m.connected ? "ok" : m.unreachable ? "bad" : "busy"}>
               {m.connected ? "Connected" : m.unreachable ? "Unreachable" : "Connecting…"}
             </State>
