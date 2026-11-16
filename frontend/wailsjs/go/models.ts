@@ -2312,6 +2312,7 @@ export namespace app {
 	    fp?: string;
 	    relayed: boolean;
 	    relay?: string;
+	    relays?: string[];
 	    running?: boolean;
 	    relay_env?: string;
 	
@@ -2325,6 +2326,7 @@ export namespace app {
 	        this.fp = source["fp"];
 	        this.relayed = source["relayed"];
 	        this.relay = source["relay"];
+	        this.relays = source["relays"];
 	        this.running = source["running"];
 	        this.relay_env = source["relay_env"];
 	    }
