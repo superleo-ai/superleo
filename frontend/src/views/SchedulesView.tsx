@@ -17,6 +17,7 @@ import { ScheduleRunList } from "../components/ScheduleRuns";
 import { notifyNow, notifyPermission, requestNotifyPermission } from "../lib/notify";
 import { useImeGuard } from "@/lib/ime";
 import { toast } from "../lib/toasts";
+import { useI18n } from "../lib/i18n";
 
 type Note = { kind: "ok" | "err"; text: string } | null;
 
@@ -46,6 +47,7 @@ export default function SchedulesView({
    *  thing and the two would drift. */
   onCount?: (n: number) => void;
 }) {
+  const { t } = useI18n();
   const ime = useImeGuard();
   const [list, setList] = useState<agent.ScheduledPrompt[]>([]);
   const [loading, setLoading] = useState(true);
@@ -199,7 +201,7 @@ export default function SchedulesView({
       {banners === "default" && (
         <button
           className="btn ghost sm"
-          title="Show a system notification when a scheduled run finishes while this tab is in the background"
+          title={t("Show a system notification when a scheduled run finishes while this tab is in the background")}
           onClick={async () => {
             const granted = await requestNotifyPermission();
             setBanners(granted);
@@ -217,7 +219,7 @@ export default function SchedulesView({
       {banners === "granted" && (
         <button
           className="btn ghost sm"
-          title="Post a test notification now"
+          title={t("Post a test notification now")}
           onClick={() => {
             const result = notifyNow("SuperLeo", "这是一条测试通知。定时任务跑完时就是这个样子。");
             setNote(
@@ -260,7 +262,7 @@ export default function SchedulesView({
     <>
         {composing && (
           <div className="card" style={{ marginBottom: 14 }}>
-            <div className="card-title">New routine</div>
+            <div className="card-title">{t("New routine")}</div>
             <div className="card-desc">
               Say what SuperLeo should do and when, in one sentence. It works out the timing itself
               and the answers land in a conversation you can open afterwards.
@@ -298,7 +300,7 @@ export default function SchedulesView({
                 )}
               </button>
               {prompt.trim() === "" && (
-                <span className="save-note">Say what should happen, and when.</span>
+                <span className="save-note">{t("Say what should happen, and when.")}</span>
               )}
             </div>
           </div>
@@ -335,7 +337,7 @@ export default function SchedulesView({
         {!loading && list.length === 0 && (
           <div className="inline-empty">
             <AlarmClockIcon className="ie-icon" size={22} strokeWidth={1.6} />
-            <div>No routines.</div>
+            <div>{t("No routines.")}</div>
             <div className="ie-hint">
               Something SuperLeo does on its own every morning, every weekday, or every few hours.
             </div>
@@ -382,7 +384,7 @@ export default function SchedulesView({
                         <button
                           className="btn ghost sm"
                           disabled={acting}
-                          title="Stop this run"
+                          title={t("Stop this run")}
                           onClick={() =>
                             act(s.id, "Stop", () => CancelScheduledRun(s.id), {
                               refusalIsFine: true,
@@ -395,7 +397,7 @@ export default function SchedulesView({
                         <button
                           className="btn ghost sm"
                           disabled={acting}
-                          title="Run this prompt immediately"
+                          title={t("Run this prompt immediately")}
                           onClick={() => act(s.id, "Run", () => RunScheduledPromptNow(s.id))}
                         >
                           {acting ? (
@@ -446,7 +448,7 @@ export default function SchedulesView({
                     </span>
                   </div>
                   <div className="rc-row">
-                    <span className="rc-key">Next run</span>
+                    <span className="rc-key">{t("Next run")}</span>
                     <span className="rc-val">
                       {!s.enabled
                         ? "— paused"
@@ -457,7 +459,7 @@ export default function SchedulesView({
                   </div>
                   {last && (
                     <div className="rc-row">
-                      <span className="rc-key">Last run</span>
+                      <span className="rc-key">{t("Last run")}</span>
                       <span className="rc-val">
                         {formatStamp(last)} · {fromNow(last)}
                       </span>
@@ -465,7 +467,7 @@ export default function SchedulesView({
                   )}
                   {title.trim() !== s.prompt.trim() && (
                     <div className="rc-row">
-                      <span className="rc-key">Prompt</span>
+                      <span className="rc-key">{t("Prompt")}</span>
                       <span className="rc-val">{s.prompt}</span>
                     </div>
                   )}

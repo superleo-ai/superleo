@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { copyText } from "../lib/format";
 import { PATHS } from "../lib/routes";
+import { useI18n } from "../lib/i18n";
 
 /** The History / New chat buttons, and which conversation this is. */
 export function HistoryBar({
@@ -22,6 +23,7 @@ export function HistoryBar({
   /** Opens what this conversation's runs sent the model and what tools did. */
   onTrace?: () => void;
 }) {
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
   return (
@@ -36,7 +38,7 @@ export function HistoryBar({
       <button
         className="btn ghost sm"
         onClick={onNew}
-        title="Start a new conversation"
+        title={t("Start a new conversation")}
       >
         <PlusIcon className="size-3.5" /> New chat
       </button>
@@ -44,7 +46,7 @@ export function HistoryBar({
         <button
           className="btn ghost sm"
           onClick={onTrace}
-          title="Every model call and tool call in this conversation"
+          title={t("Every model call and tool call in this conversation")}
         >
           <ScrollTextIcon className="size-3.5" /> Trace
         </button>

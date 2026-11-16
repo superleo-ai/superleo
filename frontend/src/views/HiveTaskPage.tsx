@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { translate } from "../lib/i18n";
 import { Link } from "react-router-dom";
 import { HiveTaskDetail } from "../../wailsjs/go/app/App";
 
@@ -140,7 +141,7 @@ export default function HiveTaskPage({
           </div>
 
           <div className="card">
-            <div className="card-title">Timeline</div>
+            <div className="card-title">{translate("Timeline")}</div>
             <ol className="hive-steps">
               {(t.events ?? []).map((e, i, all) => {
                 const last = i === all.length - 1;
@@ -165,7 +166,7 @@ export default function HiveTaskPage({
           </div>
 
           <div className="card">
-            <div className="card-title">Order</div>
+            <div className="card-title">{translate("Order")}</div>
             <pre className="hive-pre">{t.prompt}</pre>
           </div>
 

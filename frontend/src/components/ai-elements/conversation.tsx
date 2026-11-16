@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import type { ComponentProps } from "react";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { ChevronsDownIcon, ChevronsUpIcon } from "lucide-react";
+import { useI18n } from "../../lib/i18n";
 
 /**
  * The scroll box a conversation lives in, and the two ways out of it.
@@ -26,6 +27,7 @@ const ScrollBox = createContext<React.RefObject<HTMLDivElement | null> | null>(n
 export type ConversationProps = ComponentProps<"div">;
 
 export const Conversation = ({ className, children, ...props }: ConversationProps) => {
+  const { t } = useI18n();
   const ref = useRef<HTMLDivElement>(null);
   const [reach, setReach] = useState({ up: false, down: false });
 
@@ -72,8 +74,8 @@ export const Conversation = ({ className, children, ...props }: ConversationProp
                 type="button"
                 className="conv-jump-btn"
                 onClick={() => jump("top")}
-                title="Jump to the start of this conversation"
-                aria-label="Jump to the start of this conversation"
+                title={t("Jump to the start of this conversation")}
+                aria-label={t("Jump to the start of this conversation")}
               >
                 <ChevronsUpIcon className="size-4" />
               </button>
@@ -83,8 +85,8 @@ export const Conversation = ({ className, children, ...props }: ConversationProp
                 type="button"
                 className="conv-jump-btn"
                 onClick={() => jump("bottom")}
-                title="Jump to the latest message"
-                aria-label="Jump to the latest message"
+                title={t("Jump to the latest message")}
+                aria-label={t("Jump to the latest message")}
               >
                 <ChevronsDownIcon className="size-4" />
               </button>

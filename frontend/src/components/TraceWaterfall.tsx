@@ -1,5 +1,6 @@
 import { ReactNode, useMemo, useState } from "react";
 import type { TraceRow } from "./RunTracePanel";
+import { useI18n } from "../lib/i18n";
 
 /**
  * One run of a trace as bars on a shared time axis: a row per model call and
@@ -227,6 +228,7 @@ export default function TraceWaterfall({
    *  span under the one that started it. */
   flow?: boolean;
 }) {
+  const { t } = useI18n();
   const runs = useMemo(() => runsOf(rows, flow), [rows, flow]);
   // Empty follows the newest run, so a live panel moves on to the next turn
   // by itself; picking one pins it.
@@ -236,7 +238,7 @@ export default function TraceWaterfall({
   const spans = useMemo(() => (run ? spansOf(run, flow) : []), [run, flow]);
   const rootHost = spans.find((s) => s.kind === "run")?.host;
 
-  if (!run) return <div className="cr-trace-rows"><div className="cr-note">No model or tool calls in what is loaded.</div></div>;
+  if (!run) return <div className="cr-trace-rows"><div className="cr-note">{t("No model or tool calls in what is loaded.")}</div></div>;
 
   const t0 = Math.min(...spans.map((s) => s.start));
   const t1 = Math.max(...spans.map((s) => s.end));

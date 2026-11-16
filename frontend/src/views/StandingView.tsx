@@ -1,4 +1,5 @@
 import { useSearchParams } from "react-router-dom";
+import { useI18n } from "../lib/i18n";
 import { focusInWorld, useWorldSelection } from "../world/bus";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PauseIcon, PlayIcon, ZapIcon, CopyIcon, XIcon, PlusIcon } from "lucide-react";
@@ -102,7 +103,7 @@ const blank = (): Spec =>
     maxWakesPerDay: 0,
   }) as unknown as Spec;
 
-const t = (s?: string) => parseTime(s)?.getTime() ?? 0;
+const tms = (s?: string) => parseTime(s)?.getTime() ?? 0;
 const hhmm = (ms: number) => new Date(ms).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
 
 function until(ms: number) {
@@ -126,6 +127,7 @@ function until(ms: number) {
 /** `children` is what else runs on its own: the recurring routines, drawn by
  *  their own view and passed in by the app, which holds what they need. */
 export default function StandingView({ children }: { children?: React.ReactNode }) {
+  const { t } = useI18n();
   const [agents, setAgents] = useState<View[]>([]);
   const [wakes, setWakes] = useState<Mark[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
@@ -199,7 +201,7 @@ export default function StandingView({ children }: { children?: React.ReactNode 
 
       {agents.length === 0 && !error ? (
         <div className="wt-empty">
-          <div className="wt-empty-title">Nothing on watch yet</div>
+          <div className="wt-empty-title">{t("Nothing on watch yet")}</div>
           <p>
             Give an agent one thing to keep true — “every worker in the hive is live”, “main stays green”, “no empty files in
             the workspace”. It wakes on its own, looks, and tells you only when something needs you.
@@ -243,7 +245,7 @@ export default function StandingView({ children }: { children?: React.ReactNode 
 
       {children && (
         <section className="wt-routines">
-          <h2>Routines</h2>
+          <h2>{t("Routines")}</h2>
           {children}
         </section>
       )}
@@ -327,9 +329,10 @@ function Row({
   open: boolean;
   onOpen: () => void;
 }) {
+  const { t } = useI18n();
   const nowAt = pos(now, from);
-  const next = t(agent.nextDue);
-  const runStart = agent.running ? t(agent.running.started_at) : 0;
+  const next = tms(agent.nextDue);
+  const runStart = agent.running ? tms(agent.running.started_at) : 0;
   return (
     <button
       className={`wt-row wt-agent${open ? " open" : ""}${agent.waitingFor ? " needs" : ""}${agent.paused ? " paused" : ""}`}
@@ -352,14 +355,14 @@ function Row({
           <span
             key={i}
             className={`wt-mark k-${m.kind}${m.error ? " bad" : ""}`}
-            style={{ left: `${pos(t(m.started), from)}%` }}
-            title={`${hhmm(t(m.started))}, ${KIND_LABEL[m.kind] ?? m.kind}, ${m.toolCalls} tool calls${m.error ? `, failed: ${m.error}` : ""}`}
+            style={{ left: `${pos(tms(m.started), from)}%` }}
+            title={`${hhmm(tms(m.started))}, ${KIND_LABEL[m.kind] ?? m.kind}, ${m.toolCalls} tool calls${m.error ? `, failed: ${m.error}` : ""}`}
           />
         ))}
         {said
-          .filter((r) => t(r.at) >= from)
+          .filter((r) => tms(r.at) >= from)
           .map((r, i) => (
-            <span key={`r${i}`} className={`wt-said${r.kind === "error" ? " bad" : ""}`} style={{ left: `${pos(t(r.at), from)}%` }} title={`${hhmm(t(r.at))}: ${r.message}`} />
+            <span key={`r${i}`} className={`wt-said${r.kind === "error" ? " bad" : ""}`} style={{ left: `${pos(tms(r.at), from)}%` }} title={`${hhmm(tms(r.at))}: ${r.message}`} />
           ))}
         {agent.running && (
           <span className="wt-awake" style={{ left: `${pos(runStart, from)}%`, width: `${Math.max(0.6, nowAt - pos(runStart, from))}%` }} />
@@ -368,15 +371,15 @@ function Row({
       </div>
       <div className="wt-next">
         {agent.waitingFor ? (
-          <span className="wt-state needs">Waiting for you</span>
+          <span className="wt-state needs">{t("Waiting for you")}</span>
         ) : agent.running ? (
-          <span className="wt-state live">Awake</span>
+          <span className="wt-state live">{t("Awake")}</span>
         ) : agent.paused ? (
           <span className="wt-state">Paused</span>
         ) : next ? (
           <span className="wt-state">{until(next)}</span>
         ) : (
-          <span className="wt-state quiet">On an event</span>
+          <span className="wt-state quiet">{t("On an event")}</span>
         )}
       </div>
     </button>
@@ -400,6 +403,7 @@ function Detail({
   onDelete: () => void;
   onTell: (m: string) => void;
 }) {
+  const { t } = useI18n();
   const [msg, setMsg] = useState("");
   const ime = useImeGuard();
   const hook = agent.hookPath ? window.location.origin + agent.hookPath : "";
@@ -428,7 +432,7 @@ function Detail({
           />
         </div>
         {said.length === 0 ? (
-          <p className="wt-quiet">It has said nothing yet. It speaks only when something is worth your attention.</p>
+          <p className="wt-quiet">{t("It has said nothing yet. It speaks only when something is worth your attention.")}</p>
         ) : (
           <ol className="wt-log">
             {said.map((r, i) => (
@@ -464,17 +468,17 @@ function Detail({
           )}
           {agent.attention && (
             <>
-              <dt>Tells you</dt>
+              <dt>{t("Tells you")}</dt>
               <dd>{agent.attention}</dd>
             </>
           )}
           {(agent.never ?? []).length > 0 && (
             <>
-              <dt>Never</dt>
+              <dt>{t("Never")}</dt>
               <dd>{(agent.never ?? []).join(", ")}</dd>
             </>
           )}
-          <dt>Wakes</dt>
+          <dt>{t("Wakes")}</dt>
           <dd>{when.join("; ")}</dd>
         </dl>
         <div className="wt-tiers">
@@ -487,16 +491,16 @@ function Detail({
         </div>
         {agent.notes && (
           <details className="wt-notes">
-            <summary>Its notes for next time</summary>
+            <summary>{t("Its notes for next time")}</summary>
             <p>{agent.notes}</p>
           </details>
         )}
         {hook && (
           <div className="wt-hook">
-            <code title="POST any text here and it wakes with it">{hook}</code>
+            <code title={t("POST any text here and it wakes with it")}>{hook}</code>
             <button
               className="btn ghost sm"
-              aria-label="Copy webhook"
+              aria-label={t("Copy webhook")}
               onClick={() => navigator.clipboard.writeText(hook).then(() => toast.success("Webhook copied"))}
             >
               <CopyIcon size={12} />
@@ -563,6 +567,7 @@ function Chips({ value, onChange, placeholder, cls }: { value: string[]; onChang
 }
 
 function Editor({ spec, onClose, onSaved }: { spec: Spec; onClose: () => void; onSaved: (v: View) => void }) {
+  const { t } = useI18n();
   const [s, setS] = useState<Spec>(spec);
   const [servers, setServers] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
@@ -600,9 +605,9 @@ function Editor({ spec, onClose, onSaved }: { spec: Spec; onClose: () => void; o
         <header className="ed-head">
           <Glyph agent={preview} size={44} />
           <div className="ed-ident">
-            <input ref={first} className="ed-name" placeholder="Name it" value={s.name} onChange={(e) => set("name", e.target.value)} />
+            <input ref={first} className="ed-name" placeholder={t("Name it")} value={s.name} onChange={(e) => set("name", e.target.value)} />
             <div className="ed-look">
-              <input className="ed-glyph" placeholder="◎" maxLength={2} value={s.glyph ?? ""} onChange={(e) => set("glyph", e.target.value)} aria-label="Glyph" />
+              <input className="ed-glyph" placeholder="◎" maxLength={2} value={s.glyph ?? ""} onChange={(e) => set("glyph", e.target.value)} aria-label={t("Glyph")} />
               {Object.keys(HUES).map((h) => (
                 <button
                   key={h}
@@ -622,42 +627,42 @@ function Editor({ spec, onClose, onSaved }: { spec: Spec; onClose: () => void; o
         <div className="ed-body">
           <section className="ed-order">
             <label>
-              <span>Keeps this true</span>
-              <textarea rows={2} value={s.goal} onChange={(e) => set("goal", e.target.value)} placeholder="Every worker in the hive is live" />
+              <span>{t("Keeps this true")}</span>
+              <textarea rows={2} value={s.goal} onChange={(e) => set("goal", e.target.value)} placeholder={t("Every worker in the hive is live")} />
             </label>
             <label>
               <span>Watches</span>
               <input value={(s.watch ?? []).join(", ")} onChange={(e) => set("watch", split(e.target.value))} placeholder="hive members, running tasks" />
             </label>
             <label>
-              <span>Tells you when</span>
+              <span>{t("Tells you when")}</span>
               <input value={s.attention ?? ""} onChange={(e) => set("attention", e.target.value)} placeholder="a worker goes down, or a task is stuck" />
             </label>
             <label>
-              <span>Never</span>
+              <span>{t("Never")}</span>
               <input value={(s.never ?? []).join(", ")} onChange={(e) => set("never", split(e.target.value))} placeholder="dispatch work, retire a worker" />
             </label>
           </section>
 
           <section>
             <h3>Tools</h3>
-            <p className="ed-hint">Tool names; * matches anything, mcp:github means every tool of that connector.</p>
+            <p className="ed-hint">{t("Tool names; * matches anything, mcp:github means every tool of that connector.")}</p>
             <div className="ed-tiers">
               <div>
-                <span className="ed-tier auto">On its own</span>
+                <span className="ed-tier auto">{t("On its own")}</span>
                 <Chips cls="auto" value={s.auto ?? []} onChange={(v) => set("auto", v)} placeholder="fs_read*" />
               </div>
               <div>
-                <span className="ed-tier ask">Asks first</span>
+                <span className="ed-tier ask">{t("Asks first")}</span>
                 <Chips cls="ask" value={s.ask ?? []} onChange={(v) => set("ask", v)} placeholder="*bash*" />
               </div>
               <div>
-                <span className="ed-tier never">Never</span>
+                <span className="ed-tier never">{t("Never")}</span>
                 <Chips cls="never" value={s.forbid ?? []} onChange={(v) => set("forbid", v)} placeholder="*delete*" />
               </div>
             </div>
             <div className="ed-conn">
-              <span>Connectors</span>
+              <span>{t("Connectors")}</span>
               <label className="ed-check">
                 <input type="checkbox" checked={s.allConnectors} onChange={(e) => set("allConnectors", e.target.checked)} /> All
               </label>
@@ -672,12 +677,12 @@ function Editor({ spec, onClose, onSaved }: { spec: Spec; onClose: () => void; o
                     {n}
                   </label>
                 ))}
-              {!s.allConnectors && servers.length === 0 && <span className="ed-hint">No MCP servers yet.</span>}
+              {!s.allConnectors && servers.length === 0 && <span className="ed-hint">{t("No MCP servers yet.")}</span>}
             </div>
           </section>
 
           <section>
-            <h3>Wakes</h3>
+            <h3>{t("Wakes")}</h3>
             <div className="ed-grid">
               <span>Every</span>
               <div>
@@ -685,7 +690,7 @@ function Editor({ spec, onClose, onSaved }: { spec: Spec; onClose: () => void; o
                 <em>or on</em>
                 <input className="ed-cron" value={s.cron ?? ""} onChange={(e) => set("cron", e.target.value)} placeholder="0 9 * * 1-5" />
               </div>
-              <span>Glances every</span>
+              <span>{t("Glances every")}</span>
               <div>
                 <input type="number" min={0} value={s.scanEveryMinutes || ""} onChange={(e) => set("scanEveryMinutes", Number(e.target.value) || 0)} placeholder="—" /> min
                 <em>reading only, between wakes</em>
@@ -695,7 +700,7 @@ function Editor({ spec, onClose, onSaved }: { spec: Spec; onClose: () => void; o
                 <input type="number" min={0} value={s.maxWakesPerDay || ""} onChange={(e) => set("maxWakesPerDay", Number(e.target.value) || 0)} placeholder="24" /> wakes a day
               </div>
             </div>
-            <p className="ed-hint">Also wakes when it asks to, when you tell it something, and when its webhook is called.</p>
+            <p className="ed-hint">{t("Also wakes when it asks to, when you tell it something, and when its webhook is called.")}</p>
           </section>
 
           <section>

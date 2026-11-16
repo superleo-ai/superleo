@@ -309,7 +309,7 @@ export default function KnowledgeView() {
                 setSearchOpen(false);
               }
             }}
-            placeholder="Recall — e.g. what do I know about Alice?"
+            placeholder={t("Recall — e.g. what do I know about Alice?")}
             autoComplete="off"
           />
           <button className="btn" onClick={search} disabled={searching || query.trim() === ""}>
@@ -367,7 +367,7 @@ export default function KnowledgeView() {
           ref={frameRef}
           className="graph-frame"
           src={(graphSrc() ?? status?.url) ? graphLook((graphSrc() ?? status?.url)!, day) : undefined}
-          title="CortexDB knowledge graph"
+          title={t("CortexDB knowledge graph")}
         />
         <div className="graph-foot">
           <span className="graph-source">{status?.source}</span>

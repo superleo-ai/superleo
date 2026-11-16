@@ -3,6 +3,7 @@ import type { CanvasTheme } from "../canvas/theme";
 import type { CodingRun } from "../canvas/tiles";
 import { Hive, HiveTask, LinkedAgent, oneLine, short } from "../canvas/data";
 import { machine } from "../lib/machine";
+import { useI18n } from "../lib/i18n";
 
 const R = 34; // a cell's radius
 const SQ3 = Math.sqrt(3);
@@ -49,6 +50,7 @@ function doing(t: HiveTask): string {
  * that happened.
  */
 export default function LiveHive({ hive, runs, agents, now }: { hive: Hive; runs: CodingRun[]; agents: LinkedAgent[]; theme?: CanvasTheme; now: Date }) {
+  const { t } = useI18n();
   const workers = hive.members.filter((m) => !/queen/.test(m.name));
   const running = hive.tasks.filter((t) => t.state === "running");
   const busyBy = new Map<string, HiveTask>();
@@ -93,7 +95,7 @@ export default function LiveHive({ hive, runs, agents, now }: { hive: Hive; runs
   if (!hive.role) {
     return (
       <div className="dk-live-empty">
-        <b>No hive here</b>
+        <b>{t("No hive here")}</b>
         <span>This {machine} is on its own. Link it to your hive in Settings to watch the queen and her workers here.</span>
       </div>
     );
@@ -102,7 +104,7 @@ export default function LiveHive({ hive, runs, agents, now }: { hive: Hive; runs
   return (
     <div className="dk-hive">
       <div className="dk-hud">
-        <b>The hive</b>
+        <b>{t("The hive")}</b>
         <span>{workers.length + 1} members, {busyBy.size + machines.filter(machineBusy).length} working</span>
         <span className="dk-clock">{clock(now.toISOString())}</span>
       </div>

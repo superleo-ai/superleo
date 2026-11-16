@@ -173,7 +173,7 @@ export default function MCPView() {
         {!err && !loading && servers.length === 0 && (
           <div className="inline-empty">
             <PlugIcon className="ie-icon" size={22} strokeWidth={1.6} />
-            <div>No MCP servers.</div>
+            <div>{t("No MCP servers.")}</div>
             <div className="ie-hint">
               Add them in ~/.superleo/mcpServers.json (standard {"{"}"mcpServers": {"{...}"}{"}"} format) and restart.
             </div>

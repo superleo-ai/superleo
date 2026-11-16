@@ -12,6 +12,7 @@ import { useHiveMeter } from "../components/HiveMeter";
 import { useHosts, type Host, type HostAgent } from "../canvas/data";
 import PodConfirm, { type PodChange } from "../components/PodConfirm";
 import { cliName, isCore, isStandby, kindLabel } from "../world/hosts";
+import { useI18n } from "../lib/i18n";
 
 const short = (n: string) => n.replace(/^superleo-/, "");
 const fmtK = (n: number) => (n >= 1e6 ? (n / 1e6).toFixed(2) + "M" : n >= 1e3 ? (n / 1e3).toFixed(1) + "k" : String(Math.round(n)));
@@ -97,6 +98,7 @@ function ago(iso: string, now: number): string {
 }
 
 export default function HiveView() {
+  const { t } = useI18n();
   const sel = useWorldSelection();
   const navigate = useNavigate();
   // The swarm view folds away and stays the way it was left.
@@ -298,7 +300,7 @@ export default function HiveView() {
               <div className="card">
                 <div className="card-title">Workers</div>
                 {members.length === 0 ? (
-                  <div className="hive-dim">No workers yet. + Worker starts one; a SuperLeo set to join this queen joins by itself.</div>
+                  <div className="hive-dim">{t("No workers yet. + Worker starts one; a SuperLeo set to join this queen joins by itself.")}</div>
                 ) : (
                   <div className="hive-roster" role="table">
                     {members.map((m) => {
@@ -390,7 +392,7 @@ export default function HiveView() {
 
             {st.role === "" && (
               <div className="card">
-                <div className="card-title">Joining a hive</div>
+                <div className="card-title">{t("Joining a hive")}</div>
                 <div className="hive-dim">
                   This instance is complete by itself. To make it a queen, set <code>hive.role: "queen"</code>. To make
                   it a worker, set <code>hive.role: "worker"</code>, <code>hive.join_url</code> and{" "}

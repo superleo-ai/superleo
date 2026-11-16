@@ -4,12 +4,14 @@ import { machine } from "../lib/machine";
 import { useEffect, useState } from "react";
 import { HiveWorkers } from "../../wailsjs/go/app/App";
 import WorkerKitCard from "../world/WorkerKit";
+import { useI18n } from "../lib/i18n";
 
 type Worker = { name: string; kind: string; host: string; state: string; up: boolean };
 
 /** A SuperLeo on its own: no hive members, but the agents that work for it
  *  here (signed-in CLIs, named agents), the same count the status bar has. */
 function OwnWorkers({ runs, now }: { runs: CodingRun[]; now: Date }) {
+  const { t } = useI18n();
   const [list, setList] = useState<Worker[] | null>(null);
   useEffect(() => {
     let alive = true;
@@ -19,7 +21,7 @@ function OwnWorkers({ runs, now }: { runs: CodingRun[]; now: Date }) {
     return () => { alive = false; window.clearInterval(t); };
   }, []);
   if (list === null) return null;
-  if (!list.length) return <div className="dk-live-empty"><b>No workers yet</b><span>This {machine} is on its own.</span></div>;
+  if (!list.length) return <div className="dk-live-empty"><b>{t("No workers yet")}</b><span>This {machine} is on its own.</span></div>;
   const busy = (w: Worker) => runs.filter((r) => r.state === "running" && (r.agent === w.name || r.agent === w.name.split(".")[0])).length;
   return (
     <div className="dk-status">

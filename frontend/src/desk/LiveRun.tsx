@@ -3,6 +3,7 @@ import { CLIRunDetail } from "../../wailsjs/go/app/App";
 import { EventsOn } from "../../wailsjs/runtime";
 import { elapsed } from "../canvas/data";
 import { Response } from "@/components/ai-elements/response";
+import { useI18n } from "../lib/i18n";
 
 export interface RunEvent {
   seq: number;
@@ -64,10 +65,11 @@ const firstLine = (s = "") => s.split("\n").find((l) => l.trim())?.trim() ?? "";
 
 /** The run as a terminal reads: what was asked, then every step. */
 export default function LiveRun({ run, now }: { run: RunDetail | null; now: Date }) {
+  const { t } = useI18n();
   const end = useRef<HTMLDivElement>(null);
   const n = run?.events?.length ?? 0;
   useEffect(() => { end.current?.scrollIntoView({ block: "end" }); }, [n]);
-  if (!run) return <div className="dk-live-empty">Opening the run…</div>;
+  if (!run) return <div className="dk-live-empty">{t("Opening the run…")}</div>;
   const live = run.state === "running";
   return (
     <div className="dk-term">

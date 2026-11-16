@@ -6,6 +6,7 @@ import { useImeGuard } from "@/lib/ime";
 import { ChevronDown, ChevronRight, RotateCw, ScrollText, X } from "lucide-react";
 import TraceWaterfall from "./TraceWaterfall";
 import ToolStatsPanel from "./ToolStatsPanel";
+import { useI18n } from "../lib/i18n";
 
 /**
  * One task's or one conversation's JSONL trace, a row per event.
@@ -235,6 +236,7 @@ export default function RunTracePanel({
   live?: boolean;
   onClose: () => void;
 }) {
+  const { t } = useI18n();
   const [lines, setLines] = useState<string[]>([]);
   const [limit, setLimit] = useState(PAGES[0]);
   const [filter, setFilter] = useState("");
@@ -312,7 +314,7 @@ export default function RunTracePanel({
             ))}
           </span>
           {view !== "tools" && <span className="cr-tag">{rows.length} / {lines.length}</span>}
-          <button className="cr-trace-x" onClick={onClose} aria-label="Close trace">
+          <button className="cr-trace-x" onClick={onClose} aria-label={t("Close trace")}>
             <X size={14} />
           </button>
         </div>
@@ -422,6 +424,7 @@ export default function RunTracePanel({
 /** What one row holds beyond its line: a model call's request, a tool's
  *  arguments or result. */
 function TraceDetail({ id, row }: { id: string; row: TraceRow }) {
+  const { t } = useI18n();
   const [call, setCall] = useState<TraceRow | null>(null);
   const [failed, setFailed] = useState(false);
 
@@ -454,7 +457,7 @@ function TraceDetail({ id, row }: { id: string; row: TraceRow }) {
   if (row.event !== "model_end" || !row.span_id) {
     return <pre className="cr-trace-detail">{[row.event, row.lint ?? row.tool, row.verdict, detail(row)].filter(Boolean).join(" · ")}</pre>;
   }
-  if (failed) return <div className="cr-trace-detail cr-note">This call is no longer in the trace.</div>;
+  if (failed) return <div className="cr-trace-detail cr-note">{t("This call is no longer in the trace.")}</div>;
   if (!call) return <div className="cr-trace-detail cr-note">Loading…</div>;
 
   const req = call.request;

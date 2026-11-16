@@ -122,6 +122,7 @@ function Num({ v, fmt = fmtK }: { v: number; fmt?: (n: number) => string }) {
 }
 
 export default function StatsView() {
+  const { t } = useI18n();
   useI18n();
   const [dash, setDash] = useState<DashData | null>(null);
   const [graph, setGraph] = useState<{ url?: string; nodes?: number; edges?: number } | null>(null);
@@ -271,27 +272,27 @@ export default function StatsView() {
         </div>
         <div className="cr-side" data-pet-spot="charts" data-pet-label="the column of charts beside the reactor">
           <div className="cr-panel tight">
-            <div className="cr-panel-h"><Activity size={13} /><span className="cr-eyebrow">This process</span><span className={`cr-tag ${pulse.live ? "cyan" : ""}`}>{pulse.live ? "burning" : "idle"}</span></div>
+            <div className="cr-panel-h"><Activity size={13} /><span className="cr-eyebrow">{t("This process")}</span><span className={`cr-tag ${pulse.live ? "cyan" : ""}`}>{pulse.live ? "burning" : "idle"}</span></div>
             <Counters snap={pulse} />
           </div>
           <div className="cr-panel tight">
-            <div className="cr-panel-h"><Sparkles size={13} /><span className="cr-eyebrow">Cache</span></div>
+            <div className="cr-panel-h"><Sparkles size={13} /><span className="cr-eyebrow">{t("Cache")}</span></div>
             <CacheRing snap={pulse} />
           </div>
           <div className="cr-panel tight">
-            <div className="cr-panel-h"><Wrench size={13} /><span className="cr-eyebrow">Calls</span></div>
+            <div className="cr-panel-h"><Wrench size={13} /><span className="cr-eyebrow">{t("Calls")}</span></div>
             <CallRing snap={pulse} />
           </div>
           <div className="cr-panel tight">
-            <div className="cr-panel-h"><Activity size={13} /><span className="cr-eyebrow">Two minutes</span><span className="cr-tag cyan">tokens</span><span className="cr-tag lime">reasoning</span></div>
+            <div className="cr-panel-h"><Activity size={13} /><span className="cr-eyebrow">{t("Two minutes")}</span><span className="cr-tag cyan">tokens</span><span className="cr-tag lime">reasoning</span></div>
             <BurnArea snap={pulse} />
           </div>
           <div className="cr-panel tight">
-            <div className="cr-panel-h"><Gauge size={13} /><span className="cr-eyebrow">Tokens per turn</span><span className="cr-tag">{pulse.rounds}</span></div>
+            <div className="cr-panel-h"><Gauge size={13} /><span className="cr-eyebrow">{t("Tokens per turn")}</span><span className="cr-tag">{pulse.rounds}</span></div>
             <TurnColumns snap={pulse} />
           </div>
           <div className="cr-panel tight">
-            <div className="cr-panel-h"><Wrench size={13} /><span className="cr-eyebrow">Calls per tool</span><span className="cr-tag">{pulse.tools.length}</span></div>
+            <div className="cr-panel-h"><Wrench size={13} /><span className="cr-eyebrow">{t("Calls per tool")}</span><span className="cr-tag">{pulse.tools.length}</span></div>
             <ToolColumns snap={pulse} />
           </div>
           <div className="cr-panel tight">
@@ -303,7 +304,7 @@ export default function StatsView() {
 
       {/* ── the stream ── */}
       <section className="cr-panel rx-ticker" data-pet-spot="activity" data-pet-label="the live activity stream">
-        <div className="cr-panel-h"><ScrollText size={13} /><span className="cr-eyebrow">Activity</span><span className="cr-tag">newest first</span></div>
+        <div className="cr-panel-h"><ScrollText size={13} /><span className="cr-eyebrow">{t("Activity")}</span><span className="cr-tag">newest first</span></div>
         <PulseTicker snap={pulse} />
       </section>
 
@@ -351,7 +352,7 @@ export default function StatsView() {
                   <span><b>{t.segments}</b>/{t.maxSegments} seg</span>
                 </div>
                 <div className="cr-task-actions" onClick={(e) => e.stopPropagation()}>
-                  <span role="button" className="cr-btn tiny" onClick={() => setTraceId(t.taskId)} title="Every event this task emitted, one per row"><Terminal size={10} />{translate("Trace")}</span>
+                  <span role="button" className="cr-btn tiny" onClick={() => setTraceId(t.taskId)} title={translate("Every event this task emitted, one per row")}><Terminal size={10} />{translate("Trace")}</span>
                   {t.running && <span role="button" className="cr-btn tiny" onClick={() => LongRunStop(t.taskId)}><Square size={10} />Stop</span>}
                   {!t.running && !t.done && <span role="button" className="cr-btn tiny" onClick={() => LongRunStart(t.goal, segs, rounds, minutes, 0, t.taskId, unattended).then(loadList)}><RotateCcw size={10} />{translate("Resume")}</span>}
                 </div>
@@ -380,8 +381,8 @@ export default function StatsView() {
           {/* ── plan · context · cache ── */}
           <section className="cr-row3">
             <div className="cr-panel">
-              <div className="cr-panel-h"><ListChecks size={13} /><span className="cr-eyebrow">Plan · the hand-off</span><span className={`cr-tag ${d.planDone === st.plan.length && st.plan.length ? "lime" : "cyan"}`}>{d.planDone}/{st.plan.length}</span></div>
-              {st.plan.length === 0 ? <div className="cr-note">No plan yet. The agent writes one into its scratchpad; it appears here the moment it does.</div> : (
+              <div className="cr-panel-h"><ListChecks size={13} /><span className="cr-eyebrow">{t("Plan · the hand-off")}</span><span className={`cr-tag ${d.planDone === st.plan.length && st.plan.length ? "lime" : "cyan"}`}>{d.planDone}/{st.plan.length}</span></div>
+              {st.plan.length === 0 ? <div className="cr-note">{t("No plan yet. The agent writes one into its scratchpad; it appears here the moment it does.")}</div> : (
                 <ol className="cr-plan">
                   {st.plan.map((p, i) => (
                     <li key={i} className={p.done ? "done" : i === d.nextIdx ? "next" : ""} style={{ animationDelay: `${i * 30}ms` }} title={p.note || p.text}>
@@ -390,7 +391,7 @@ export default function StatsView() {
                 </ol>)}
             </div>
             <div className="cr-panel span2">
-              <div className="cr-panel-h"><Grid3x3 size={13} /><span className="cr-eyebrow">Turns · newest first</span><span className="cr-tag amber">{st.compactions} folds</span><span className={`cr-tag ${d.cacheRate >= 80 ? "lime" : d.cacheRate >= 40 ? "amber" : "rose"}`}>{d.cacheRate}% cached</span><span className="cr-tag">peak {fmtK(d.maxTok)}</span></div>
+              <div className="cr-panel-h"><Grid3x3 size={13} /><span className="cr-eyebrow">{t("Turns · newest first")}</span><span className="cr-tag amber">{st.compactions} folds</span><span className={`cr-tag ${d.cacheRate >= 80 ? "lime" : d.cacheRate >= 40 ? "amber" : "rose"}`}>{d.cacheRate}% cached</span><span className="cr-tag">peak {fmtK(d.maxTok)}</span></div>
               <div className="cr-table-wrap">
                 <table className="cr-table">
                   <thead><tr><th>turn</th><th>seg</th><th className="num">tokens</th><th className="num">cached</th><th className="num">%</th><th className="num">tools</th><th className="num">text</th><th className="num">ms</th><th>flags</th></tr></thead>
@@ -412,7 +413,7 @@ export default function StatsView() {
           {/* ── wall · activity · ledger ── */}
           <section className="cr-row3 wide">
             <div className="cr-panel">
-              <div className="cr-panel-h"><Grid3x3 size={13} /><span className="cr-eyebrow">The run wall · <b>{d.rs.length}</b> turns since the task began</span><span className={`cr-tag ${st.running ? "cyan" : ""}`}>{st.running ? "● live" : "settled"}</span></div>
+              <div className="cr-panel-h"><Grid3x3 size={13} /><span className="cr-eyebrow">{t("The run wall ·")} <b>{d.rs.length}</b> turns since the task began</span><span className={`cr-tag ${st.running ? "cyan" : ""}`}>{st.running ? "● live" : "settled"}</span></div>
               <div className="cr-wall">
                 {d.rs.map((r, i) => { const first = i === 0 || d.rs[i - 1].segment !== r.segment;
                   return <i key={i} className={`${r.failed || r.lint ? "x" : r.compacted ? "c" : ""}${first ? " seg" : ""}`} style={{ animationDelay: `${Math.min(i, 80) * 8}ms` }} title={`r${r.round} s${r.segment + 1}${r.lint ? " · " + r.lint : ""}`}>{r.failed || r.lint ? "×" : ""}</i>; })}
@@ -420,14 +421,14 @@ export default function StatsView() {
               <div className="cr-note small">one cell = one turn · ringed = first of a segment · × = rejected · pale = history folded</div>
             </div>
             <div className="cr-panel">
-              <div className="cr-panel-h"><ScrollText size={13} /><span className="cr-eyebrow">Activity</span><span className="cr-tag">{st.log.length}</span></div>
+              <div className="cr-panel-h"><ScrollText size={13} /><span className="cr-eyebrow">{t("Activity")}</span><span className="cr-tag">{st.log.length}</span></div>
               <div className="cr-log" ref={logRef}>
                 {st.log.length === 0 && <div className="cr-dim">waiting for the first turn…</div>}
                 {st.log.slice(-160).map((l, i) => <div key={i} className={`cr-line ${l.kind}`}><span className="at">{hms(l.at)}</span><span className="k">{l.kind}</span>{logText(l)}</div>)}
               </div>
             </div>
             <div className="cr-panel">
-              <div className="cr-panel-h"><AlertTriangle size={13} /><span className="cr-eyebrow">Deviation ledger</span><span className={`cr-tag ${d.rejected ? "rose" : "lime"}`}>{d.rs.length ? `clean ${pct(d.accepted, d.rs.length)}%` : "—"}</span></div>
+              <div className="cr-panel-h"><AlertTriangle size={13} /><span className="cr-eyebrow">{t("Deviation ledger")}</span><span className={`cr-tag ${d.rejected ? "rose" : "lime"}`}>{d.rs.length ? `clean ${pct(d.accepted, d.rs.length)}%` : "—"}</span></div>
               <div className={`cr-big ${d.rejected ? "rose" : "lime"}`}><Num v={d.rejected} fmt={(n) => String(Math.round(n))} /></div>
               <div className="cr-eyebrow">caught by lints</div>
               {d.lintRows.map(([k, v]) => <div key={k} className="cr-ledger rose"><span className="k">{k}</span><span className="bar"><i style={{ width: `${pct(v, Math.max(1, d.rejected))}%` }} /></span><span className="n">{v}</span></div>)}

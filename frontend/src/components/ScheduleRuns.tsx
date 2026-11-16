@@ -9,6 +9,7 @@ import {
   formatStamp,
   parseTime,
 } from "../lib/format";
+import { useI18n } from "../lib/i18n";
 
 /**
  * Reporting a scheduled run that finished while the app was open.
@@ -74,6 +75,7 @@ function RunModal({
   onClose: () => void;
   onOpenConversation?: (session: string) => void;
 }) {
+  const { t } = useI18n();
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -117,7 +119,7 @@ function RunModal({
             <Response>{run.answer}</Response>
           ) : (
             run.error === "" && (
-              <div className="trace-empty">The run produced no answer.</div>
+              <div className="trace-empty">{t("The run produced no answer.")}</div>
             )
           )}
         </div>

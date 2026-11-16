@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ZapIcon } from "lucide-react";
 import { StartYoloMode, StopYoloMode, ToolApprovalInfo } from "../../wailsjs/go/app/App";
 import { EventsOn } from "../../wailsjs/runtime";
+import { useI18n } from "../lib/i18n";
 
 /**
  * Whether approvals are switched off right now, and the switch itself.
@@ -18,6 +19,7 @@ import { EventsOn } from "../../wailsjs/runtime";
  * it is the only lit thing up there) and quiet when it is not.
  */
 export default function YoloToggle() {
+  const { t } = useI18n();
   const [gated, setGated] = useState(false);
   const [on, setOn] = useState(false);
 
@@ -59,7 +61,7 @@ export default function YoloToggle() {
           ? "Approving everything — click to go back to asking"
           : "Asking before shell commands — click to approve everything"
       }
-      aria-label="YOLO mode"
+      aria-label={t("YOLO mode")}
       aria-pressed={on}
     >
       <ZapIcon className="size-4" />

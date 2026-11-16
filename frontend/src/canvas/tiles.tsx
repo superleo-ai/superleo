@@ -6,6 +6,7 @@ import type { ChatMessage } from "../lib/types";
 import { Bee, Hive, LinkedAgent, elapsed, isToday, oneLine, short } from "./data";
 import { withoutCallNotes } from "../lib/format";
 import { queenNamed, useQueenName } from "../lib/queenName";
+import { useI18n } from "../lib/i18n";
 
 /** A tick every second, for clocks that count up. */
 function useNow(ms = 1000) {
@@ -30,6 +31,7 @@ export function Cell({ label, state, size = 28, onClick }: { label: string; stat
 /** What needs a person, on top of everything. One question at a time, said in
  *  full; the rest wait under it. When nothing does, a single line. */
 export function NeedsYou({ pending, resolve, bees }: { pending: ToolApproval[]; resolve: (id: string, allow: boolean) => void; bees: Bee[] }) {
+  const { t } = useI18n();
   const now = useNow();
   const a = pending[0];
   if (!a) {
@@ -37,7 +39,7 @@ export function NeedsYou({ pending, resolve, bees }: { pending: ToolApproval[]; 
     return (
       <div className="cv-glass cv-clear" data-testid="nothing-needs-you">
         <i />
-        <b>Nothing needs you</b>
+        <b>{t("Nothing needs you")}</b>
         {out && <span>{out.name} is out</span>}
       </div>
     );
@@ -104,7 +106,8 @@ export function InFlight({ hive, open }: { hive: Hive; open: (worker: string) =>
 }
 
 export function Machines({ hive, open, agents = [] }: { hive: Hive; open: (name: string) => void; agents?: LinkedAgent[] }) {
-  if (hive.loaded && !hive.role) return <p className="cv-quiet">This SuperLeo is not in a hive.</p>;
+  const { t } = useI18n();
+  if (hive.loaded && !hive.role) return <p className="cv-quiet">{t("This SuperLeo is not in a hive.")}</p>;
   const busy = new Set(hive.tasks.filter((t) => t.state === "running").map((t) => t.worker));
   const recent = new Set(hive.tasks.slice(0, 30).filter((t) => t.state === "done").map((t) => t.worker));
   const center = hive.role === "queen" ? hive.name : "queen";
@@ -149,7 +152,8 @@ export function Today({ hive, pulse }: { hive: Hive; pulse: Snap }) {
 }
 
 export function Bees({ bees, open }: { bees: Bee[]; open: () => void }) {
-  if (bees.length === 0) return <p className="cv-quiet">No bees yet. Ask for one below: “watch the hive and tell me when a worker drops”.</p>;
+  const { t } = useI18n();
+  if (bees.length === 0) return <p className="cv-quiet">{t("No bees yet. Ask for one below: “watch the hive and tell me when a worker drops”.")}</p>;
   return (
     <div className="cv-rows">
       {bees.map((b) => (
@@ -167,6 +171,7 @@ export function Bees({ bees, open }: { bees: Bee[]; open: () => void }) {
 
 /** The last order given here and what the queen said. */
 export function Queen({ messages }: { messages: ChatMessage[] }) {
+  const { t } = useI18n();
   const shown = messages.filter((m) => m.kind !== "context");
   const you = [...shown].reverse().find((m) => m.role === "user");
   const her = shown.length && shown[shown.length - 1].role === "assistant" ? shown[shown.length - 1] : undefined;
@@ -175,14 +180,14 @@ export function Queen({ messages }: { messages: ChatMessage[] }) {
   if (!you) return <p className="cv-quiet">Orders you give below go to {queenNamed(q) ? q.name : "the queen"}; her answer shows here.</p>;
   return (
     <div className="cv-queen">
-      <div className="cv-queen-you"><b>You</b>{withoutCallNotes(you.content)}</div>
+      <div className="cv-queen-you"><b>{t("You")}</b>{withoutCallNotes(you.content)}</div>
       {her && (
         <div className="cv-queen-her">
           <b>{name}</b>
           {her.content ? <Response>{withoutCallNotes(her.content)}</Response> : <span className="cv-quiet">…</span>}
         </div>
       )}
-      {!her && <div className="cv-queen-her"><b>{name}</b><span className="cv-quiet">Working on it…</span></div>}
+      {!her && <div className="cv-queen-her"><b>{name}</b><span className="cv-quiet">{t("Working on it…")}</span></div>}
     </div>
   );
 }
@@ -215,8 +220,9 @@ function whenLabel(iso: string | undefined, now: number): string {
  *  bees alike, soonest first: one list, because they are one thing to whoever
  *  is waiting on them. */
 export function Later({ items, open }: { items: UpcomingItem[]; open: (i: UpcomingItem) => void }) {
+  const { t } = useI18n();
   const now = useNow(30000);
-  if (items.length === 0) return <p className="cv-quiet">Nothing is scheduled. Ask below: “every weekday at 8, check the hive and tell me if anything is down”.</p>;
+  if (items.length === 0) return <p className="cv-quiet">{t("Nothing is scheduled. Ask below: “every weekday at 8, check the hive and tell me if anything is down”.")}</p>;
   return (
     <div className="cv-rows">
       {items.slice(0, 6).map((i) => (
@@ -249,8 +255,9 @@ export interface CodingRun {
 /** The coding agents' sessions — Claude Code, Codex — here and on linked
  *  machines, newest first. */
 export function Coding({ runs, open }: { runs: CodingRun[]; open: () => void }) {
+  const { t } = useI18n();
   const now = useNow();
-  if (runs.length === 0) return <p className="cv-quiet">No coding sessions yet. Write @claude or @claude.mac below to start one.</p>;
+  if (runs.length === 0) return <p className="cv-quiet">{t("No coding sessions yet. Write @claude or @claude.mac below to start one.")}</p>;
   return (
     <div className="cv-rows">
       {runs.slice(0, 5).map((r) => (

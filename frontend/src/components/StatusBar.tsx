@@ -4,6 +4,7 @@ import { Accent, AppStatus, Theme } from "../lib/types";
 import ThemePicker from "./ThemePicker";
 import NotificationCenter from "./NotificationCenter";
 import YoloToggle from "./YoloToggle";
+import { useI18n } from "../lib/i18n";
 
 // Only the served build has a session to end; the desktop window has no door.
 const served = Boolean((window as unknown as Record<string, unknown>).superleoServed);
@@ -35,6 +36,7 @@ export default function StatusBar({
   /** Where a notification that names a conversation goes when it is clicked. */
   onOpenConversation?: (session: string) => void;
 }) {
+  const { t } = useI18n();
   let dotClass = "unknown";
   let label = "Connecting…";
   if (!loading && status) {
@@ -55,7 +57,7 @@ export default function StatusBar({
           className="nav-open panel-toggle"
           onClick={onOpenNav}
           title="Menu"
-          aria-label="Open navigation"
+          aria-label={t("Open navigation")}
         >
           <MenuIcon className="size-4" />
         </button>
@@ -93,7 +95,7 @@ export default function StatusBar({
             className={`pill-btn icon-only pet-btn${petOpen ? " on" : ""}`}
             onClick={onTogglePet}
             title={petOpen ? "Send the avatar away" : "Let the avatar out into the window"}
-            aria-label="Avatar"
+            aria-label={t("Avatar")}
             aria-pressed={petOpen}
           >
             <PawPrintIcon className="size-4" />

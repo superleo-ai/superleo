@@ -4,6 +4,7 @@ import { ForgetLife, Life } from "../../wailsjs/go/app/App";
 import { fromNow, parseTime } from "../lib/format";
 import { toast } from "../lib/toasts";
 import "./life.css";
+import { useI18n } from "../lib/i18n";
 
 type Row = Record<string, unknown>;
 
@@ -23,6 +24,7 @@ function about(info: Row): string {
  * by talking to it.
  */
 export default function AboutYou({ onClose }: { onClose: () => void }) {
+  const { t } = useI18n();
   const [notes, setNotes] = useState<Row[]>([]);
   const [people, setPeople] = useState<[string, Row][]>([]);
   const [sure, setSure] = useState("");
@@ -55,12 +57,12 @@ export default function AboutYou({ onClose }: { onClose: () => void }) {
   return (
     <aside className="ay" onMouseLeave={() => setSure("")}>
       <header className="ay-h">
-        <b>What I know about you</b>
+        <b>{t("What I know about you")}</b>
         <button className="btn ghost sm icon-only" onClick={onClose} aria-label="Close"><XIcon size={15} /></button>
       </header>
       <div className="ay-body">
         <h4>People <span>{people.length}</span></h4>
-        {people.length === 0 && <p className="ay-none">Nobody yet.</p>}
+        {people.length === 0 && <p className="ay-none">{t("Nobody yet.")}</p>}
         {people.map(([name, info]) => (
           <div key={name} className="ay-row">
             <div><b>{name}</b><small>{about(info)}</small></div>
@@ -68,7 +70,7 @@ export default function AboutYou({ onClose }: { onClose: () => void }) {
           </div>
         ))}
         <h4>Notes <span>{notes.length}</span></h4>
-        {notes.length === 0 && <p className="ay-none">Nothing written down yet.</p>}
+        {notes.length === 0 && <p className="ay-none">{t("Nothing written down yet.")}</p>}
         {notes.map((n) => {
           const id = text(n.id), title = text(n.title) || text(n.body).slice(0, 40);
           const when = parseTime(text(n.occurred_at));

@@ -1,5 +1,6 @@
 import React, { useCallback, useRef, useState } from "react";
 import { ImportCSV } from "../../wailsjs/go/app/App";
+import { useI18n } from "../lib/i18n";
 
 /**
  * Feeding the brain, on the page that shows it.
@@ -23,6 +24,7 @@ export type ImportPanelProps = {
 };
 
 export default function ImportPanel({ open: openProp, onOpenChange }: ImportPanelProps = {}) {
+  const { t } = useI18n();
   const [openState, setOpenState] = useState(false);
   const controlled = openProp !== undefined;
   const open = controlled ? openProp : openState;
@@ -105,7 +107,7 @@ export default function ImportPanel({ open: openProp, onOpenChange }: ImportPane
   return (
     <div className="import-panel">
       <div className="import-head">
-        <span className="card-title">Import into this graph</span>
+        <span className="card-title">{t("Import into this graph")}</span>
         <button className="link-btn" onClick={() => setOpen(false)}>
           Close
         </button>
@@ -147,7 +149,7 @@ export default function ImportPanel({ open: openProp, onOpenChange }: ImportPane
           className="input"
           value={hint}
           onChange={(e) => setHint(e.target.value)}
-          placeholder="Optional: what this dataset is — e.g. customer contacts, sales orders"
+          placeholder={t("Optional: what this dataset is — e.g. customer contacts, sales orders")}
           autoComplete="off"
         />
         <button className="btn" onClick={run} disabled={running || path.trim() === ""}>

@@ -1,6 +1,7 @@
 import React from "react";
 import { ActivityIcon, ScrollTextIcon } from "lucide-react";
 import { Counters, PulseTicker, usePulse } from "./Reactor";
+import { useI18n } from "../lib/i18n";
 
 /**
  * The Stats page's activity stream, beside the conversation.
@@ -16,18 +17,19 @@ import { Counters, PulseTicker, usePulse } from "./Reactor";
  * The header says so.
  */
 export function ActivityBody() {
+  const { t } = useI18n();
   const pulse = usePulse();
   return (
     <div className="cr-scope side-activity">
       <div className="side-activity-h">
         <ActivityIcon className="size-3.5" />
-        <span className="cr-eyebrow">This process</span>
+        <span className="cr-eyebrow">{t("This process")}</span>
         <span className={`cr-tag ${pulse.live ? "cyan" : ""}`}>{pulse.live ? "burning" : "idle"}</span>
       </div>
       <Counters snap={pulse} />
       <div className="side-activity-h">
         <ScrollTextIcon className="size-3.5" />
-        <span className="cr-eyebrow">Activity</span>
+        <span className="cr-eyebrow">{t("Activity")}</span>
         <span className="cr-tag">newest first</span>
       </div>
       <PulseTicker snap={pulse} max={200} />

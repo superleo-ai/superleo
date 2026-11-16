@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Doctor } from "../../wailsjs/go/app/App";
 import { backend } from "../../wailsjs/go/models";
 import { HeartPulse, RotateCw, ChevronDown, ChevronRight } from "lucide-react";
+import { useI18n } from "../lib/i18n";
 
 /**
  * Is this install set up correctly?
@@ -15,6 +16,7 @@ import { HeartPulse, RotateCw, ChevronDown, ChevronRight } from "lucide-react";
  * collapse to a count nobody needs to read.
  */
 export default function HealthCard() {
+  const { t } = useI18n();
   const [rep, setRep] = useState<backend.DoctorReport | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
@@ -45,7 +47,7 @@ export default function HealthCard() {
     <div className="cr-panel cr-health">
       <div className="cr-panel-h">
         <HeartPulse size={13} />
-        <span className="cr-eyebrow">Health · the install, not the run</span>
+        <span className="cr-eyebrow">{t("Health · the install, not the run")}</span>
         <span className={`cr-tag ${tone}`}>
           {rep ? (rep.healthy ? (warns.length ? "degraded" : "healthy") : "broken") : busy ? "checking…" : "—"}
         </span>
@@ -63,7 +65,7 @@ export default function HealthCard() {
             <b>{rep?.fail ?? 0}</b> fail
           </span>
         </div>
-        <button className="cr-btn tiny" onClick={run} disabled={busy} title="Run the checks again">
+        <button className="cr-btn tiny" onClick={run} disabled={busy} title={t("Run the checks again")}>
           <RotateCw size={10} />
           {busy ? "Checking…" : "Check"}
         </button>

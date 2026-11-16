@@ -49,6 +49,7 @@ import AgentProgress from "../components/AgentProgress";
 import { ChatTurnBrowser, newestBrowserTurn } from "../components/BrowserCard";
 import { isBrowserStep } from "../lib/browser";
 import { machine } from "../lib/machine";
+import { useI18n } from "../lib/i18n";
 
 /**
  * What a finished answer cost, for the line under its name: "34s · 6 tools".
@@ -82,6 +83,7 @@ export default function ChatView({
   openSession?: string;
   onSessionOpened?: () => void;
 }) {
+  const { t } = useI18n();
   const chat = useChat();
   const [traceOpen, setTraceOpen] = useState(false);
   const attach = useAttachments();
@@ -240,8 +242,8 @@ export default function ChatView({
               {messages.length === 0 ? (
                 <ConversationEmptyState
                   icon={<MessageSquareIcon className="size-10" />}
-                  title="Start a conversation"
-                  description="Chat with SuperLeo. It can use tools, search memory and the web, and stream its reasoning live."
+                  title={t("Start a conversation")}
+                  description={t("Chat with SuperLeo. It can use tools, search memory and the web, and stream its reasoning live.")}
                 >
                   {notReady && (
                     <div className="empty-hint">
@@ -316,7 +318,7 @@ export default function ChatView({
                                   </div>
                                 )}
                                 {m.stopping && !m.cancelled && (
-                                  <div className="msg-stopped">Stopping…</div>
+                                  <div className="msg-stopped">{t("Stopping…")}</div>
                                 )}
                                 {m.error && !m.cancelled && (
                                   <div className="msg-error">⚠ {m.error}</div>
@@ -450,7 +452,7 @@ export default function ChatView({
                     disabled={attach.importing}
                     data-pet-spot="attach"
                     data-pet-label="the paperclip that attaches a file"
-                    title="Attach files (Word / Excel / PPT / PDF / image)"
+                    title={t("Attach files (Word / Excel / PPT / PDF / image)")}
                   >
                     <PaperclipIcon className="size-3.5" />
                     {attach.importing ? "Importing…" : "Attach"}
@@ -462,7 +464,7 @@ export default function ChatView({
                     className="text-muted-foreground"
                     onClick={() => chat.clear()}
                     disabled={chat.messages.length === 0}
-                    title="Clear conversation"
+                    title={t("Clear conversation")}
                   >
                     <Trash2Icon className="size-3.5" />
                     Clear
@@ -479,8 +481,8 @@ export default function ChatView({
                     size="icon"
                     variant="secondary"
                     className="rounded-lg"
-                    title="Stop generating"
-                    aria-label="Stop generating"
+                    title={t("Stop generating")}
+                    aria-label={t("Stop generating")}
                     onClick={() => chat.cancel()}
                   >
                     <SquareIcon className="size-3.5 fill-current" />

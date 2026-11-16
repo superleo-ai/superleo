@@ -14,6 +14,7 @@ import {
 } from "../../wailsjs/go/app/App";
 import { agent } from "../../wailsjs/go/models";
 import { Response } from "@/components/ai-elements/response";
+import { useI18n } from "../lib/i18n";
 
 function fmtSize(n: number): string {
   if (n < 1024) return `${n} B`;
@@ -69,6 +70,7 @@ export default function DeliverablesBar({
   /** Bump to re-read the list (e.g. when a turn finishes). */
   refreshKey?: number;
 }) {
+  const { t } = useI18n();
   const [items, setItems] = useState<agent.Deliverable[]>([]);
   const [open, setOpen] = useState(
     () => localStorage.getItem(OPEN_KEY) !== "0",
@@ -160,7 +162,7 @@ export default function DeliverablesBar({
           <button
             className="btn ghost sm"
             onClick={refresh}
-            title="Rescan the workspace"
+            title={t("Rescan the workspace")}
           >
             <RefreshCwIcon className="size-3.5" /> Refresh
           </button>
@@ -203,14 +205,14 @@ export default function DeliverablesBar({
                 <button
                   className="btn ghost sm"
                   onClick={() => download(viewer.path)}
-                  title="Save a copy outside the workspace"
+                  title={t("Save a copy outside the workspace")}
                 >
                   <DownloadIcon className="size-3.5" /> Download
                 </button>
                 <button
                   className="btn ghost sm"
                   onClick={() => OpenWorkspaceFileExternal(viewer.path)}
-                  title="Open with the default app"
+                  title={t("Open with the default app")}
                 >
                   Open externally
                 </button>

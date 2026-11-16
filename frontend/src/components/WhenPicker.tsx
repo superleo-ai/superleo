@@ -12,6 +12,7 @@ import {
   whenToCron,
 } from "../lib/cron";
 import { formatStamp, fromNow } from "../lib/format";
+import { useI18n } from "../lib/i18n";
 
 const MODES: { key: WhenMode; label: string }[] = [
   { key: "daily", label: "Every day" },
@@ -51,6 +52,7 @@ export default function WhenPicker({
   when: When;
   onChange: (w: When) => void;
 }) {
+  const { t } = useI18n();
   const patch = (p: Partial<When>) => onChange({ ...when, ...p });
   const cron = whenToCron(when);
   const problem = whenProblem(when);
@@ -68,7 +70,7 @@ export default function WhenPicker({
 
   return (
     <div className="field">
-      <label>When should it run?</label>
+      <label>{t("When should it run?")}</label>
 
       <div className="when-presets">
         {PRESETS.map((p) => {
@@ -107,7 +109,7 @@ export default function WhenPicker({
             <input
               className="input when-time"
               type="time"
-              aria-label="Time of day"
+              aria-label={t("Time of day")}
               value={when.time}
               onChange={(e) => patch({ time: e.target.value })}
             />
@@ -133,7 +135,7 @@ export default function WhenPicker({
               <input
                 className="input when-time"
                 type="time"
-                aria-label="Time of day"
+                aria-label={t("Time of day")}
                 value={when.time}
                 onChange={(e) => patch({ time: e.target.value })}
               />
@@ -149,7 +151,7 @@ export default function WhenPicker({
               type="number"
               min={1}
               max={31}
-              aria-label="Day of the month"
+              aria-label={t("Day of the month")}
               value={when.dom}
               onChange={(e) => patch({ dom: clampInt(Number(e.target.value), 1, 31) })}
             />
@@ -171,7 +173,7 @@ export default function WhenPicker({
               type="number"
               min={1}
               max={23}
-              aria-label="Hours between runs"
+              aria-label={t("Hours between runs")}
               value={when.everyHours}
               onChange={(e) => patch({ everyHours: clampInt(Number(e.target.value), 1, 23) })}
             />
@@ -181,7 +183,7 @@ export default function WhenPicker({
               type="number"
               min={0}
               max={59}
-              aria-label="Minute of the hour"
+              aria-label={t("Minute of the hour")}
               value={when.minute}
               onChange={(e) => patch({ minute: clampInt(Number(e.target.value), 0, 59) })}
             />
@@ -196,7 +198,7 @@ export default function WhenPicker({
               type="number"
               min={1}
               max={59}
-              aria-label="Minutes between runs"
+              aria-label={t("Minutes between runs")}
               value={when.everyMinutes}
               onChange={(e) => patch({ everyMinutes: clampInt(Number(e.target.value), 1, 59) })}
             />
@@ -208,7 +210,7 @@ export default function WhenPicker({
           <>
             <input
               className="input mono"
-              aria-label="Cron expression"
+              aria-label={t("Cron expression")}
               value={when.expr}
               spellCheck={false}
               autoComplete="off"
@@ -228,7 +230,7 @@ export default function WhenPicker({
         ) : preview.kind === "invalid" ? (
           <span className="hint err">{preview.why}</span>
         ) : preview.kind === "unknown" ? (
-          <span className="wp-next">SuperLeo works out the next run when you save this.</span>
+          <span className="wp-next">{t("SuperLeo works out the next run when you save this.")}</span>
         ) : (
           <>
             <span className="wp-next">

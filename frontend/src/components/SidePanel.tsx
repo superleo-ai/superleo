@@ -14,6 +14,7 @@ import { PromptPreviewBody } from "./PromptPreviewPanel";
 import { ActivityBody } from "./ActivityPanel";
 import { useRoom } from "../lib/useViewport";
 import { AgentsBody } from "./AgentsPanel";
+import { useI18n } from "../lib/i18n";
 
 /**
  * The rail down the right of a conversation, and whichever panel it is showing.
@@ -97,6 +98,7 @@ export default function SidePanel({
    *  still writes what and presses send. */
   onMention?: (name: string) => void;
 }) {
+  const { t } = useI18n();
   // The key is the one the trace panel has always used, so an existing install
   // opens the way it was left rather than resetting because the code moved. A
   // new one starts on the rail: an empty trace is not worth a third of the room.
@@ -247,7 +249,7 @@ export default function SidePanel({
         }}
         role="separator"
         aria-orientation="vertical"
-        aria-label="Resize panel (double-click to reset)"
+        aria-label={t("Resize panel (double-click to reset)")}
         title="Drag to resize · double-click to reset"
       />
       <div className="panel-tabs">
@@ -271,8 +273,8 @@ export default function SidePanel({
           type="button"
           className="panel-toggle inline"
           onClick={() => (floats ? setPeeked(false) : setOpen(false))}
-          title="Hide panel"
-          aria-label="Hide panel"
+          title={t("Hide panel")}
+          aria-label={t("Hide panel")}
         >
           <PanelRightCloseIcon className="size-4" />
         </button>

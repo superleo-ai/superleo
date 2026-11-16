@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { PreviewPrompt } from "../../wailsjs/go/app/App";
 import { backend } from "../../wailsjs/go/models";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { useI18n } from "../lib/i18n";
 
 /**
  * What the model is about to be told, before it is told.
@@ -59,6 +60,7 @@ export function PromptPreviewBody({
    *  not worth doing per keystroke. */
   goal: string;
 }) {
+  const { t } = useI18n();
   const [p, setP] = useState<backend.PromptPreview | null>(null);
   const [busy, setBusy] = useState(true);
   const [err, setErr] = useState("");
@@ -91,7 +93,7 @@ export function PromptPreviewBody({
   return (
     <>
       <div className="trace-head">
-        <span>Prompt preview</span>
+        <span>{t("Prompt preview")}</span>
         <span style={{ color: "var(--text-3)", fontWeight: 400 }}>nothing is sent</span>
       </div>
       <div className="pp-body">
@@ -112,12 +114,12 @@ export function PromptPreviewBody({
                 the schema, and those bytes are not counted here.
               </div>
 
-              <Section title="System context" meta={`${p.systemPrompt.length} chars`} defaultOpen>
+              <Section title={t("System context")} meta={`${p.systemPrompt.length} chars`} defaultOpen>
                 <pre>{p.systemPrompt || "(empty)"}</pre>
               </Section>
 
               <Section
-                title="Contributed sections"
+                title={t("Contributed sections")}
                 meta={contributed.length ? `${contributed.length}` : "none"}
               >
                 {contributed.length === 0 ? (
@@ -131,7 +133,7 @@ export function PromptPreviewBody({
 
               <Section title="Conversation" meta={`${conversation.length}`}>
                 {conversation.length === 0 ? (
-                  <div className="pp-empty">No history — this would be the first turn.</div>
+                  <div className="pp-empty">{t("No history — this would be the first turn.")}</div>
                 ) : (
                   conversation.map((m, i) => (
                     <div key={i} className="pp-msg">
@@ -142,7 +144,7 @@ export function PromptPreviewBody({
                 )}
               </Section>
 
-              <Section title="Tools offered" meta={`${p.tools.length}`}>
+              <Section title={t("Tools offered")} meta={`${p.tools.length}`}>
                 {p.tools.length === 0 ? (
                   <div className="pp-empty">
                     No tools. {p.forbidTools ? "This run's constraints forbid them." : ""}
@@ -157,7 +159,7 @@ export function PromptPreviewBody({
               </Section>
 
               <Section
-                title="Constraints"
+                title={t("Constraints")}
                 meta={p.constraintExtractionSkipped ? "not resolved" : p.constraintsDeclared ? "declared" : "none"}
                 defaultOpen={p.constraintsDeclared || p.forbidTools}
               >
@@ -174,7 +176,7 @@ export function PromptPreviewBody({
                     ))}
                   </div>
                 ) : (
-                  <div className="pp-empty">None declared for this turn.</div>
+                  <div className="pp-empty">{t("None declared for this turn.")}</div>
                 )}
               </Section>
             </>

@@ -21,6 +21,7 @@ import { useEffect, useRef, useState } from "react";
 import Sky from "../canvas/Sky";
 import "../canvas/canvas.css";
 import { loadTheme, themeVars } from "../canvas/theme";
+import { useI18n } from "../lib/i18n";
 
 // The door is the canvas's own sky with one pane of glass on it, so signing in
 // and arriving look like the same place.
@@ -32,6 +33,7 @@ const IDLE = [
 ];
 
 export default function Gate({ onEnter }: { onEnter: () => void }) {
+  const { t } = useI18n();
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [err, setErr] = useState("");
@@ -75,14 +77,14 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
       <Sky at={new Date()} lanes={IDLE} base={theme.base} mode={theme.mode} />
       <form className="cv-glass gate2-card" onSubmit={submit}>
         <h1>SuperLeo</h1>
-        <p>Your hive is behind this door.</p>
+        <p>{t("Your hive is behind this door.")}</p>
         <div className="gate2-field">
           <input
             ref={field}
             type={show ? "text" : "password"}
             value={password}
             autoComplete="current-password"
-            placeholder="Password"
+            placeholder={t("Password")}
             onChange={(e) => setPassword(e.target.value)}
           />
           <button type="button" tabIndex={-1} onClick={() => setShow((s) => !s)}>

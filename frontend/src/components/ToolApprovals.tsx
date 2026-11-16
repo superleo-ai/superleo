@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ShieldAlertIcon } from "lucide-react";
 import { ToolApproval } from "../lib/useToolApprovals";
 import { StartYoloMode } from "../../wailsjs/go/app/App";
+import { useI18n } from "../lib/i18n";
 
 /**
  * Asking before the agent runs a shell command.
@@ -50,6 +51,7 @@ function ApprovalCard({
   req: ToolApproval;
   onResolve: (id: string, allow: boolean) => void;
 }) {
+  const { t } = useI18n();
   const left = useCountdown(req.expiresAt);
   return (
     <div className="modal-overlay approval-overlay">
@@ -97,7 +99,7 @@ function ApprovalCard({
               banner is what keeps saying so. */}
           <button
             className="btn ghost approval-yolo"
-            title="Approve everything from now on, until you switch it off"
+            title={t("Approve everything from now on, until you switch it off")}
             onClick={() => { void StartYoloMode(); }}
           >
             Allow all

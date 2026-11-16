@@ -191,7 +191,7 @@ export default function AgentsView() {
           </button>
         </div>
         <div className="cd-list">
-          {threads.length === 0 && terms.length === 0 && <div className="cd-none">Runs you start, and ones the queen starts, show up here.</div>}
+          {threads.length === 0 && terms.length === 0 && <div className="cd-none">{t("Runs you start, and ones the queen starts, show up here.")}</div>}
           {terms.length > 0 && <div className="cd-group">{t("In terminals")}</div>}
           {terms.map((x) => (
             <button key={termKey(x)} className={`cd-item${termKey(x) === selected ? " on" : ""}`} onClick={() => setSelected(termKey(x))} data-testid="term-session">
@@ -243,6 +243,7 @@ export default function AgentsView() {
 
 /** A new run: one box, @ picks which CLI and where. */
 function Start({ choices, onStarted }: { choices: string[] | null; onStarted: (r: Run) => void }) {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [text, setText] = useState("");
   const [cwd, setCwd] = useState("");
@@ -290,9 +291,9 @@ function Start({ choices, onStarted }: { choices: string[] | null; onStarted: (r
     return (
       <div className="cd-start">
         <div className="cd-start-in">
-          <h2>No coding CLI to run</h2>
-          <p className="cd-sub">Core has none installed and no linked agent offers one. Install Claude Code or Codex on core, or run <code>superleo agent</code> on a machine that has them.</p>
-          <button className="cd-btn" onClick={() => navigate(PATHS.settings)}>Open Settings</button>
+          <h2>{t("No coding CLI to run")}</h2>
+          <p className="cd-sub">{t("Core has none installed and no linked agent offers one. Install Claude Code or Codex on core, or run")} <code>superleo agent</code> on a machine that has them.</p>
+          <button className="cd-btn" onClick={() => navigate(PATHS.settings)}>{t("Open Settings")}</button>
         </div>
       </div>
     );
@@ -326,7 +327,7 @@ function Start({ choices, onStarted }: { choices: string[] | null; onStarted: (r
                 <FolderIcon size={13} />
                 <input value={cwd} placeholder={translate("workspace")} onChange={(e) => setCwd(e.target.value)} spellCheck={false} />
               </label>
-              <label className="cd-ask" title="Off: the CLI runs its tools without asking">
+              <label className="cd-ask" title={t("Off: the CLI runs its tools without asking")}>
                 <input type="checkbox" checked={ask} onChange={(e) => setAsk(e.target.checked)} /> {translate("Ask before tools run")}
               </label>
             </>

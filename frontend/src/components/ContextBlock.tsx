@@ -6,6 +6,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Response } from "@/components/ai-elements/response";
+import { useI18n } from "../lib/i18n";
 
 /**
  * The memory the agent was handed before answering.
@@ -20,6 +21,7 @@ import { Response } from "@/components/ai-elements/response";
  * bubble is what made it read as one.
  */
 export default function ContextBlock({ content }: { content: string }) {
+  const { t } = useI18n();
   return (
     <Collapsible className="group not-prose w-full py-1">
       <CollapsibleTrigger
@@ -29,7 +31,7 @@ export default function ContextBlock({ content }: { content: string }) {
         )}
       >
         <BookOpenIcon className="size-3.5 shrink-0" />
-        <span className="min-w-0 flex-1 truncate">Recalled from memory</span>
+        <span className="min-w-0 flex-1 truncate">{t("Recalled from memory")}</span>
         <ChevronDownIcon className="size-3.5 shrink-0 transition-transform group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
       <CollapsibleContent className="ctx-body mt-1.5 border-l border-border pl-3">

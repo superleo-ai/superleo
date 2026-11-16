@@ -2,6 +2,7 @@ import { forwardRef, lazy, Suspense, useImperativeHandle, useRef, useState } fro
 import HiveStage, { type Look as FlowLook } from "./HiveStage";
 import HiveHex from "./HiveHex";
 import type { StageHandle, StageProps } from "./hiveFx";
+import { useI18n } from "../lib/i18n";
 
 // The hive stage, in whichever look and dimension the viewer picked.
 //
@@ -71,6 +72,7 @@ function initialHeight(): number {
 }
 
 const HiveStageView = forwardRef<StageHandle, StageProps>(function HiveStageView(props, ref) {
+  const { t } = useI18n();
   // The stage's height, dragged by its bottom edge and kept in this browser.
   const [height, setHeight] = useState(initialHeight);
   const frame = useRef<HTMLDivElement>(null);
@@ -138,7 +140,7 @@ const HiveStageView = forwardRef<StageHandle, StageProps>(function HiveStageView
         className="hive-stage-grip"
         role="separator"
         aria-orientation="horizontal"
-        aria-label="Resize the hive stage"
+        aria-label={t("Resize the hive stage")}
         title="Drag to resize · double-click to reset"
         onPointerDown={grab}
         onDoubleClick={() => {
@@ -150,7 +152,7 @@ const HiveStageView = forwardRef<StageHandle, StageProps>(function HiveStageView
           }
         }}
       />
-      <div className="hive-stage-mode" role="group" aria-label="Stage view">
+      <div className="hive-stage-mode" role="group" aria-label={t("Stage view")}>
         {LOOKS.map((l) => (
           <button key={l.key} type="button" aria-pressed={choice.look === l.key} onClick={() => pick({ look: l.key })}>
             {l.label}

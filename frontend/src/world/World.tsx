@@ -218,13 +218,13 @@ export default function World({ view, onFlipTheme }: { view: ViewKey; onFlipThem
       {/* The leader to the open card; none when no card is open. */}
       <svg className="wl-lead" style={{ display: picked ? "" : "none" }}><line ref={line} /></svg>
       <div className="wl-cam">
-        <button title="Zoom in" onClick={() => engine.current?.zoomBy(1.3)}><PlusIcon size={16} /></button>
-        <button title="Zoom out" onClick={() => engine.current?.zoomBy(1 / 1.3)}><MinusIcon size={16} /></button>
-        <button title="Turn left" onClick={() => engine.current?.rotateBy(-Math.PI / 8)}><RotateCcwIcon size={15} /></button>
-        <button title="Turn right" onClick={() => engine.current?.rotateBy(Math.PI / 8)}><RotateCwIcon size={15} /></button>
-        <button title="Back to this view" onClick={() => engine.current?.home()}><HomeIcon size={15} /></button>
+        <button title={t("Zoom in")} onClick={() => engine.current?.zoomBy(1.3)}><PlusIcon size={16} /></button>
+        <button title={t("Zoom out")} onClick={() => engine.current?.zoomBy(1 / 1.3)}><MinusIcon size={16} /></button>
+        <button title={t("Turn left")} onClick={() => engine.current?.rotateBy(-Math.PI / 8)}><RotateCcwIcon size={15} /></button>
+        <button title={t("Turn right")} onClick={() => engine.current?.rotateBy(Math.PI / 8)}><RotateCwIcon size={15} /></button>
+        <button title={t("Back to this view")} onClick={() => engine.current?.home()}><HomeIcon size={15} /></button>
         <span className="wl-cam-sep" />
-        <button title="Reset to the default view" onClick={() => {
+        <button title={t("Reset to the default view")} onClick={() => {
           // The whole cluster, from the usual corner, nothing selected.
           const l = lensOf("home", byHost);
           engine.current?.select(null);

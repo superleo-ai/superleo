@@ -94,10 +94,11 @@ function RecordCard({ obj, fallbackTitle }: { obj: any; fallbackTitle?: string }
 }
 
 function InlineEmpty({ icon: Icon, hint }: { icon: LucideIcon; hint: string }) {
+  const { t } = useI18n();
   return (
     <div className="inline-empty">
       <Icon className="ie-icon" size={22} strokeWidth={1.6} />
-      <div>Nothing here yet.</div>
+      <div>{t("Nothing here yet.")}</div>
       <div className="ie-hint">{hint}</div>
     </div>
   );

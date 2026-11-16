@@ -4,11 +4,13 @@ import { ForgetLife } from "../../wailsjs/go/app/App";
 import { AttentionItem } from "../canvas/attention";
 import { toast } from "../lib/toasts";
 import "./life.css";
+import { useI18n } from "../lib/i18n";
 
 /** A meeting or reminder from "Coming up", opened: when (yours and its own
  *  zone), who, where. A meeting that was saved wrong can be deleted here; any
  *  other change is said to the queen. */
 export default function EventSheet({ item, onClose, onGone }: { item: AttentionItem; onClose: () => void; onGone?: () => void }) {
+  const { t } = useI18n();
   const [sure, setSure] = useState(false);
   const at = item.at ? new Date(item.at) : null;
   const yours = at?.toLocaleString(undefined, { weekday: "long", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" });
@@ -48,7 +50,7 @@ export default function EventSheet({ item, onClose, onGone }: { item: AttentionI
           {item.kind === "reminder" && item.detail && <><dt /><dd>{item.detail}</dd></>}
         </dl>
         <div className="ev-foot">
-          <span>To change it, tell the queen.</span>
+          <span>{t("To change it, tell the queen.")}</span>
           {item.kind === "event" && item.ref && (
             sure
               ? <button className="cv-pill ev-del" onClick={forget}>Delete it</button>

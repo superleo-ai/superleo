@@ -3,6 +3,7 @@ import { ClipboardSetText } from "../../wailsjs/runtime";
 import { EmitAvatarTest } from "../../wailsjs/go/app/App";
 import { AppStatus } from "../lib/types";
 import { openExternal } from "../lib/openExternal";
+import { useI18n } from "../lib/i18n";
 
 /**
  * The avatar bridge, as a section of Settings rather than a page.
@@ -33,6 +34,7 @@ export default function AvatarSection({
 }: {
   status: AppStatus | null;
 }) {
+  const { t } = useI18n();
   const port =
     status?.avatarPort && status.avatarPort > 0 ? status.avatarPort : 0;
   const base = port ? `http://127.0.0.1:${port}` : "http://127.0.0.1:<port>";
@@ -61,7 +63,7 @@ export default function AvatarSection({
   return (
     <>
       <div className="card">
-        <div className="card-title">Avatar bridge</div>
+        <div className="card-title">{t("Avatar bridge")}</div>
         <div className="card-desc">
           Streams emotions to an external 2D / 3D renderer over SSE. Renderers
           connect to the event URL; the page below is a reference implementation

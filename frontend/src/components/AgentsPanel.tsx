@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { AtSignIcon, CircleSlashIcon, RadioIcon, ServerIcon } from "lucide-react";
 import { RemoteAgentNames } from "../../wailsjs/go/app/App";
 import { AgentInfo } from "../lib/useAgentMentions";
+import { useI18n } from "../lib/i18n";
 
 /**
  * Who else you can ask, in the rail.
@@ -17,6 +18,7 @@ import { AgentInfo } from "../lib/useAgentMentions";
  * list.
  */
 export function AgentsBody({ onMention }: { onMention?: (name: string) => void }) {
+  const { t } = useI18n();
   const [agents, setAgents] = useState<AgentInfo[] | null>(null);
 
   useEffect(() => {
@@ -43,7 +45,7 @@ export function AgentsBody({ onMention }: { onMention?: (name: string) => void }
       <div className="agents-panel">
         <div className="agents-empty">
           <CircleSlashIcon className="size-4" />
-          <p>No other agents are reachable.</p>
+          <p>{t("No other agents are reachable.")}</p>
           {/* Named exactly, because the two switches are in different places
               and turning on the wrong one looks like the feature is broken. */}
           <p className="agents-dim">

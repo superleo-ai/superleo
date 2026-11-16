@@ -24,7 +24,7 @@ import type { ChatMessage, TraceItem } from "../lib/types";
 import { ChatTurnBrowser, newestBrowserTurn } from "../components/BrowserCard";
 import TraceChip from "../components/TraceChip";
 import { queenRef, queenTitle, useQueenName } from "../lib/queenName";
-import { translate } from "../lib/i18n";
+import { translate, useI18n } from "../lib/i18n";
 
 type Kind = "inFlight" | "machines" | "today" | "stats" | "bees" | "later" | "coding" | "queen" | "generated";
 interface Tile { id: string; kind: Kind; span: 2 | 3 | 4 | 6 }
@@ -82,6 +82,7 @@ function loadLayout(): Tile[] {
  * it all, the hive's day as a time-lapse.
  */
 export default function CanvasView({ approvals }: { approvals: { pending: ToolApproval[]; resolve: (id: string, allow: boolean) => void } }) {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const hive = useHive();
   const bees = useBees();
@@ -106,7 +107,7 @@ export default function CanvasView({ approvals }: { approvals: { pending: ToolAp
       {(approvals.pending.length > 0 || feed.length === 0) && <NeedsYou pending={approvals.pending} resolve={approvals.resolve} bees={bees} />}
       {feed.length > 0 && (
         <section className="cv-glass cv-tile cv-foryou" data-testid="for-you">
-          <h2>For you</h2>
+          <h2>{t("For you")}</h2>
           <AttentionList items={feed} onOpen={openItem} />
         </section>
       )}
@@ -236,7 +237,7 @@ export default function CanvasView({ approvals }: { approvals: { pending: ToolAp
                 {([["Conversations", PATHS.chat], ["Bees", PATHS.agents], ["Hive", PATHS.hive], ["Coding", PATHS.coding], ["Stats", PATHS.stats], ["Knowledge", PATHS.knowledge], ["Skills", PATHS.skills], ["MCP", PATHS.mcp], ["Settings", PATHS.settings]] as const).map(([label, path]) => (
                   <button key={label} onClick={() => navigate(path)}>{label}</button>
                 ))}
-                <button onClick={() => { setMenu(false); setAttention(true); }}>Attention</button>
+                <button onClick={() => { setMenu(false); setAttention(true); }}>{t("Attention")}</button>
                 <button onClick={() => { setMenu(false); setTheming(true); }} data-testid="menu-theme">Theme</button>
               </div>
             )}
@@ -253,7 +254,7 @@ export default function CanvasView({ approvals }: { approvals: { pending: ToolAp
                   value={order}
                   onChange={(e) => setOrder(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } }}
-                  placeholder="Ask, order, or change this screen"
+                  placeholder={t("Ask, order, or change this screen")}
                   data-testid="canvas-say"
                 />
                 <button className="cv-go" onClick={() => (chat.sending ? chat.cancel() : send())} disabled={!chat.sending && !order.trim()} aria-label={chat.sending ? "Stop" : "Send"} data-testid="canvas-send">
@@ -282,7 +283,7 @@ export default function CanvasView({ approvals }: { approvals: { pending: ToolAp
                 </section>
               ))}
               {editing && (
-                <button className="cv-glass cv-add" onClick={() => setAdding(true)} data-testid="add-tile"><PlusIcon size={16} /> Add a tile</button>
+                <button className="cv-glass cv-add" onClick={() => setAdding(true)} data-testid="add-tile"><PlusIcon size={16} /> {t("Add a tile")}</button>
               )}
               <Replay hive={hive} at={replayAt} onScrub={setReplayAt} />
             </aside>
@@ -304,7 +305,7 @@ export default function CanvasView({ approvals }: { approvals: { pending: ToolAp
               {t.kind !== "generated" && <h2>{TITLES[t.kind]}</h2>}
               {editing && (
                 <div className="cv-handles">
-                  <button onClick={() => setTiles((ts) => ts.map((x) => (x.id === t.id ? { ...x, span: nextSpan(x.span) } : x)))} aria-label="Resize">
+                  <button onClick={() => setTiles((ts) => ts.map((x) => (x.id === t.id ? { ...x, span: nextSpan(x.span) } : x)))} aria-label={translate("Resize")}>
                     {t.span === 6 ? <Minimize2Icon size={12} /> : <Maximize2Icon size={12} />}
                   </button>
                   <button className="ink" onClick={() => setTiles((ts) => ts.filter((x) => x.id !== t.id))} aria-label="Remove"><MinusIcon size={13} /></button>
@@ -314,7 +315,7 @@ export default function CanvasView({ approvals }: { approvals: { pending: ToolAp
             </section>
           ))}
           {editing && (
-            <button className="cv-glass cv-add span-6" onClick={() => setAdding(true)} data-testid="add-tile"><PlusIcon size={16} /> Add a tile</button>
+            <button className="cv-glass cv-add span-6" onClick={() => setAdding(true)} data-testid="add-tile"><PlusIcon size={16} /> {t("Add a tile")}</button>
           )}
         </div>
         </>
@@ -329,7 +330,7 @@ export default function CanvasView({ approvals }: { approvals: { pending: ToolAp
             value={order}
             onChange={(e) => setOrder(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } }}
-            placeholder="Ask, order, or change this screen"
+            placeholder={t("Ask, order, or change this screen")}
             data-testid="canvas-say"
           />
           <button className="cv-go" onClick={() => (chat.sending ? chat.cancel() : send())} disabled={!chat.sending && !order.trim()} aria-label={chat.sending ? "Stop" : "Send"} data-testid="canvas-send">
@@ -417,6 +418,7 @@ function Conversation({ messages, trace }: { messages: ChatMessage[]; trace: Tra
 }
 
 function Generated({ spec, busy, onRefresh }: { spec?: GenSpec; busy: boolean; onRefresh: () => void }) {
+  const { t } = useI18n();
   const items = spec?.items ?? [];
   const top = Math.max(1, ...items.map((i) => Math.abs(i.value ?? 0)));
   return (
@@ -425,7 +427,7 @@ function Generated({ spec, busy, onRefresh }: { spec?: GenSpec; busy: boolean; o
         {spec?.title || spec?.prompt}
         <button onClick={onRefresh} aria-label="Refresh" className={busy ? "spin" : ""}><RefreshCwIcon size={12} /></button>
       </h2>
-      {!spec?.updated && !spec?.error && <p className="cv-quiet">The hive is making this…</p>}
+      {!spec?.updated && !spec?.error && <p className="cv-quiet">{t("The hive is making this…")}</p>}
       {spec?.error && <p className="cv-quiet">{spec.error}</p>}
       {spec?.updated && spec.kind === "number" && (
         <div className="cv-fig big"><b>{spec.value ?? "—"}</b>{spec.caption && <small>{spec.caption}</small>}</div>
@@ -452,21 +454,22 @@ function Generated({ spec, busy, onRefresh }: { spec?: GenSpec; busy: boolean; o
 }
 
 function AddTile({ present, onPick, onDescribe, onClose }: { present: Set<Kind>; onPick: (k: Kind) => void; onDescribe: (p: string) => void; onClose: () => void }) {
+  const { t } = useI18n();
   const [text, setText] = useState("");
   const kinds = (Object.keys(TITLES) as Kind[]).filter((k) => k !== "generated" && !present.has(k));
   return (
     <div className="cv-scrim" onClick={onClose}>
       <div className="cv-glass cv-sheet" onClick={(e) => e.stopPropagation()}>
-        <h3>Add a tile</h3>
-        <label>Describe one</label>
+        <h3>{t("Add a tile")}</h3>
+        <label>{t("Describe one")}</label>
         <div className="cv-describe">
-          <input autoFocus value={text} onChange={(e) => setText(e.target.value)} placeholder="Which workers were busiest this week"
+          <input autoFocus value={text} onChange={(e) => setText(e.target.value)} placeholder={t("Which workers were busiest this week")}
             onKeyDown={(e) => { if (e.key === "Enter" && text.trim() && !e.nativeEvent.isComposing) onDescribe(text.trim()); }} data-testid="describe-tile" />
-          <button className="cv-pill ink" disabled={!text.trim()} onClick={() => onDescribe(text.trim())} data-testid="make-tile">Make</button>
+          <button className="cv-pill ink" disabled={!text.trim()} onClick={() => onDescribe(text.trim())} data-testid="make-tile">{t("Make")}</button>
         </div>
-        <label>Or pick one</label>
+        <label>{t("Or pick one")}</label>
         <div className="cv-chips">
-          {kinds.length === 0 && <p className="cv-quiet">Every built-in tile is already on your screen.</p>}
+          {kinds.length === 0 && <p className="cv-quiet">{t("Every built-in tile is already on your screen.")}</p>}
           {kinds.map((k) => <button key={k} className="cv-pill glassy" onClick={() => onPick(k)}>{TITLES[k]}</button>)}
         </div>
       </div>
@@ -475,6 +478,7 @@ function AddTile({ present, onPick, onDescribe, onClose }: { present: Set<Kind>;
 }
 
 function MachineDrawer({ name, hive, onClose }: { name: string; hive: Hive; onClose: () => void }) {
+  const { t } = useI18n();
   const mine = hive.tasks.filter((t) => t.worker === name);
   const now = mine.find((t) => t.state === "running");
   const member = hive.members.find((m) => m.name === name);
@@ -487,12 +491,12 @@ function MachineDrawer({ name, hive, onClose }: { name: string; hive: Hive; onCl
         </div>
         {now && (
           <div className="cv-glass cv-now">
-            <small>Now</small>
+            <small>{t("Now")}</small>
             <b>{oneLine(now.prompt)}</b>
             <span>{now.tool ? `Using ${now.tool}, ` : ""}{now.tools} tool calls, {elapsed(now.started_at)}</span>
           </div>
         )}
-        <h4>Earlier</h4>
+        <h4>{t("Earlier")}</h4>
         {mine.filter((t) => t.state !== "running").slice(0, 15).map((t) => (
           <div key={t.id} className="cv-earlier">
             <span>{new Date(t.started_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} <em className={t.state}>{t.state}</em></span>
@@ -500,7 +504,7 @@ function MachineDrawer({ name, hive, onClose }: { name: string; hive: Hive; onCl
             {t.result && <p className="cv-quiet">{oneLine(t.result).slice(0, 240)}</p>}
           </div>
         ))}
-        {mine.length === 0 && <p className="cv-quiet">No orders on this machine yet.</p>}
+        {mine.length === 0 && <p className="cv-quiet">{t("No orders on this machine yet.")}</p>}
       </aside>
     </div>
   );
@@ -518,6 +522,7 @@ const RULES: [string, string][] = [
 /** What is worth interrupting you for. For now kept in this browser only; the
  *  hive's approvals still follow the server's own settings. */
 function Attention({ onClose }: { onClose: () => void }) {
+  const { t } = useI18n();
   // On unless turned off, except quiet hours, which are off unless turned on.
   const read = (k: string) => {
     try {
@@ -536,8 +541,8 @@ function Attention({ onClose }: { onClose: () => void }) {
   return (
     <div className="cv-scrim" onClick={onClose}>
       <div className="cv-glass cv-sheet" onClick={(e) => e.stopPropagation()}>
-        <h3>Attention</h3>
-        <p className="cv-quiet">Everything else the hive decides by itself, and you can watch it on the screen.</p>
+        <h3>{t("Attention")}</h3>
+        <p className="cv-quiet">{t("Everything else the hive decides by itself, and you can watch it on the screen.")}</p>
         {RULES.map(([k, label]) => (
           <div key={k} className="cv-rule">
             <span>{label}</span>

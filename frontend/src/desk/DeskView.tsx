@@ -570,7 +570,7 @@ export default function DeskView({ approvals, openSession, onSessionOpened, atte
               </button>
             );
           })}
-          <button className="dk-icon" title="Open a coding run" onClick={() => navigate(PATHS.coding)}><PlusIcon size={17} /></button>
+          <button className="dk-icon" title={t("Open a coding run")} onClick={() => navigate(PATHS.coding)}><PlusIcon size={17} /></button>
         </div>}
         <div className={current === "hive" ? "dk-screen see-world" : "cv-glass dk-screen"}>
           <div className="dk-in">
@@ -598,6 +598,7 @@ function RunTab({ id, now }: { id: string; now: Date }) {
 
 /** Under the screen: who is driving, and how to step in. */
 function Controls({ current, run, dash, busy, onOpenHive, onOpenStats }: { current: TabKey; run?: CodingRun; dash?: Dashboard; busy: number; onOpenHive: () => void; onOpenStats: () => void }) {
+  const { t } = useI18n();
   const [err, setErr] = useState("");
   useEffect(() => { setErr(""); }, [current]);
   const detail = useRunSession(run?.id);
@@ -612,8 +613,8 @@ function Controls({ current, run, dash, busy, onOpenHive, onOpenStats }: { curre
     return (
       <div className="dk-ctl">
         <span>{busy > 0 ? `${queenNamed() ? getQueenName().name : "The queen"} has the hive` : "The hive is resting"}</span>
-        {busy > 0 && <button className="dk-btn ghost" onClick={() => CancelAllChats().catch((e) => setErr(String(e)))}>Stop all</button>}
-        <button className="dk-btn light" onClick={onOpenHive}>Open the hive</button>
+        {busy > 0 && <button className="dk-btn ghost" onClick={() => CancelAllChats().catch((e) => setErr(String(e)))}>{t("Stop all")}</button>}
+        <button className="dk-btn light" onClick={onOpenHive}>{t("Open the hive")}</button>
         {err && <em className="dk-ctl-err">{err}</em>}
       </div>
     );
@@ -628,7 +629,7 @@ function Controls({ current, run, dash, busy, onOpenHive, onOpenStats }: { curre
         {/* Take over opens a terminal on the machine this window runs on; a
             browser tab has none to open. */}
         {detail?.session && !served && (
-          <button className="dk-btn light" onClick={() => TakeOver(run.agent, detail.session!, detail.cwd).catch((e) => setErr(String(e?.message ?? e)))}>Take over</button>
+          <button className="dk-btn light" onClick={() => TakeOver(run.agent, detail.session!, detail.cwd).catch((e) => setErr(String(e?.message ?? e)))}>{t("Take over")}</button>
         )}
         {err && <em className="dk-ctl-err">{err}</em>}
       </div>
