@@ -101,7 +101,7 @@
       </li>
       <li>
         <span class="k"><span lang="zh">在别的地方</span><span lang="en">Anywhere else</span></span>
-        <span class="v"><span lang="zh">经过 <strong>relay.superleo.app</strong> 中转。不用注册。</span><span lang="en">Through <strong>relay.superleo.app</strong>. No sign-up.</span></span>
+        <span class="v"><span lang="zh">经过 <strong>gateway.superleo.cn</strong> 或 <strong>gateway.superleo.app</strong> 中转，端口 443。不用注册。</span><span lang="en">Through <strong>gateway.superleo.cn</strong> or <strong>gateway.superleo.app</strong>, on port 443. No sign-up.</span></span>
       </li>
       <li>
         <span class="k"><span lang="zh">你自己的方式</span><span lang="en">Your own way</span></span>
@@ -119,8 +119,12 @@
       <span lang="en">When you pair, the phone takes the fingerprint of the computer's certificate from the QR code. Every connection after that is encrypted between the phone and the computer, and the phone accepts only that certificate. The relay forwards the encrypted bytes to the right computer by name. It cannot read them and does not store them.</span>
     </p>
     <p>
-      <span lang="zh">每台电脑在中转上的地址是用它自己的密钥算出来的，形如 <code>https://&lt;id&gt;.relay.superleo.app:43443</code>，<code>&lt;id&gt;</code> 是 16 个字符。电脑连上中转时用同一把密钥签名，证明这个地址属于它，所以不需要账号。</span>
-      <span lang="en">Each computer's address at the relay is derived from its own key and looks like <code>https://&lt;id&gt;.relay.superleo.app:43443</code>, where <code>&lt;id&gt;</code> is 16 characters. When the computer connects to the relay it signs with that key to prove the address is its own, so no account is needed.</span>
+      <span lang="zh">每台电脑在中转上的地址是用它自己的密钥算出来的，形如 <code>https://&lt;id&gt;.gateway.superleo.cn</code> 和 <code>https://&lt;id&gt;.gateway.superleo.app</code>，<code>&lt;id&gt;</code> 是 16 个字符。电脑连上中转时用同一把密钥签名，证明这个地址属于它，所以不需要账号。</span>
+      <span lang="en">Each computer's address at the relay is derived from its own key and looks like <code>https://&lt;id&gt;.gateway.superleo.cn</code> and <code>https://&lt;id&gt;.gateway.superleo.app</code>, where <code>&lt;id&gt;</code> is 16 characters. When the computer connects to the relay it signs with that key to prove the address is its own, so no account is needed.</span>
+    </p>
+    <p>
+      <span lang="zh">两个地址后面是同一组中转服务器，彼此互为备份。电脑连上其中任何一台，手机从任何一个地址都能连到它。</span>
+      <span lang="en">Both addresses lead to the same set of relay servers, which back each other up. Once the computer is linked to any one of them, the phone reaches it through either address.</span>
     </p>
     <p>
       <span lang="zh">桌面版的「设置 › 通知中心 › 在外面也能连」里能看到这台电脑的中转地址，以及它现在有没有连上中转。</span>
