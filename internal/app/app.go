@@ -1562,7 +1562,7 @@ func (a *App) ReadWorkspaceFile(path string) string {
 	a.mu.Lock()
 	svc := a.svc
 	a.mu.Unlock()
-	if svc == nil {
+	if svc == nil || !a.readableWorkspaceFile(path) {
 		return ""
 	}
 	out, err := svc.ReadWorkspaceFile(path)
@@ -1750,7 +1750,7 @@ func (a *App) ReadWorkspaceFileDataURL(path string) string {
 	a.mu.Lock()
 	svc := a.svc
 	a.mu.Unlock()
-	if svc == nil {
+	if svc == nil || !a.readableWorkspaceFile(path) {
 		return ""
 	}
 	out, err := svc.ReadWorkspaceFileDataURL(path)
