@@ -2331,6 +2331,142 @@ export namespace app {
 	        this.relay_env = source["relay_env"];
 	    }
 	}
+	export class PhoneProxyView {
+	    mode: string;
+	    url: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new PhoneProxyView(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.mode = source["mode"];
+	        this.url = source["url"];
+	    }
+	}
+	export class PhoneRemoteAgent {
+	    name: string;
+	    about?: string;
+	    hosts: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new PhoneRemoteAgent(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.about = source["about"];
+	        this.hosts = source["hosts"];
+	    }
+	}
+	export class PhoneRemoteAgents {
+	    enabled: boolean;
+	    agents: PhoneRemoteAgent[];
+	
+	    static createFrom(source: any = {}) {
+	        return new PhoneRemoteAgents(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.enabled = source["enabled"];
+	        this.agents = this.convertValues(source["agents"], PhoneRemoteAgent);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class PhoneSettingsView {
+	    queen_name: string;
+	    queen_aliases: string[];
+	    workspace_dir: string;
+	    proxy: PhoneProxyView;
+	    max_rounds: number;
+	    turn_max_tokens: number;
+	    long_task_max_tokens: number;
+	    pii_redaction: boolean;
+	    disable_ptc: boolean;
+	    cliproxy_enabled: boolean;
+	    llm_base_url: string;
+	    llm_model: string;
+	    memory_backend: string;
+	    shared_memory_endpoint: string;
+	    shared_memory_namespace: string;
+	    embed_base_url: string;
+	    embed_model: string;
+	    disable_tool_approval: boolean;
+	    remote_agents: PhoneRemoteAgents;
+	    hive_role: string;
+	    phone_relay: string;
+	    phone_urls: string[];
+	    secrets: Record<string, boolean>;
+	
+	    static createFrom(source: any = {}) {
+	        return new PhoneSettingsView(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.queen_name = source["queen_name"];
+	        this.queen_aliases = source["queen_aliases"];
+	        this.workspace_dir = source["workspace_dir"];
+	        this.proxy = this.convertValues(source["proxy"], PhoneProxyView);
+	        this.max_rounds = source["max_rounds"];
+	        this.turn_max_tokens = source["turn_max_tokens"];
+	        this.long_task_max_tokens = source["long_task_max_tokens"];
+	        this.pii_redaction = source["pii_redaction"];
+	        this.disable_ptc = source["disable_ptc"];
+	        this.cliproxy_enabled = source["cliproxy_enabled"];
+	        this.llm_base_url = source["llm_base_url"];
+	        this.llm_model = source["llm_model"];
+	        this.memory_backend = source["memory_backend"];
+	        this.shared_memory_endpoint = source["shared_memory_endpoint"];
+	        this.shared_memory_namespace = source["shared_memory_namespace"];
+	        this.embed_base_url = source["embed_base_url"];
+	        this.embed_model = source["embed_model"];
+	        this.disable_tool_approval = source["disable_tool_approval"];
+	        this.remote_agents = this.convertValues(source["remote_agents"], PhoneRemoteAgents);
+	        this.hive_role = source["hive_role"];
+	        this.phone_relay = source["phone_relay"];
+	        this.phone_urls = source["phone_urls"];
+	        this.secrets = source["secrets"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class PostNotificationRequest {
 	    title: string;
 	    body: string;

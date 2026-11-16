@@ -582,6 +582,10 @@ export function PairedDevices() {
   return window['go']['app']['App']['PairedDevices']();
 }
 
+export function PatchPhoneSettings(arg1) {
+  return window['go']['app']['App']['PatchPhoneSettings'](arg1);
+}
+
 export function PatchSettings(arg1) {
   return window['go']['app']['App']['PatchSettings'](arg1);
 }
@@ -608,6 +612,10 @@ export function PhoneBrowserResult(arg1, arg2, arg3, arg4) {
 
 export function PhoneLinks() {
   return window['go']['app']['App']['PhoneLinks']();
+}
+
+export function PhoneSettings() {
+  return window['go']['app']['App']['PhoneSettings']();
 }
 
 export function PickFiles() {

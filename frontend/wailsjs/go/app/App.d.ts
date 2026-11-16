@@ -297,6 +297,8 @@ export function PairPhone():Promise<app.PairCode>;
 
 export function PairedDevices():Promise<Array<app.PairedDevice>>;
 
+export function PatchPhoneSettings(arg1:Record<string, any>):Promise<app.PhoneSettingsView>;
+
 export function PatchSettings(arg1:Record<string, any>):Promise<backend.Settings>;
 
 export function PauseStandingAgent(arg1:string):Promise<void>;
@@ -310,6 +312,8 @@ export function PhoneBrowserOnline(arg1:string):Promise<void>;
 export function PhoneBrowserResult(arg1:string,arg2:boolean,arg3:string,arg4:string):Promise<void>;
 
 export function PhoneLinks():Promise<app.PhoneLinkInfo>;
+
+export function PhoneSettings():Promise<app.PhoneSettingsView>;
 
 export function PickFiles():Promise<Array<string>>;
 

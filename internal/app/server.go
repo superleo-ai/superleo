@@ -58,6 +58,17 @@ var rpcDenied = map[string]string{
 	"Call": "the desktop window's path; call the method itself",
 }
 
+// deviceDenied lists methods a paired phone or watch may not call: the whole
+// settings file, which carries every key and token in clear, and a channel's
+// receive token. A phone reads and changes settings through PhoneSettings and
+// PatchPhoneSettings (phone_settings.go), where secrets are only set or not.
+var deviceDenied = map[string]string{
+	"GetSettings":        "use PhoneSettings",
+	"SaveSettings":       "use PatchPhoneSettings",
+	"PatchSettings":      "use PatchPhoneSettings",
+	"RevealChannelToken": "a channel's token is not shown on a phone",
+}
+
 // Call runs one App method by name for the desktop window. The window sends
 // every bound call through here (frontend/src/lib/callpath.ts) so that it
 // takes the same road as a browser tab's /api/rpc and core's agent-link
@@ -228,6 +239,10 @@ func rpcCall(app *App, w http.ResponseWriter, r *http.Request) {
 	name := strings.TrimPrefix(r.URL.Path, "/api/rpc/")
 	if reason, denied := rpcDenied[name]; denied {
 		http.Error(w, name+": "+reason, http.StatusNotFound)
+		return
+	}
+	if reason, denied := deviceDenied[name]; denied && clientKindFrom(r.Context()) == "device" {
+		http.Error(w, name+": "+reason, http.StatusForbidden)
 		return
 	}
 	body, err := io.ReadAll(io.LimitReader(r.Body, 32<<20))
