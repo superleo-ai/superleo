@@ -79,7 +79,7 @@ type deviceStore struct {
 	// again. Only a demo instance sets one (SUPERLEO_STANDING_PAIR_CODE), so
 	// that App Review can pair long after a five-minute code would be gone.
 	standing string
-	now     func() time.Time
+	now      func() time.Time
 }
 
 var (

@@ -128,8 +128,8 @@ type Outbox struct {
 }
 
 var (
-	outboxMu  sync.Mutex
-	outboxes  = map[string]*Outbox{}
+	outboxMu sync.Mutex
+	outboxes = map[string]*Outbox{}
 	// quietFrom is the quiet hours in force: SUPERLEO_QUIET_HOURS when set
 	// (a hive's settings file is rewritten at every start), else the setting.
 	quietFrom = func() string {
