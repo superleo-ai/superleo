@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  ListTodoIcon, LayoutDashboardIcon, ChartColumnIcon, PanelRightOpenIcon, PanelRightCloseIcon, BookOpenIcon, HexagonIcon, MessageSquareIcon, PaletteIcon,
+  LayoutDashboardIcon, ChartColumnIcon, PanelRightOpenIcon, PanelRightCloseIcon, BookOpenIcon, HexagonIcon, MessageSquareIcon, PaletteIcon,
   MessagesSquareIcon, PuzzleIcon, SlidersHorizontalIcon, TerminalIcon, XIcon,
   MoonIcon, SunIcon, CalendarDaysIcon, GlobeIcon,
   HeartPulseIcon, AlarmClockIcon,
@@ -15,7 +15,7 @@ import { AppStatus, ViewKey } from "../lib/types";
 import { SetWindowTheme } from "../../wailsjs/go/app/App";
 import { useI18n } from "../lib/i18n";
 import { queenTitle, useQueenName } from "../lib/queenName";
-import NotificationCenter from "../components/NotificationCenter";
+import NotificationCenter, { NeedsYou } from "../components/NotificationCenter";
 import ThemePanel from "../canvas/ThemePanel";
 import { ChatFab, ConversationsFab, FabStack, ModeFab, SettingsFab } from "../components/Fabs";
 import { askToCompose } from "../lib/compose";
@@ -61,7 +61,6 @@ const RAIL: { key: ViewKey; label: string; Icon: typeof HexagonIcon; cls: string
   { key: "conversations", label: "Conversations", Icon: MessagesSquareIcon, cls: "dk-a-rec" },
   { key: "schedule", label: "Schedule", Icon: CalendarDaysIcon, cls: "dk-a-sched" },
   { key: "wellbeing", label: "Wellbeing", Icon: HeartPulseIcon, cls: "dk-a-sched" },
-  { key: "tasks", label: "Needs your attention", Icon: ListTodoIcon, cls: "dk-a-later" },
   { key: "hive", label: "Hive", Icon: HexagonIcon, cls: "dk-a-hive" },
   { key: "routines", label: "Scheduled tasks", Icon: AlarmClockIcon, cls: "dk-a-sched" },
   { key: "coding", label: "Coding", Icon: TerminalIcon, cls: "dk-a-code" },
@@ -83,7 +82,7 @@ export const TITLES: Record<ViewKey, string> = {
  * is the shell's child — the home's three panes, or any other screen on a
  * pane of glass.
  */
-export default function DeskShell({ view, badges, children, overlay, onOpenConversation, status, loading }: { view: ViewKey; overlay?: React.ReactNode; badges?: Partial<Record<ViewKey, number>>; children: React.ReactNode; onOpenConversation?: (session: string) => void; status:AppStatus|null; loading:boolean }) {
+export default function DeskShell({ view, badges, children, overlay, onOpenConversation, status, loading, needs }: { view: ViewKey; needs?: NeedsYou; overlay?: React.ReactNode; badges?: Partial<Record<ViewKey, number>>; children: React.ReactNode; onOpenConversation?: (session: string) => void; status:AppStatus|null; loading:boolean }) {
   const { t } = useI18n();
   const browserOn = useBrowserPanelOpen();
   const features = useFeatures();
@@ -231,7 +230,7 @@ export default function DeskShell({ view, badges, children, overlay, onOpenConve
             onClick={() => setTheme({ ...theme, mode: theme.mode === "dark" ? "light" : "dark" })}>
             {theme.mode === "dark" ? <SunIcon size={18} /> : <MoonIcon size={18} />}
           </button>
-          <NotificationCenter variant="desk" onOpenConversation={onOpenConversation} />
+          <NotificationCenter variant="desk" onOpenConversation={onOpenConversation} needs={needs} />
         </div>}
         <nav className="dk-rail" style={drag}>
           {RAIL.filter(({ key }) => viewShown(key, features)).map(({ key, label, Icon, cls }) => (

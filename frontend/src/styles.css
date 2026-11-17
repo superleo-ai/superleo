@@ -4219,3 +4219,10 @@ code, kbd, pre, .mono { font-family: var(--font-mono); }
 :root[data-theme="dark"] .hive-banner { color: #f0c27a; }
 :root[data-theme="dark"] .hive-banner.dk-hive { background: #3a2a12; }
 .hive-banner.dk-hive { margin: 0; position: sticky; top: -10px; z-index: 2; background: #fbeed8; }
+
+/* What needs a decision, above the notices in the bell's panel. */
+.notif-need { background: color-mix(in srgb, #f59e0b 9%, transparent); border-left-color: #f59e0b; }
+.notif-need .notif-icon { color: #d97706; }
+.notif-cmd { margin: 4px 0 0; padding: 4px 6px; font-size: 11px; white-space: pre-wrap; word-break: break-all; background: var(--surface-2, rgba(0,0,0,.04)); border-radius: 4px; max-height: 80px; overflow: auto; }
+.notif-need-actions { display: flex; gap: 10px; margin-top: 4px; }
+.notif-badge-needs { background: #d97706; }

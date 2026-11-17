@@ -227,7 +227,7 @@ export default function App() {
   if (clientKind() === "desktop") {
     return (
       <>
-        <DeskShell overlay={<CardStack runs={runs} approvals={approvals.pending} note={approvals.note} onDismissNote={approvals.dismissNote} onResolve={approvals.resolve} onOpenConversation={openConversation} />} status={status} loading={loading} view={view} badges={{ records: runs.unseen, tasks: attention.items.filter(i => i.level === "needs").length }} onOpenConversation={openConversation}>
+        <DeskShell needs={{ items: attention.items, approvals: approvals.pending, onResolve: approvals.resolve }} overlay={<CardStack runs={runs} approvals={approvals.pending} note={approvals.note} onDismissNote={approvals.dismissNote} onResolve={approvals.resolve} onOpenConversation={openConversation} />} status={status} loading={loading} view={view} badges={{ records: runs.unseen, tasks: attention.items.filter(i => i.level === "needs").length }} onOpenConversation={openConversation}>
           {view === "home" || view === "chat" ? (
             <DeskView attentionItems={attention.items} attentionError={attention.error} approvals={world3d ? { ...approvals, pending: [] } : approvals} openSession={pendingSession} onSessionOpened={() => setPendingSession("")} />
           ) : routes}

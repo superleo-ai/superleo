@@ -13,7 +13,25 @@ import {
   useNotificationList,
   useUnreadNotifications,
 } from "../lib/notifications";
-import { deeplinkPath } from "../lib/routes";
+import { attentionPath, deeplinkPath } from "../lib/routes";
+import { AttentionItem, attentionTitle } from "../canvas/attention";
+import { ToolApproval } from "../lib/useToolApprovals";
+
+/** What needs a decision now: shown above the notices, not on a page of its own. */
+export type NeedsYou = {
+  items: AttentionItem[];
+  approvals: ToolApproval[];
+  onResolve?: (id: string, allow: boolean) => void;
+};
+
+const NEEDS_LABEL: Record<string, string> = {
+  approval: "Approval required",
+  bee: "Waiting for your reply",
+  report: "From a bee",
+  failed: "Task failed",
+  lost: "Worker offline",
+  run: "Coding run failed",
+};
 
 /**
  * What SuperLeo said while you were not looking.
@@ -51,15 +69,29 @@ function ago(at: string): string {
 export default function NotificationCenter({
   onOpenConversation,
   variant = "default",
+  needs,
 }: {
   variant?: "default" | "desk";
   onOpenConversation?: (session: string) => void;
+  needs?: NeedsYou;
 }) {
   const { t } = useI18n();
   const unread = useUnreadNotifications();
   const [open, setOpen] = useState(false);
   const { items, loading, error, reload, markAllRead, clear } = useNotificationList(open);
   const wrap = useRef<HTMLDivElement | null>(null);
+  const order = ["approval", "bee", "report", "failed", "run", "lost"];
+  const needItems = (needs?.items ?? [])
+    .filter((i) => i.level === "needs" && i.kind !== "reminder")
+    .sort((a, b) => (order.includes(a.kind) ? order.indexOf(a.kind) : 99) - (order.includes(b.kind) ? order.indexOf(b.kind) : 99));
+  const badge = unread + needItems.length;
+  const openNeed = (it: AttentionItem) => {
+    if (it.kind === "approval") {
+      const a = needs?.approvals.find((x) => x.id === it.ref);
+      if (a?.session && onOpenConversation) onOpenConversation(a.session);
+    } else window.location.hash = "#" + attentionPath(it);
+    setOpen(false);
+  };
 
   // Where the panel hangs. Measured rather than written in CSS: the status bar
   // wraps to a second row when the pills do not fit, and the bell is not the
@@ -120,12 +152,12 @@ export default function NotificationCenter({
         type="button"
         className={`${variant === "desk" ? "dk-icon dk-bell" : "pill-btn icon-only"} notif-bell${open ? " on" : ""}`}
         onClick={() => setOpen((v) => !v)}
-        title={unread > 0 ? t("{count} unread",{count:unread}) : t("Notifications")}
+        title={badge > 0 ? t("{count} unread",{count:badge}) : t("Notifications")}
         aria-label={t("Notifications")}
         aria-expanded={open}
       >
         <BellIcon size={variant === "desk" ? 18 : 16} />
-        {unread > 0 && <span className="notif-badge">{unread > 99 ? "99+" : unread}</span>}
+        {badge > 0 && <span className={`notif-badge${needItems.length ? " notif-badge-needs" : ""}`}>{badge > 99 ? "99+" : badge}</span>}
       </button>
 
       {open && (
@@ -145,7 +177,30 @@ export default function NotificationCenter({
           </div>
           {error && <div className="notif-empty" role="alert">{t(error)} <button className="notif-action" onClick={() => void reload()}>{t("Retry")}</button></div>}
           <div className="notif-list">
-            {items.length === 0 && !error && (
+            {needItems.map((it, i) => {
+              const approval = it.kind === "approval" ? needs?.approvals.find((a) => a.id === it.ref) : undefined;
+              return (
+                <div key={`need-${it.kind}-${it.ref}-${i}`} className="notif-row notif-warn notif-new notif-need">
+                  <AlertTriangleIcon size={14} className="notif-icon" />
+                  <div className="notif-text">
+                    <div className="notif-row-title">{t(NEEDS_LABEL[it.kind] ?? "Needs attention")}</div>
+                    <div className="notif-message">{attentionTitle(it)}</div>
+                    {approval?.command && <pre className="notif-cmd">{approval.command}</pre>}
+                    <div className="notif-need-actions">
+                      {approval && needs?.onResolve ? (
+                        <>
+                          <button className="notif-action" onClick={() => needs.onResolve!(approval.id, true)}>{t("Allow once")}</button>
+                          <button className="notif-action" onClick={() => needs.onResolve!(approval.id, false)}>{t("Deny")}</button>
+                        </>
+                      ) : (
+                        <button className="notif-action" onClick={() => openNeed(it)}>{t("Open")}</button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+            {items.length === 0 && !error && needItems.length === 0 && (
               <div className="notif-empty">{t(loading ? "Loading…" : "Nothing yet.")}</div>
             )}
             {items.map((n) => {
