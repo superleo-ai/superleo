@@ -61,9 +61,25 @@ function parseCode(code) {
   return m ? { port: Number(m[1]), token: m[2].trim() } : null;
 }
 
+// SuperLeo rewrites this folder when it updates, but Chrome keeps running the
+// code it loaded. A manifest on disk newer than the running one means reload.
+async function reloadIfUpdated() {
+  try {
+    const r = await fetch(chrome.runtime.getURL("manifest.json"), { cache: "no-store" });
+    if (!r.ok) return false;
+    const onDisk = (await r.json())?.version;
+    if (onDisk && onDisk !== VERSION) {
+      chrome.runtime.reload();
+      return true;
+    }
+  } catch (_) {}
+  return false;
+}
+
 async function connect() {
   clearTimeout(retryTimer);
   if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
+  if (await reloadIfUpdated()) return;
   const raw = await loadCode();
   const c = parseCode(raw);
   if (!c) {
@@ -144,6 +160,20 @@ function releaseAll() {
   children.clear();
   discover = false;
   autoAttach = false;
+  tidyGroup().catch(() => {});
+}
+
+// With nobody driving, the SuperLeo tab group should not sit in the tab bar:
+// its blank tabs close, and a page it left open stays, out of the group.
+async function tidyGroup() {
+  for (const tab of await ownedTabs()) {
+    if (isBlank(tab.url)) await chrome.tabs.remove(tab.id).catch(() => {});
+    else await chrome.tabs.ungroup(tab.id).catch(() => {});
+  }
+}
+
+function isBlank(url) {
+  return !url || url === "about:blank" || url.startsWith("chrome://newtab");
 }
 
 chrome.runtime.onMessage.addListener((m, _s, reply) => {

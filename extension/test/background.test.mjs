@@ -42,6 +42,10 @@ async function world({ tabs, groups = [{ id: 10, title: "SuperLeo", windowId: 1 
         w.created.push(t);
         return t;
       },
+      ungroup: async (id) => {
+        w.ungrouped = (w.ungrouped || []).concat(id);
+        w.tabs.find((t) => t.id === id).groupId = -1;
+      },
       group: async ({ tabIds, groupId, createProperties }) => {
         let gid = groupId;
         if (gid === undefined) {
@@ -263,4 +267,24 @@ test("reconnects after the socket drops", async () => {
   assert.equal(w.sockets[1].readyState, 1);
   w.sock = w.sockets[1];
   assert.equal((await w.call("Target.getTargets")).result.targetInfos.length, 1);
+});
+
+test("with nobody driving, the group leaves the tab bar: blank tabs close, pages are ungrouped", async () => {
+  const tabs = [
+    { id: 1, groupId: 10, url: "https://news.ycombinator.com/", title: "HN" },
+    { id: 4, groupId: 10, url: "about:blank", title: "" },
+    { id: 2, groupId: -1, url: "https://mail.example/inbox", title: "Mail" },
+    { id: 3, groupId: 99, url: "https://bank.example/", title: "Bank" },
+  ];
+  const w = await world({ tabs, groups: groups() });
+  w.sock.onmessage({ data: JSON.stringify({ type: "clients", n: 0 }) });
+  await tick();
+  const idle = w.timers.find((t) => t.ms === 15000);
+  assert.ok(idle, "an idle timer is set");
+  idle.f();
+  for (let i = 0; i < 10; i++) await tick();
+  assert.deepEqual(w.removed, [4]);
+  assert.deepEqual(w.ungrouped, [1]);
+  assert.equal(w.tabs.find((t) => t.id === 3).groupId, 99, "other groups are left alone");
+  assert.equal(w.tabs.find((t) => t.id === 2).groupId, -1);
 });
