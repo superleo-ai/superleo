@@ -925,23 +925,47 @@ var windowEmit = func(ctx context.Context, name string, payload map[string]any) 
 func (a *App) emit(name string, payload map[string]any) {
 	payload = a.withTurnSession(name, payload)
 	a.journal().record(name, payload)
-	if a.emitFn != nil {
-		a.emitFn(name, payload)
-	}
 	// In-process listeners: an MCP caller waiting on its answer (mcp_ask.go).
 	a.taps.Range(func(_, fn any) bool {
 		fn.(func(string, map[string]any))(name, payload)
 		return true
 	})
-	if hub := a.companionHub.Load(); hub != nil {
-		hub.broadcast(name, payload)
-	}
+	// The loop's own "done"/"stuck" calls are how a turn ends, not work the
+	// person watches: the phone listed task_complete as a step. The journal,
+	// in-process listeners and the agent link above still see them.
 	if tap := a.agentTap.Load(); tap != nil {
 		(*tap)(name, payload)
+	}
+	if loopCallEvent(name, payload) {
+		return
+	}
+	if a.emitFn != nil {
+		a.emitFn(name, payload)
+	}
+	if hub := a.companionHub.Load(); hub != nil {
+		hub.broadcast(name, payload)
 	}
 	if a.ctx != nil && !a.quietWhileLinked(name) {
 		windowEmit(a.ctx, name, payload)
 	}
+}
+
+// loopCallEvent says whether a chat event is a call to, or the result of,
+// one of the tools that only end a run.
+func loopCallEvent(name string, payload map[string]any) bool {
+	if name != "chat:event" {
+		return false
+	}
+	switch payload["type"] {
+	case "tool_call", "tool_result":
+	default:
+		return false
+	}
+	switch payload["tool"] {
+	case "task_complete", "task_blocked":
+		return true
+	}
+	return false
 }
 
 func (a *App) emitLogin(status, provider, message string) {
