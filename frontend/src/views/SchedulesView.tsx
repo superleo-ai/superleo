@@ -4,7 +4,6 @@ import {
   CancelScheduledRun,
   DeleteScheduledPrompt,
   RunScheduledPromptNow,
-  ScheduleFromText,
   ScheduledPrompts,
   SetScheduledPromptEnabled,
 } from "../../wailsjs/go/app/App";
@@ -15,7 +14,6 @@ import { firstLine, formatStamp, fromNow, parseTime } from "../lib/format";
 import { ScheduleRunLog } from "../lib/useScheduleRuns";
 import { ScheduleRunList } from "../components/ScheduleRuns";
 import { notifyNow, notifyPermission, requestNotifyPermission } from "../lib/notify";
-import { useImeGuard } from "@/lib/ime";
 import { toast } from "../lib/toasts";
 import { useI18n } from "../lib/i18n";
 
@@ -48,19 +46,11 @@ export default function SchedulesView({
   onCount?: (n: number) => void;
 }) {
   const { t } = useI18n();
-  const ime = useImeGuard();
   const [list, setList] = useState<agent.ScheduledPrompt[]>([]);
   const [loading, setLoading] = useState(true);
   const [note, setNote] = useState<Note>(null);
-  const [composing, setComposing] = useState(false);
-  const [prompt, setPrompt] = useState("");
-  // What the agent said about what it arranged. Shown verbatim: it is the only
-  // account of how a sentence was understood.
-  const [reply, setReply] = useState("");
-  const [saving, setSaving] = useState(false);
   const [busy, setBusy] = useState("");
   const [confirmDelete, setConfirmDelete] = useState("");
-  const [fresh, setFresh] = useState("");
   // Folded to one line each; the prompt can run to a page.
   const [open, setOpen] = useState<Set<string>>(() => new Set());
   const toggle = (id: string) =>
@@ -123,55 +113,6 @@ export default function SchedulesView({
     onCount?.(list.length);
   }, [list.length, onCount]);
 
-  const canCreate = prompt.trim() !== "" && !saving;
-
-  /**
-   * Hand the sentence to the agent and let it arrange the schedule.
-   *
-   * Nothing here parses time. "每天早八点" and "工作日下午三点" are the same kind
-   * of thing to a model and were six different controls to a form, and the
-   * agent already owns the tools that write a schedule.
-   */
-  const create = async () => {
-    setSaving(true);
-    setNote(null);
-    setReply("");
-    const known = new Set(list.map((s) => s.id));
-    try {
-      const res: any = await ScheduleFromText(prompt.trim());
-      if (res && res.answer) setReply(String(res.answer));
-      if (res && res.ok === false) {
-        toast.error(String(res.error || "could not arrange that"));
-        return;
-      }
-      const next = await ScheduledPrompts();
-      const rows = Array.isArray(next) ? next : [];
-      setList(rows);
-      // The new row is the confirmation, not the reply: a model that says it
-      // scheduled something and a scheduler that has it are different claims.
-      const created = rows.find((s) => !known.has(s.id));
-      setFresh(created?.id || "");
-      if (created) {
-        const at = parseTime(created.next_run);
-        setNote({
-          kind: "ok",
-          text: at ? `Scheduled. First run ${formatStamp(at)} — ${fromNow(at)}.` : "Scheduled.",
-        });
-        setPrompt("");
-        setComposing(false);
-      } else {
-        setNote({
-          kind: "err",
-          text: "Nothing new is on the schedule — read the reply above and try saying the time more plainly.",
-        });
-      }
-    } catch (e: any) {
-      toast.error(String(e?.message || e));
-    } finally {
-      setSaving(false);
-    }
-  };
-
   // opts.refusalIsFine covers Stop: a stop that lands after the run has already
   // finished is late, not wrong, and the backend says so in words. Painting
   // that reply red would teach the user that the button is broken.
@@ -183,7 +124,6 @@ export default function SchedulesView({
   ) => {
     setBusy(id);
     setNote(null);
-    setFresh("");
     setConfirmDelete("");
     try {
       const res = await call();
@@ -244,15 +184,6 @@ export default function SchedulesView({
           🔔 试一下
         </button>
       )}
-      <button
-        className="btn ghost sm"
-        onClick={() => {
-          setFresh("");
-          setComposing((v) => !v);
-        }}
-      >
-        {composing ? t("Close") : `+ ${t("New scheduled task")}`}
-      </button>
       {/* Wrapped rather than passed directly: onClick would hand load()
           the click event as its `quiet` argument. */}
       <button className="btn ghost sm" onClick={() => load()} disabled={loading}>
@@ -269,52 +200,6 @@ export default function SchedulesView({
 
   const body = (
     <>
-        {composing && (
-          <div className="card" style={{ marginBottom: 14 }}>
-            <div className="card-title">{t("New scheduled task")}</div>
-            <div className="card-desc">
-              Say what SuperLeo should do and when, in one sentence. It works out the timing itself
-              and the answers land in a conversation you can open afterwards.
-            </div>
-            <div className="field">
-              <textarea
-                className="input"
-                rows={3}
-                autoFocus
-                value={prompt}
-                placeholder="每天早八点看看昨天的部署有没有问题，有问题就告诉我"
-                onChange={(e) => setPrompt(e.target.value)}
-                onCompositionStart={ime.handlers.onCompositionStart}
-                onCompositionEnd={ime.handlers.onCompositionEnd}
-                onKeyDown={(e) => {
-                  if (ime.composing(e)) return;
-                  if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && canCreate) create();
-                }}
-              />
-              <span className="hint">
-                一句话说清楚做什么、什么时候做。⌘/Ctrl + Enter 提交。
-              </span>
-            </div>
-
-            {reply && <div className="card-desc" style={{ whiteSpace: "pre-wrap" }}>{reply}</div>}
-
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <button className="btn" onClick={create} disabled={!canCreate}>
-                {saving ? (
-                  <>
-                    <span className="spinner" /> Arranging…
-                  </>
-                ) : (
-                  "Schedule it"
-                )}
-              </button>
-              {prompt.trim() === "" && (
-                <span className="save-note">{t("Say what should happen, and when.")}</span>
-              )}
-            </div>
-          </div>
-        )}
-
         {banners === "denied" && (
           <div className="save-note" style={{ display: "block", marginBottom: 12 }}>
             The browser is blocking notifications. Schedules still run, but nothing pops up
@@ -366,9 +251,7 @@ export default function SchedulesView({
               const isOpen = open.has(s.id);
               return (
                 <div
-                  className={`record-card${s.enabled ? "" : " paused"}${
-                    fresh === s.id ? " fresh" : ""
-                  }`}
+                  className={`record-card${s.enabled ? "" : " paused"}`}
                   key={s.id}
                 >
                   <div
