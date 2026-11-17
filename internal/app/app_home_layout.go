@@ -152,6 +152,13 @@ func (a *App) runHomeLayoutTool(ctx context.Context, args map[string]any) map[st
 		return homeToolResult(st, homeGetNote(st))
 	}
 
+	// Finance switched off takes its widgets with it.
+	if act.Action == "add" && (act.Kind == "portfolio" || act.Kind == "quote") {
+		if cfg := a.GetSettings(); !cfg.FeatureOn(backend.FeatureFinance) {
+			return map[string]any{"ok": false, "error": "finance is switched off in Settings; turn it on to add a " + act.Kind + " widget"}
+		}
+	}
+
 	// A symbol is looked up before the store is locked: the lookup is a
 	// network call, and the phone's own writes should not wait on it.
 	var symbolErr error

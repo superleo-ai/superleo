@@ -157,6 +157,9 @@ func fail(code, msg string) MCPCallResult {
 }
 
 func (m *MCPActions) call(ctx context.Context, server, tool string, args any, opts MCPCallOptions) MCPCallResult {
+	if ServerSwitchedOff(server) {
+		return fail(ActionNotConfigured, server+" is switched off in Settings")
+	}
 	if server == "" || tool == "" {
 		return fail(ActionBadArgs, "server and tool are required")
 	}

@@ -111,6 +111,9 @@ func (a *App) SetBrowserMode(mode string) error {
 	}
 	s := a.GetSettings()
 	s.BrowserMode = mode
+	if mode != backend.BrowserModeOff {
+		s.BrowserLastMode = mode
+	}
 	return a.SaveSettings(s)
 }
 

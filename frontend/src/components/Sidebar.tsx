@@ -20,9 +20,11 @@ import {
   PuzzleIcon,
   SettingsIcon,
   HeartPulseIcon,
+  AlarmClockIcon,
 } from "lucide-react";
 import { ViewKey } from "../lib/types";
 import { openBrowserPanel } from "../lib/browser";
+import { useFeatures, viewShown } from "../lib/features";
 import { useRoom } from "../lib/useViewport";
 
 const served = Boolean((window as unknown as Record<string, unknown>).superleoServed);
@@ -57,6 +59,7 @@ const NAV: {
       { key: "stats", label: "Stats", Icon: ChartColumnIcon, shortcut: "2" },
       { key: "hive", label: "Hive", Icon: HexagonIcon },
       { key: "agents", label: "Bees", Icon: BotIcon },
+      { key: "routines", label: "Scheduled tasks", Icon: AlarmClockIcon },
       { key: "coding", label: "Coding", Icon: TerminalIcon },
       { key: "browser", label: "Browser", Icon: GlobeIcon },
     ],
@@ -105,6 +108,7 @@ export default function Sidebar({
   onToggle: () => void;
 }) {
   const { t } = useI18n();
+  const features = useFeatures();
   // "Collapsed" means two different things depending on how much room there is,
   // and the component used to only know the desktop one. On a desktop it is the
   // 60px icon rail: navigation stays one click away, it just stops spending
@@ -181,7 +185,7 @@ export default function Sidebar({
         {NAV.map((group) => (
           <div key={t(group.section)}>
             {labels && <div className="nav-section">{t(group.section)}</div>}
-            {group.items.map((it) => {
+            {group.items.filter((it) => viewShown(it.key, features)).map((it) => {
               const badge = it.key === "browser" ? 0 : badges?.[it.key] ?? 0;
               const Icon = it.Icon;
               return (

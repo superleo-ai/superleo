@@ -242,17 +242,17 @@ export default function SchedulesView({
           setComposing((v) => !v);
         }}
       >
-        {composing ? "Close" : "+ New routine"}
+        {composing ? t("Close") : `+ ${t("New scheduled task")}`}
       </button>
       {/* Wrapped rather than passed directly: onClick would hand load()
           the click event as its `quiet` argument. */}
       <button className="btn ghost sm" onClick={() => load()} disabled={loading}>
         {loading ? (
           <>
-            <span className="spinner" style={{ borderTopColor: "var(--text-1)" }} /> Loading…
+            <span className="spinner" style={{ borderTopColor: "var(--text-1)" }} /> {t("Loading…")}
           </>
         ) : (
-          "↻ Refresh"
+          `↻ ${t("Refresh")}`
         )}
       </button>
     </div>
@@ -262,7 +262,7 @@ export default function SchedulesView({
     <>
         {composing && (
           <div className="card" style={{ marginBottom: 14 }}>
-            <div className="card-title">{t("New routine")}</div>
+            <div className="card-title">{t("New scheduled task")}</div>
             <div className="card-desc">
               Say what SuperLeo should do and when, in one sentence. It works out the timing itself
               and the answers land in a conversation you can open afterwards.
@@ -337,10 +337,7 @@ export default function SchedulesView({
         {!loading && list.length === 0 && (
           <div className="inline-empty">
             <AlarmClockIcon className="ie-icon" size={22} strokeWidth={1.6} />
-            <div>{t("No routines.")}</div>
-            <div className="ie-hint">
-              Something SuperLeo does on its own every morning, every weekday, or every few hours.
-            </div>
+            <div>{t("No scheduled tasks.")}</div>
           </div>
         )}
 
@@ -504,11 +501,7 @@ export default function SchedulesView({
     <div className="view">
       <div className="view-header with-action">
         <div>
-          <div className="view-title">Schedules{list.length > 0 ? ` (${list.length})` : ""}</div>
-          <div className="view-desc">
-            Prompts SuperLeo runs on a clock, without being asked — “every morning at eight, work out
-            my stock returns and message me”.
-          </div>
+          <div className="view-title">{t("Scheduled tasks")}{list.length > 0 ? ` (${list.length})` : ""}</div>
         </div>
         {actions}
       </div>

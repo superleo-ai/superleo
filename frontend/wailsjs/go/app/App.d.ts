@@ -139,6 +139,8 @@ export function ExportWorkspaceFile(arg1:string):Promise<string>;
 
 export function ExternalAgentsStatus():Promise<Array<backend.ExternalAgentStatus>>;
 
+export function Features():Promise<Record<string, boolean>>;
+
 export function FinanceNews(arg1:string,arg2:number):Promise<any>;
 
 export function FinanceTopics(arg1:string,arg2:string,arg3:number):Promise<any>;
@@ -420,6 +422,8 @@ export function SetDashboardCron(arg1:string,arg2:string):Promise<Record<string,
 export function SetDesktopBlockedApps(arg1:Array<string>,arg2:boolean):Promise<void>;
 
 export function SetDesktopControl(arg1:boolean):Promise<void>;
+
+export function SetFeature(arg1:string,arg2:boolean):Promise<Record<string, boolean>>;
 
 export function SetHomeLayout(arg1:any,arg2:number):Promise<Record<string, any>>;
 

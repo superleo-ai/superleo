@@ -381,6 +381,7 @@ func (a *App) boot() {
 	a.refreshMember()
 	s, _ := backend.LoadSettings() // returns defaults even on error
 	a.settings = s
+	backend.ApplyFeatures(s)
 	// Before anything reaches out: every request from here on asks it.
 	backend.InstallProxy()
 	backend.ApplyProxy(s.Proxy)
@@ -658,6 +659,7 @@ func (a *App) SaveSettings(s backend.Settings) error {
 	a.mu.Lock()
 	a.settings = &s
 	a.mu.Unlock()
+	backend.ApplyFeatures(&s)
 	if phoneLinkSettingsChanged(before, &s) {
 		go a.restartPhoneLink()
 	}

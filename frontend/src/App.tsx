@@ -12,6 +12,7 @@ import HiveView from "./views/HiveView";
 import AgentsView from "./views/AgentsView";
 import StandingView from "./views/StandingView";
 import SchedulesView from "./views/SchedulesView";
+import { Feature, useFeatures } from "./lib/features";
 import SettingsView from "./views/SettingsView";
 import KnowledgeView from "./views/KnowledgeView";
 import ExtensionsView from "./views/ExtensionsView";
@@ -201,11 +202,12 @@ export default function App() {
       <Route path="/tasks" element={<TasksView attention={attention} approvals={approvals.pending} onOpenConversation={openConversation} onResolve={approvals.resolve} />} />
       <Route path="/schedule" element={<ScheduleView />} />
       <Route path="/stats" element={<StatsView />} />
-      <Route path="/wellbeing" element={<WellbeingView />} />
+      <Route path="/wellbeing" element={<FeatureGate feature="wellbeing"><WellbeingView /></FeatureGate>} />
       {/* Everything under /hive is the Hive screen's own to route:
           the overview, and one page per task. */}
       <Route path="/hive/*" element={<HiveView />} />
-      <Route path="/agents" element={<StandingView><SchedulesView embedded status={status} log={runs} onOpenConversation={openConversation} /></StandingView>} />
+      <Route path="/agents" element={<StandingView />} />
+      <Route path="/routines" element={<SchedulesView status={status} log={runs} onOpenConversation={openConversation} />} />
       <Route path="/coding" element={<AgentsView />} />
       <Route path="/settings" element={<SettingsView onSaved={refreshStatus} theme={theme} onTheme={setTheme} accent={accent} onAccent={setAccent} />} />
       <Route path="/knowledge" element={<KnowledgeView />} />
@@ -315,4 +317,11 @@ export default function App() {
       />
     </>
   );
+}
+
+/** A feature's page: off, opening it goes home instead. */
+function FeatureGate({ feature, children }: { feature: Feature; children: React.ReactNode }) {
+  const f = useFeatures();
+  if (!f) return null;
+  return f[feature] ? <>{children}</> : <Navigate to="/" replace />;
 }

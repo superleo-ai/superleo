@@ -297,6 +297,7 @@ func NewService(s *Settings) (*Service, error) {
 	// prompt says so (notedSection); with Vita, health does (vitaSection).
 	_, notedMissing, _, notedConfigured := findMCPServer(MCPConfigSources(), NotedServer, os.LookupEnv)
 	notedConfigured = notedConfigured && len(notedMissing) == 0
+	applyFeatures(s)
 	_, vitaMissing, _, vitaConfigured := findMCPServer(MCPConfigSources(), VitaServer, os.LookupEnv)
 	vitaConfigured = vitaConfigured && len(vitaMissing) == 0
 	b := agent.New("SuperLeo").

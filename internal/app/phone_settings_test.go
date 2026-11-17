@@ -148,3 +148,33 @@ func TestDeviceCannotReadTheSettingsFile(t *testing.T) {
 		t.Fatalf("PhoneSettings from a device: %d", rec.Code)
 	}
 }
+
+// The phone reads every feature and switches them through features.
+func TestPhoneSettingsFeatures(t *testing.T) {
+	t.Setenv("SUPERLEO_HOME", t.TempDir())
+	t.Setenv("SUPERLEO_BROWSER_MODE", "")
+	t.Setenv("SUPERLEO_DESKTOP", "")
+	app := NewApp()
+	app.settings = phoneTestSettings()
+	v := app.PhoneSettings()
+	if !v.Features["wellbeing"] || !v.Features["finance"] || v.Features["browser"] {
+		t.Fatalf("features: %v", v.Features)
+	}
+	v, err := app.PatchPhoneSettings(map[string]any{"features": map[string]any{"finance": false, "desktop": true}, "pii_redaction": true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v.Features["finance"] || !v.Features["desktop"] || !v.PIIRedaction {
+		t.Fatalf("after patch: %+v", v)
+	}
+	if s := app.GetSettings(); len(s.FeaturesOff) != 1 || !s.DesktopControl {
+		t.Fatalf("saved: %v %v", s.FeaturesOff, s.DesktopControl)
+	}
+	if _, err := app.PatchPhoneSettings(map[string]any{"features": map[string]any{"nope": true}}); err == nil {
+		t.Fatal("an unknown feature was taken")
+	}
+	if _, err := app.PatchPhoneSettings(map[string]any{"features": map[string]any{"finance": "yes"}}); err == nil {
+		t.Fatal("a non-bool was taken")
+	}
+	backend.ApplyFeatures(&backend.Settings{})
+}

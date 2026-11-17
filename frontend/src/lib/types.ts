@@ -14,6 +14,7 @@ export type ViewKey =
   | "records"
   | "hive"
   | "agents"
+  | "routines"
   | "coding"
   | "tasks"
   | "schedule"

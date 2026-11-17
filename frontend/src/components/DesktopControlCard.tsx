@@ -112,13 +112,13 @@ export default function DesktopControlCard({ onChanged, onBlockedChanged }: {
   const sub = err || st?.error || (on && st?.ready && st.version ? `agent-desktop ${st.version}` : "");
   return (
     <>
-      <Row label="Desktop apps" testId="desktop-control-card"
+      <Row label="Mac apps" testId="desktop-control-card"
         sub={sub ? <span className={err || st?.error ? "st-note bad" : undefined}>{sub}</span> : undefined}>
         {state}
         {needsAccess && (
           <Btn disabled={asking} onClick={() => void ask()} data-testid="desktop-grant">{asking ? "Opening…" : "Grant access"}</Btn>
         )}
-        <Toggle label="Desktop apps" on={on} disabled={busy || !st} onChange={(v) => void pick(v)} testId="desktop-switch" />
+        <Toggle label="Mac apps" on={on} disabled={busy || !st} onChange={(v) => void pick(v)} testId="desktop-switch" />
       </Row>
       {on && st && (
         <Row stack label={

@@ -2416,6 +2416,7 @@ export namespace app {
 	    hive_role: string;
 	    phone_relay: string;
 	    phone_urls: string[];
+	    features: Record<string, boolean>;
 	    secrets: Record<string, boolean>;
 	
 	    static createFrom(source: any = {}) {
@@ -2446,6 +2447,7 @@ export namespace app {
 	        this.hive_role = source["hive_role"];
 	        this.phone_relay = source["phone_relay"];
 	        this.phone_urls = source["phone_urls"];
+	        this.features = source["features"];
 	        this.secrets = source["secrets"];
 	    }
 	
@@ -4547,7 +4549,9 @@ export namespace backend {
 	    long_task_max_tokens?: number;
 	    disable_browser: boolean;
 	    browser_mode?: string;
+	    browser_last_mode?: string;
 	    desktop_control?: boolean;
+	    features_off?: string[];
 	    desktop_blocked_apps: string[];
 	    start_at_login?: boolean;
 	    desktop_keep_running?: boolean;
@@ -4620,7 +4624,9 @@ export namespace backend {
 	        this.long_task_max_tokens = source["long_task_max_tokens"];
 	        this.disable_browser = source["disable_browser"];
 	        this.browser_mode = source["browser_mode"];
+	        this.browser_last_mode = source["browser_last_mode"];
 	        this.desktop_control = source["desktop_control"];
+	        this.features_off = source["features_off"];
 	        this.desktop_blocked_apps = source["desktop_blocked_apps"];
 	        this.start_at_login = source["start_at_login"];
 	        this.desktop_keep_running = source["desktop_keep_running"];

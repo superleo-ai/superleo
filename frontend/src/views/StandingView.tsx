@@ -124,9 +124,7 @@ function until(ms: number) {
  * it spoke, and who is waiting for you. The track is the page; everything
  * else is quiet.
  */
-/** `children` is what else runs on its own: the recurring routines, drawn by
- *  their own view and passed in by the app, which holds what they need. */
-export default function StandingView({ children }: { children?: React.ReactNode }) {
+export default function StandingView() {
   const { t } = useI18n();
   const [agents, setAgents] = useState<View[]>([]);
   const [wakes, setWakes] = useState<Mark[]>([]);
@@ -241,13 +239,6 @@ export default function StandingView({ children }: { children?: React.ReactNode 
             </React.Fragment>
           ))}
         </div>
-      )}
-
-      {children && (
-        <section className="wt-routines">
-          <h2>{t("Routines")}</h2>
-          {children}
-        </section>
       )}
 
       {editing && (

@@ -31,5 +31,3 @@
 .ay-del.sure { color: #fff; background: #d0313f; }
 
 /* The Bees page: what else runs on its own, below the bees. */
-.wt-routines { margin: 32px 32px 0; }
-.wt-routines > h2 { font-size: 15px; font-weight: 650; margin: 0 0 10px; color: var(--text-0); }

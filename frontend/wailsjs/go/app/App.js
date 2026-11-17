@@ -266,6 +266,10 @@ export function ExternalAgentsStatus() {
   return window['go']['app']['App']['ExternalAgentsStatus']();
 }
 
+export function Features() {
+  return window['go']['app']['App']['Features']();
+}
+
 export function FinanceNews(arg1, arg2) {
   return window['go']['app']['App']['FinanceNews'](arg1, arg2);
 }
@@ -828,6 +832,10 @@ export function SetDesktopBlockedApps(arg1, arg2) {
 
 export function SetDesktopControl(arg1) {
   return window['go']['app']['App']['SetDesktopControl'](arg1);
+}
+
+export function SetFeature(arg1, arg2) {
+  return window['go']['app']['App']['SetFeature'](arg1, arg2);
 }
 
 export function SetHomeLayout(arg1, arg2) {

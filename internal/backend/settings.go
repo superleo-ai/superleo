@@ -161,9 +161,16 @@ type Settings struct {
 	// person's own Chrome, "own" in one it launches, "off" — the default —
 	// has none.
 	BrowserMode string `json:"browser_mode,omitempty"`
+	// BrowserLastMode is the mode the browser was last on in, so switching
+	// it off and on again (features.go) brings back the same one.
+	BrowserLastMode string `json:"browser_last_mode,omitempty"`
 	// DesktopControl lets the agent operate this machine's desktop apps
 	// through their accessibility trees (desktop.go). Off unless chosen.
 	DesktopControl bool `json:"desktop_control,omitempty"`
+	// FeaturesOff names the features switched off that are otherwise on:
+	// "wellbeing", "finance" (features.go). Off, a feature is hidden
+	// everywhere and its tools are not mounted.
+	FeaturesOff []string `json:"features_off,omitempty"`
 	// DesktopBlockedApps are the apps desktop control leaves alone; null,
 	// desktopBlockedDefault (messages, mail, password stores, terminals,
 	// System Settings). Not omitempty: an emptied list is the person saying

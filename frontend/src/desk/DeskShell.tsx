@@ -4,7 +4,7 @@ import {
   ListTodoIcon, LayoutDashboardIcon, ChartColumnIcon, PanelRightOpenIcon, PanelRightCloseIcon, BookOpenIcon, BotIcon, HexagonIcon, MessageSquareIcon, PaletteIcon,
   NotebookTabsIcon, MessagesSquareIcon, PuzzleIcon, SlidersHorizontalIcon, TerminalIcon, XIcon,
   MoonIcon, SunIcon, CalendarDaysIcon, GlobeIcon,
-  HeartPulseIcon,
+  HeartPulseIcon, AlarmClockIcon,
 } from "lucide-react";
 import DeskStatusBar from "./DeskStatusBar";
 import World from "../world/World";
@@ -20,6 +20,7 @@ import ThemePanel from "../canvas/ThemePanel";
 import { ChatFab, ConversationsFab, FabStack, ModeFab, SettingsFab } from "../components/Fabs";
 import { askToCompose } from "../lib/compose";
 import { openBrowserPanel, useBrowserPanelOpen } from "../lib/browser";
+import { useFeatures, viewShown } from "../lib/features";
 import "../canvas/canvas.css";
 import "./desk.css";
 
@@ -63,6 +64,7 @@ const RAIL: { key: ViewKey; label: string; Icon: typeof HexagonIcon; cls: string
   { key: "tasks", label: "Needs your attention", Icon: ListTodoIcon, cls: "dk-a-later" },
   { key: "hive", label: "Hive", Icon: HexagonIcon, cls: "dk-a-hive" },
   { key: "agents", label: "Bees", Icon: BotIcon, cls: "dk-a-bees" },
+  { key: "routines", label: "Scheduled tasks", Icon: AlarmClockIcon, cls: "dk-a-sched" },
   { key: "coding", label: "Coding", Icon: TerminalIcon, cls: "dk-a-code" },
   { key: "knowledge", label: "Knowledge", Icon: BookOpenIcon, cls: "dk-a-know" },
   { key: "records", label: "Records", Icon: NotebookTabsIcon, cls: "dk-a-rec" },
@@ -73,7 +75,7 @@ const RAIL: { key: ViewKey; label: string; Icon: typeof HexagonIcon; cls: string
 const SIDE: ViewKey[] = ["dashboards", "stats"];
 
 export const TITLES: Record<ViewKey, string> = {
-  home: "", chat: "Chat", conversations: "Conversations", tasks: "Needs your attention", schedule: "Schedule", dashboards: "Dashboards", wellbeing: "Wellbeing", hive: "Hive", agents: "Bees", coding: "Coding", knowledge: "Knowledge",
+  home: "", chat: "Chat", conversations: "Conversations", tasks: "Needs your attention", schedule: "Schedule", dashboards: "Dashboards", wellbeing: "Wellbeing", hive: "Hive", agents: "Bees", routines: "Scheduled tasks", coding: "Coding", knowledge: "Knowledge",
   skills: "Skills", mcp: "MCP", stats: "Stats", records: "Records", settings: "Settings",
 };
 
@@ -86,6 +88,7 @@ export const TITLES: Record<ViewKey, string> = {
 export default function DeskShell({ view, badges, children, overlay, onOpenConversation, status, loading }: { view: ViewKey; overlay?: React.ReactNode; badges?: Partial<Record<ViewKey, number>>; children: React.ReactNode; onOpenConversation?: (session: string) => void; status:AppStatus|null; loading:boolean }) {
   const { t } = useI18n();
   const browserOn = useBrowserPanelOpen();
+  const features = useFeatures();
   const queen = useQueenName();
   const navigate = useNavigate();
   const [theme, setThemeState] = useState<CanvasTheme>(loadTheme);
@@ -233,7 +236,7 @@ export default function DeskShell({ view, badges, children, overlay, onOpenConve
           <NotificationCenter variant="desk" onOpenConversation={onOpenConversation} />
         </div>}
         <nav className="dk-rail" style={drag}>
-          {RAIL.map(({ key, label, Icon, cls }) => (
+          {RAIL.filter(({ key }) => viewShown(key, features)).map(({ key, label, Icon, cls }) => (
             <button key={key} title={key === "home" ? queenTitle(queen) : t(label)} style={noDrag} className={`dk-app ${cls} ${view === key || (key === "skills" && view === "mcp") || (key === "home" && view === "chat") ? "on" : ""}`}
               onClick={() => navigate(PATHS[key])}>
               <Icon size={21} strokeWidth={2} />
@@ -242,9 +245,11 @@ export default function DeskShell({ view, badges, children, overlay, onOpenConve
           ))}
           {/* The browser the agent drives, live, whenever you want to look
               or take it over; a panel over whatever page you are on. */}
-          <button title={t("Browser")} style={noDrag} className={`dk-app dk-a-web${browserOn ? " on" : ""}`} onClick={openBrowserPanel} data-testid="rail-browser">
-            <GlobeIcon size={20} strokeWidth={2} />
-          </button>
+          {features?.browser && (
+            <button title={t("Browser")} style={noDrag} className={`dk-app dk-a-web${browserOn ? " on" : ""}`} onClick={openBrowserPanel} data-testid="rail-browser">
+              <GlobeIcon size={20} strokeWidth={2} />
+            </button>
+          )}
           <span className="dk-sp" />
           <button title={t("Theme")} style={noDrag} className={`dk-app dk-a-mode${theming ? " on" : ""}`} onClick={() => setTheming((v) => !v)}>
             <PaletteIcon size={19} />

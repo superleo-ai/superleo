@@ -14,6 +14,7 @@ import QueenEngineCard from "../components/QueenEngineCard";
 import ProxyCard from "../components/ProxyCard";
 import BrowserModeCard from "../components/BrowserModeCard";
 import DesktopControlCard from "../components/DesktopControlCard";
+import FeatureRow from "../components/FeatureRow";
 import AddAgentCard from "../components/AddAgentCard";
 import AddWorkerCard from "../components/AddWorkerCard";
 import CodingToolsCard from "../components/settings/CodingToolsCard";
@@ -654,14 +655,20 @@ export default function SettingsView({ onSaved, theme, onTheme, accent, onAccent
           {/* ── Abilities: what it can reach, and who else it can hand work to ── */}
           {section === "abilities" && (
             <>
-              <Group icon={LaptopIcon} title="Computer">
-                {/* Both apply at once, so the page's own copy is told too: a
-                    later Save must not put the old value back. */}
-                <BrowserModeCard onChanged={(mode) => absorbFields({ browser_mode: mode })} />
+              <Group icon={LaptopIcon} title="Features" testId="features-group">
+                {/* Each applies at once, so the page's own copy is told too: a
+                    later Save must not put the old value back. Off, a feature
+                    is hidden everywhere and its tools are gone. */}
+                <BrowserModeCard lastMode={s.browser_last_mode}
+                  onChanged={(mode) => absorbFields(mode === "off" ? { browser_mode: mode } : { browser_mode: mode, browser_last_mode: mode })} />
                 <DesktopControlCard
                   onChanged={(on) => absorbFields({ desktop_control: on })}
                   onBlockedChanged={(list) => absorbFields({ desktop_blocked_apps: list })}
                 />
+                {(["wellbeing", "finance"] as const).map((f) => (
+                  <FeatureRow key={f} feature={f} label={f === "wellbeing" ? "Wellbeing" : "Finance"}
+                    onChanged={(off) => absorbFields({ features_off: off.length ? off : null })} />
+                ))}
               </Group>
 
               <CodingToolsCard />

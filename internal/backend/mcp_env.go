@@ -161,7 +161,15 @@ func resolveMCPConfig(src string, lookup func(string) (string, bool)) (string, e
 	}
 	hasRefs := mcpEnvRef.Match(raw)
 	ownBrowser := browserBuiltin.Load() && strings.Contains(string(raw), "agent-browser")
-	if !hasRefs && !ownBrowser && !strings.Contains(string(raw), "npx") {
+	switchedOff := false
+	if m := serversOff.Load(); m != nil {
+		for name := range *m {
+			if strings.Contains(string(raw), `"`+name+`"`) {
+				switchedOff = true
+			}
+		}
+	}
+	if !hasRefs && !ownBrowser && !switchedOff && !strings.Contains(string(raw), "npx") {
 		return src, nil
 	}
 	var f struct {
@@ -176,6 +184,13 @@ func resolveMCPConfig(src string, lookup func(string) (string, bool)) (string, e
 	out := map[string]map[string]any{}
 	localized := false
 	for name, entry := range f.MCPServers {
+		// A server whose feature the person switched off is not mounted:
+		// its tools must not reach the model.
+		if ServerSwitchedOff(name) {
+			slog.Info("mcp server left out: its feature is off", "server", name)
+			localized = true
+			continue
+		}
 		// The built-in browser is this agent-browser, with a stream the
 		// page can show; a second one from the file would only compete.
 		if ownBrowser && isUserBrowserEntry(name, entry) {
@@ -233,6 +248,9 @@ func findMCPServer(sources []string, name string, lookup func(string) (string, b
 			continue
 		}
 		if e, found := f.MCPServers[name]; found {
+			if ServerSwitchedOff(name) {
+				return nil, nil, "", false
+			}
 			resolved, miss := expandMCPEntry(e, lookup)
 			return resolved, miss, src, true
 		}

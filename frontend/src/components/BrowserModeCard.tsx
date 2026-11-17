@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { translate } from "../lib/i18n";
 import { setBrowserMode, useBrowserStatus, useBrowserSwitching } from "../lib/browser";
-import { Row, Seg } from "./settings/kit";
+import { Row, Seg, Toggle } from "./settings/kit";
 
 /** Copies a value and says so for a moment. */
 function CopyButton({ value, label }: { value: string; label: string }) {
@@ -19,20 +19,20 @@ function CopyButton({ value, label }: { value: string; label: string }) {
 }
 
 const MODES = [
-  { value: "off", label: "Off" },
   { value: "chrome", label: "My Chrome" },
   { value: "own", label: "Separate browser" },
 ] as const;
 
-type Mode = (typeof MODES)[number]["value"];
+type Mode = "off" | (typeof MODES)[number]["value"];
 
 /**
- * Which browser the agent drives: none, the person's own Chrome (with their
- * sign-ins), or a separate one agent-browser launches. Applied at once, not
+ * Whether the agent has a browser, and which: the person's own Chrome (with
+ * their sign-ins) or a separate one agent-browser launches. Switched on, it
+ * comes back in the mode it was last in (lastMode). Applied at once, not
  * with the page's Save: the backend rebuilds around it, and the line under
  * the name follows it until the browser is up.
  */
-export default function BrowserModeCard({ onChanged }: { onChanged?: (mode: string) => void }) {
+export default function BrowserModeCard({ onChanged, lastMode }: { onChanged?: (mode: string) => void; lastMode?: string }) {
   const st = useBrowserStatus();
   const switching = useBrowserSwitching();
   const [err, setErr] = useState("");
@@ -55,7 +55,11 @@ export default function BrowserModeCard({ onChanged }: { onChanged?: (mode: stri
     <>
       <Row label="Browser" testId="browser-mode-card"
         sub={state ? <span className={bad ? "st-note bad" : undefined}>{state}</span> : undefined}>
-        <Seg label="Browser" value={current} options={[...MODES]} disabled={!!switching} onChange={(m) => void pick(m)} />
+        {current !== "off" && (
+          <Seg label="Browser" value={current} options={[...MODES]} disabled={!!switching} onChange={(m) => void pick(m)} />
+        )}
+        <Toggle label="Browser" on={current !== "off"} testId="feature-browser"
+          onChange={(on) => void pick(on ? (lastMode === "chrome" ? "chrome" : "own") : "off")} />
       </Row>
       {bridge && (
         <>

@@ -46,6 +46,10 @@ type PhoneSettingsView struct {
 	PhoneRelay        string            `json:"phone_relay"`
 	PhoneURLs         []string          `json:"phone_urls"`
 
+	// Features is each switchable part by name (browser, desktop, wellbeing,
+	// finance); the phone hides what is off.
+	Features map[string]bool `json:"features"`
+
 	// Secrets says which secrets are set, by their settings key.
 	Secrets map[string]bool `json:"secrets"`
 }
@@ -97,6 +101,7 @@ func phoneSettingsOf(s backend.Settings) PhoneSettingsView {
 		RemoteAgents:    PhoneRemoteAgents{Enabled: s.RemoteAgents.Enabled, Agents: []PhoneRemoteAgent{}},
 		HiveRole:        s.Hive.Role,
 		PhoneRelay:      s.PhoneRelay, PhoneURLs: nonNilStrings(s.PhoneURLs),
+		Features:        s.Features(),
 		Secrets: map[string]bool{
 			"llm_key":             s.LLMKey != "",
 			"embed_key":           s.EmbedKey != "",
@@ -144,9 +149,30 @@ func (a *App) PhoneSettings() PhoneSettingsView {
 // PatchPhoneSettings applies a merge patch of the fields PhoneSettings shows
 // and returns them as saved. Anything else in it is refused whole.
 func (a *App) PatchPhoneSettings(patch map[string]any) (PhoneSettingsView, error) {
-	clean, err := phonePatch(a.GetSettings(), patch)
+	features, rest, err := phoneFeatures(patch)
 	if err != nil {
 		return PhoneSettingsView{}, err
+	}
+	clean, err := phonePatch(a.GetSettings(), rest)
+	if err != nil {
+		return PhoneSettingsView{}, err
+	}
+	if len(features) > 0 {
+		// Applied to the settings as they are, then saved with the rest.
+		cur := a.GetSettings()
+		next, err := mergeSettingsPatch(cur, clean)
+		if err != nil {
+			return PhoneSettingsView{}, err
+		}
+		for _, name := range backend.FeatureNames {
+			if on, ok := features[name]; ok {
+				next.SetFeature(name, on)
+			}
+		}
+		if err := a.SaveSettings(next); err != nil {
+			return PhoneSettingsView{}, err
+		}
+		return a.PhoneSettings(), nil
 	}
 	if len(clean) == 0 {
 		return a.PhoneSettings(), nil
@@ -277,4 +303,39 @@ func phonePatch(cur backend.Settings, patch map[string]any) (map[string]any, err
 		}
 	}
 	return out, nil
+}
+
+// phoneFeatures takes the features out of a phone's patch: an object of
+// feature names to true or false. The rest goes through phonePatch.
+func phoneFeatures(patch map[string]any) (map[string]bool, map[string]any, error) {
+	raw, ok := patch["features"]
+	if !ok {
+		return nil, patch, nil
+	}
+	m, ok := raw.(map[string]any)
+	if !ok {
+		return nil, nil, fmt.Errorf("features must be an object")
+	}
+	known := map[string]bool{}
+	for _, n := range backend.FeatureNames {
+		known[n] = true
+	}
+	out := map[string]bool{}
+	for k, v := range m {
+		if !known[k] {
+			return nil, nil, fmt.Errorf("no feature called %s", k)
+		}
+		b, ok := v.(bool)
+		if !ok {
+			return nil, nil, fmt.Errorf("features.%s must be true or false", k)
+		}
+		out[k] = b
+	}
+	rest := make(map[string]any, len(patch))
+	for k, v := range patch {
+		if k != "features" {
+			rest[k] = v
+		}
+	}
+	return out, rest, nil
 }
