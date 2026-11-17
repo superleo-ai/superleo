@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  ListTodoIcon, LayoutDashboardIcon, ChartColumnIcon, PanelRightOpenIcon, PanelRightCloseIcon, BookOpenIcon, BotIcon, HexagonIcon, MessageSquareIcon, PaletteIcon,
+  ListTodoIcon, LayoutDashboardIcon, ChartColumnIcon, PanelRightOpenIcon, PanelRightCloseIcon, BookOpenIcon, HexagonIcon, MessageSquareIcon, PaletteIcon,
   NotebookTabsIcon, MessagesSquareIcon, PuzzleIcon, SlidersHorizontalIcon, TerminalIcon, XIcon,
   MoonIcon, SunIcon, CalendarDaysIcon, GlobeIcon,
   HeartPulseIcon, AlarmClockIcon,
@@ -63,7 +63,6 @@ const RAIL: { key: ViewKey; label: string; Icon: typeof HexagonIcon; cls: string
   { key: "wellbeing", label: "Wellbeing", Icon: HeartPulseIcon, cls: "dk-a-sched" },
   { key: "tasks", label: "Needs your attention", Icon: ListTodoIcon, cls: "dk-a-later" },
   { key: "hive", label: "Hive", Icon: HexagonIcon, cls: "dk-a-hive" },
-  { key: "agents", label: "Bees", Icon: BotIcon, cls: "dk-a-bees" },
   { key: "routines", label: "Scheduled tasks", Icon: AlarmClockIcon, cls: "dk-a-sched" },
   { key: "coding", label: "Coding", Icon: TerminalIcon, cls: "dk-a-code" },
   { key: "knowledge", label: "Knowledge", Icon: BookOpenIcon, cls: "dk-a-know" },
