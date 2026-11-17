@@ -6,28 +6,23 @@ import { Life } from "../../wailsjs/go/app/App";
 import { backend } from "../../wailsjs/go/models";
 import { AppStatus } from "../lib/types";
 import { ScheduleRunLog } from "../lib/useScheduleRuns";
-import SchedulesView from "./SchedulesView";
-import { AlarmClockIcon, CalendarClockIcon, NotebookPenIcon, UserIcon, type LucideIcon } from "lucide-react";
+import { NotebookPenIcon, UserIcon, type LucideIcon } from "lucide-react";
 
 // The tab keyed "records" is labelled Notes, and used to be keyed that way
 // too — inside a page that is itself called Records. Two different things with
 // one name, one nested in the other. The key follows the label now; the backend
 // field it reads is still `records`, which is where the name came from and the
 // one place it is not ambiguous.
-type TabKey = "schedules" | "notes" | "persons" | "reminders";
+type TabKey = "notes" | "persons";
 
 const TABS: { key: TabKey; label: string; icon: LucideIcon }[] = [
-  { key: "schedules", label: "Schedules", icon: CalendarClockIcon },
   { key: "notes", label: "Notes", icon: NotebookPenIcon },
   { key: "persons", label: "People", icon: UserIcon },
-  { key: "reminders", label: "Reminders", icon: AlarmClockIcon },
 ];
 
 const EMPTY_HINT: Record<TabKey, string> = {
-  schedules: "No schedules yet — ask SuperLeo in Chat to add one.",
   notes: "No notes yet — ask SuperLeo in Chat to keep notes for you.",
   persons: "No people yet — mention someone in Chat and SuperLeo will remember them.",
-  reminders: "No reminders yet — ask SuperLeo in Chat to remind you of something.",
 };
 
 // Known display fields, in priority order, for loose map[string]any objects.
@@ -118,12 +113,10 @@ export default function RecordsView({
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string>("");
   const [params] = useSearchParams();
-  const [tab, setTab] = useState<TabKey>(() => params.get("tab") === "reminders" ? "reminders" : "schedules");
-  useEffect(() => { if (params.get("tab") === "reminders") setTab("reminders"); }, [params]);
+  const [tab, setTab] = useState<TabKey>("notes");
   // The scheduler's own count, reported by the view that owns it. Life() has a
   // schedules field too, but it is a second answer to the same question and the
   // two drift.
-  const [scheduleCount, setScheduleCount] = useState(0);
   const stripRef = useRef<HTMLDivElement | null>(null);
   // Whether the strip is scrolled to its right end, which is what takes the
   // edge fade off. Settings' strip answers the same question the same way; two
@@ -186,10 +179,8 @@ export default function RecordsView({
   const personEntries = Object.entries(persons);
 
   const count: Record<TabKey, number> = {
-    schedules: scheduleCount + schedules.length,
     notes: records.length,
     persons: personEntries.length,
-    reminders: reminders.length,
   };
 
   const renderArrayTab = (items: any[], key: TabKey, icon: LucideIcon) => {
@@ -208,12 +199,9 @@ export default function RecordsView({
       <div className="view-header with-action">
         <div>
           <div className="view-title">{t("Records")}</div>
-          <div className="view-desc">{t("Schedules, notes, people and reminders SuperLeo keeps for you. Edits happen via Chat.")}</div>
+          <div className="view-desc">{t("Notes and people SuperLeo keeps for you. Edits happen via Chat.")}</div>
         </div>
-        {/* The Schedules tab reloads itself from the scheduler and has its own
-            button. Showing this one too would stack two Refreshes that refresh
-            different things. */}
-        {tab !== "schedules" && (
+        {(
           <div className="vh-actions">
             <button className="btn ghost sm" onClick={load} disabled={loading}>
               {loading ? <><span className="spinner" style={{ borderTopColor: "var(--text-1)" }} /> Loading…</> : "↻ Refresh"}
@@ -251,20 +239,7 @@ export default function RecordsView({
         )}
         {!err && data && (
           <>
-            {tab === "schedules" && (
-              <>
-              <CalendarAgenda items={schedules}/>
-              <SchedulesView
-                embedded
-                status={status}
-                log={log}
-                onOpenConversation={onOpenConversation}
-                onCount={setScheduleCount}
-              />
-              </>
-            )}
             {tab === "notes" && renderArrayTab(records, "notes", NotebookPenIcon)}
-            {tab === "reminders" && renderArrayTab(reminders, "reminders", AlarmClockIcon)}
             {tab === "persons" &&
               (personEntries.length === 0 ? (
                 <InlineEmpty icon={UserIcon} hint={EMPTY_HINT.persons} />

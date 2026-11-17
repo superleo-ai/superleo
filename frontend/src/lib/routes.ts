@@ -53,7 +53,7 @@ export function attentionPath(item: { kind: string; open?: string; ref?: string 
   if (item.kind === "failed" && item.ref) return taskPath(item.ref);
   if (item.open === "agents") return PATHS.agents + (item.ref ? `?agent=${encodeURIComponent(item.ref)}` : "");
   if (item.open === "coding") return PATHS.coding + (item.ref ? `?run=${encodeURIComponent(item.ref)}` : "");
-  if (item.kind === "reminder") return PATHS.records + "?tab=reminders";
+  if (item.kind === "reminder") return PATHS.routines;
   if (item.open === "records") return PATHS.records;
   return PATHS.hive;
 }

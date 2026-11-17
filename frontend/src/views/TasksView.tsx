@@ -32,7 +32,9 @@ export default function TasksView({attention, approvals, onOpenConversation, onR
     document.querySelector(".attention-card.on")?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [sel]);
   const items = attention.items.filter(i=>i.level==="needs" && i.kind!=="reminder");
-  const reminders = attention.items.filter(i => i.kind === "reminder");
+  // Upcoming reminders are scheduled tasks, listed on their own page; this one
+  // is only what needs a decision, a reply or a look now.
+  const reminders: typeof attention.items = [];
   const order = ["approval","bee","report","failed","run","lost"];
   const sorted = [...items].sort((a,b) => (order.includes(a.kind) ? order.indexOf(a.kind) : 99) - (order.includes(b.kind) ? order.indexOf(b.kind) : 99));
   const open = (it: AttentionItem) => {
@@ -43,9 +45,9 @@ export default function TasksView({attention, approvals, onOpenConversation, onR
     } else navigate(attentionPath(it));
   };
   return <div className="attention-view">
-    <header className="attention-heading"><span className={`attention-symbol${items.length ? " urgent" : ""}`}><BellIcon size={24}/></span><div><h1>{t("Needs your attention")}</h1><p>{items.length ? t("{count} items need a decision, a reply or an investigation.", {count:items.length}) : t("Decisions, issues and reminders that need your attention appear here.")}</p></div><button className="attention-refresh" onClick={attention.refresh}>{t("Refresh")}</button></header>
+    <header className="attention-heading"><span className={`attention-symbol${items.length ? " urgent" : ""}`}><BellIcon size={24}/></span><div><h1>{t("Needs your attention")}</h1><p>{items.length ? t("{count} items need a decision, a reply or an investigation.", {count:items.length}) : t("Decisions and issues that need your attention appear here.")}</p></div><button className="attention-refresh" onClick={attention.refresh}>{t("Refresh")}</button></header>
     {attention.error && <div className="attention-error" role="alert">{t(attention.error)} <button onClick={attention.refresh}>{t("Retry")}</button></div>}
-    {!attention.error && !items.length && !reminders.length && <div className="attention-empty"><CheckCircleIcon size={36}/><h2>{t(attention.loading ? "Checking what needs you…" : "Nothing needs your attention")}</h2><p>{t("Approval requests, agents waiting for a reply, failed tasks, offline workers and reminders will appear here automatically.")}</p></div>}
+    {!attention.error && !items.length && !reminders.length && <div className="attention-empty"><CheckCircleIcon size={36}/><h2>{t(attention.loading ? "Checking what needs you…" : "Nothing needs your attention")}</h2><p>{t("Approval requests, agents waiting for a reply, failed tasks and offline workers will appear here automatically.")}</p></div>}
     {items.length > 0 && <h2 className="attention-section-title">{t("Needs action")} <span>{items.length}</span></h2>}
     <div className="attention-cards">{[...sorted, ...reminders].map((it,index)=>{
       const type=TYPES[it.kind] ?? {label:"Needs attention",action:"Open details",Icon:BellIcon};

@@ -47,11 +47,11 @@ test('repeated reports keep newest update and each independent agent, without sw
  assert.equal(result.length,5);assert.equal(result[0].title,'new');assert.equal(result[0].updates,2);
  assert.equal(result[1].ref,'ask-1');assert.equal(result[2].ref,'bee-b');assert.equal(input[0].title,'old');assert.equal(input[0].updates,undefined);
 });
-test('attention links preserve target identity and reminder tab',()=>{
+test('attention links preserve target identity; a reminder opens scheduled tasks',()=>{
  assert.equal(attentionPath({kind:'report',open:'agents',ref:'a/b'}),'/agents?agent=a%2Fb');
  assert.equal(attentionPath({kind:'run',open:'coding',ref:'run 1'}),'/coding?run=run%201');
  assert.equal(attentionPath({kind:'failed',open:'hive',ref:'failed-1'}),'/hive/tasks/failed-1');
- assert.equal(attentionPath({kind:'reminder',open:'records'}),'/records?tab=reminders');
+ assert.equal(attentionPath({kind:'reminder',open:'records'}),'/routines');
  assert.equal(viewOf('/mcp'),'mcp');
 });
 test('language changes persist and preserve user-written content',()=>{
@@ -94,7 +94,7 @@ test('status bar distinguishes connecting, not-ready and active coding runs',()=
  const unavailable=renderToStaticMarkup(React.createElement(Status,{status:{...ready,ready:false,error:'test unavailable'},loading:false,codingRuns:0}));assert.match(unavailable,/Not ready/);assert.match(unavailable,/test unavailable/);
 });
 
-test('human-attention screen provides approval decisions and reminders without task checkboxes',()=>{
+test('human-attention screen provides approval decisions, leaves upcoming reminders to scheduled tasks, no task checkboxes',()=>{
  i18n.setLanguage('zh-CN');
  const Tasks=load('src/views/TasksView.tsx').default;
  const props={attention:{items:[
@@ -103,7 +103,7 @@ test('human-attention screen provides approval decisions and reminders without t
   {kind:'reminder',level:'soon',title:'QA reminder',ref:'reminder',open:'records',at:'2026-10-06T09:00:00+08:00'},
  ],loading:false,error:'',refresh(){}},approvals:[{id:'ask',command:'printf qa',session:'qa',tool:'Bash',args:{},by:'QA',expiresAt:''}],onResolve(){},onOpenConversation(){}};
  const html=renderToStaticMarkup(React.createElement(MemoryRouter,{initialEntries:['/tasks']},React.createElement(Tasks,props)));
- assert.match(html,/允许一次/);assert.match(html,/拒绝/);assert.match(html,/QA reminder/);assert.match(html,/查看提醒/);assert.match(html,/共 4 条更新/);assert.doesNotMatch(html,/type="checkbox"/);
+ assert.match(html,/允许一次/);assert.match(html,/拒绝/);assert.doesNotMatch(html,/QA reminder/);assert.match(html,/共 4 条更新/);assert.doesNotMatch(html,/type="checkbox"/);
  i18n.setLanguage('en');
 });
 
