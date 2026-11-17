@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useRef, useState } from "r
 import { useNavigate } from "react-router-dom";
 import {
   ListTodoIcon, LayoutDashboardIcon, ChartColumnIcon, PanelRightOpenIcon, PanelRightCloseIcon, BookOpenIcon, HexagonIcon, MessageSquareIcon, PaletteIcon,
-  NotebookTabsIcon, MessagesSquareIcon, PuzzleIcon, SlidersHorizontalIcon, TerminalIcon, XIcon,
+  MessagesSquareIcon, PuzzleIcon, SlidersHorizontalIcon, TerminalIcon, XIcon,
   MoonIcon, SunIcon, CalendarDaysIcon, GlobeIcon,
   HeartPulseIcon, AlarmClockIcon,
 } from "lucide-react";
@@ -66,7 +66,6 @@ const RAIL: { key: ViewKey; label: string; Icon: typeof HexagonIcon; cls: string
   { key: "routines", label: "Scheduled tasks", Icon: AlarmClockIcon, cls: "dk-a-sched" },
   { key: "coding", label: "Coding", Icon: TerminalIcon, cls: "dk-a-code" },
   { key: "knowledge", label: "Knowledge", Icon: BookOpenIcon, cls: "dk-a-know" },
-  { key: "records", label: "Records", Icon: NotebookTabsIcon, cls: "dk-a-rec" },
   { key: "skills", label: "Extensions", Icon: PuzzleIcon, cls: "dk-a-later" },
 ];
 
