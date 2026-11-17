@@ -469,6 +469,10 @@ func NewService(s *Settings) (*Service, error) {
 	svc.RegisterObserver(out.traces)
 	if browserMode != BrowserModeOff {
 		out.startBrowser(browserMode)
+	} else if _, err := os.Stat(ChromeExtensionDir()); err == nil {
+		// Kept current with the browser off too: the extension reloads
+		// itself when it finds a newer version on disk.
+		go func() { _ = InstallChromeExtension() }()
 	}
 	if s.desktopControl() {
 		out.startDesktop(s.desktopBlocked())
