@@ -15,6 +15,7 @@ import { queenTitle, useQueenName } from "../lib/queenName";
 import { isLegacyConsole, legacyConsoleTitle, pairedDeviceNames, queenSession, useQueenSession } from "../lib/queenConsole";
 import { useStickToBottom } from "../lib/useStickToBottom";
 import "./conversations.css";
+import { SkeletonLines, SkeletonRows } from "../components/Skeleton";
 
 type Conv = app.Conversation;
 
@@ -125,6 +126,7 @@ export default function ConversationsView() {
         </header>
         <div className="cv2-rows">
           {failed && <div className="cv2-empty" role="alert">{failed}</div>}
+          {!failed && !data && <SkeletonRows n={7} />}
           {!failed && data && items.length === 0 && <div className="cv2-empty">{t("No conversations")}</div>}
           {items.map((c) => {
             const Icon = KIND[c.kind]?.Icon ?? BotIcon;
@@ -265,7 +267,8 @@ export function Thread({ id, onBack, onOpen, onChanged }: { id: string; onBack: 
     onBack();
   };
 
-  if (!th) return <div className="cv2-none">{error || t("Loading…")}</div>;
+  if (!th && error) return <div className="cv2-none">{error}</div>;
+  if (!th) return <div className="cv2-none" style={{ alignItems: "stretch", justifyContent: "flex-start", padding: 24 }}><SkeletonLines n={5} /></div>;
   const turns = (th.turns ?? []).filter((m: backend.ChatTurn) => m.kind !== "context");
   const canReply = !!c && (c.replyable || fresh) ;
   const startNew = !!c && c.kind === "coding" && !c.replyable;

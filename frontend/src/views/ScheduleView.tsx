@@ -16,6 +16,7 @@ import {
 } from "../lib/schedule";
 import { ModeChip, ModePicker } from "../components/ModeChip";
 import "./schedule.css";
+import { Skeleton, SkeletonLines, SkeletonRows, SkeletonCards } from "../components/Skeleton";
 
 const STEP = 7;
 const MAX_DAYS = 62;
@@ -142,7 +143,7 @@ export default function ScheduleView() {
       <div className={`sch-body${picked ? " with-panel" : ""}`}>
         <div className="sch-scroll">
           {err && <div className="sch-error" role="alert">{err} <button className="sch-link" onClick={() => void load()}>{t("Retry")}</button></div>}
-          {!err && !data && loading && <div className="sch-loading">{t("Loading…")}</div>}
+          {!err && !data && loading && <div className="sch-loading"><SkeletonRows n={6} /></div>}
           {data && (
             <>
               {grouped.map((day) => (

@@ -7,6 +7,7 @@ import { ToolApproval } from "../lib/useToolApprovals";
 import { PATHS, attentionPath } from "../lib/routes";
 import { focusInWorld, isSelected, useWorldSelection } from "../world/bus";
 import "./tasks.css";
+import { SkeletonCards } from "../components/Skeleton";
 const TYPES: Record<string, { label: string; action: string; Icon: typeof BellIcon }> = {
   reminder: {label:"Reminder", action:"View reminder", Icon:BellIcon},
   approval: {label:"Approval required", action:"Review request", Icon:ShieldAlertIcon},
@@ -47,7 +48,8 @@ export default function TasksView({attention, approvals, onOpenConversation, onR
   return <div className="attention-view">
     <header className="attention-heading"><span className={`attention-symbol${items.length ? " urgent" : ""}`}><BellIcon size={24}/></span><div><h1>{t("Needs your attention")}</h1><p>{items.length ? t("{count} items need a decision, a reply or an investigation.", {count:items.length}) : t("Decisions and issues that need your attention appear here.")}</p></div><button className="attention-refresh" onClick={attention.refresh}>{t("Refresh")}</button></header>
     {attention.error && <div className="attention-error" role="alert">{t(attention.error)} <button onClick={attention.refresh}>{t("Retry")}</button></div>}
-    {!attention.error && !items.length && !reminders.length && <div className="attention-empty"><CheckCircleIcon size={36}/><h2>{t(attention.loading ? "Checking what needs you…" : "Nothing needs your attention")}</h2><p>{t("Approval requests, agents waiting for a reply, failed tasks and offline workers will appear here automatically.")}</p></div>}
+    {!attention.error && !items.length && !reminders.length && attention.loading && <SkeletonCards n={3} h={96} />}
+    {!attention.error && !items.length && !reminders.length && !attention.loading && <div className="attention-empty"><CheckCircleIcon size={36}/><h2>{t("Nothing needs your attention")}</h2><p>{t("Approval requests, agents waiting for a reply, failed tasks and offline workers will appear here automatically.")}</p></div>}
     {items.length > 0 && <h2 className="attention-section-title">{t("Needs action")} <span>{items.length}</span></h2>}
     <div className="attention-cards">{[...sorted, ...reminders].map((it,index)=>{
       const type=TYPES[it.kind] ?? {label:"Needs attention",action:"Open details",Icon:BellIcon};

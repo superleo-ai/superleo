@@ -4,6 +4,7 @@ import { EventsOn } from "../../wailsjs/runtime";
 import { WellbeingDays, WellbeingStatus, WellbeingToday } from "../../wailsjs/go/app/App";
 import { useI18n } from "../lib/i18n";
 import "./wellbeing.css";
+import { SkeletonCards } from "../components/Skeleton";
 
 /**
  * Wellbeing: the person's health, one summary per day, as the iPhone reads it
@@ -153,7 +154,12 @@ export default function WellbeingView() {
   );
   const avg = points.length ? points.reduce((s, p) => s + p.value, 0) / points.length : undefined;
 
-  if (!status && !err) return <div className="wb-view" />;
+  if (!status && !err) return (
+    <div className="wb-view" aria-busy="true">
+      <header className="wb-head"><h1>{t("Wellbeing")}</h1></header>
+      <SkeletonCards n={3} h={110} />
+    </div>
+  );
   if (status && (!status.connected || !status.days)) {
     return (
       <div className="wb-view">

@@ -3,6 +3,7 @@ import { AtSignIcon, CircleSlashIcon, RadioIcon, ServerIcon } from "lucide-react
 import { RemoteAgentNames } from "../../wailsjs/go/app/App";
 import { AgentInfo } from "../lib/useAgentMentions";
 import { useI18n } from "../lib/i18n";
+import { SkeletonRows } from "./Skeleton";
 
 /**
  * Who else you can ask, in the rail.
@@ -37,7 +38,7 @@ export function AgentsBody({ onMention }: { onMention?: (name: string) => void }
   }, []);
 
   if (agents === null) {
-    return <div className="agents-panel"><div className="agents-empty">looking…</div></div>;
+    return <div className="agents-panel"><SkeletonRows n={4} /></div>;
   }
 
   if (agents.length === 0) {

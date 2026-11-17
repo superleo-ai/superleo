@@ -15,6 +15,7 @@ import {
 import { agent } from "../../wailsjs/go/models";
 import { Response } from "@/components/ai-elements/response";
 import { useI18n } from "../lib/i18n";
+import { SkeletonLines } from "./Skeleton";
 
 function fmtSize(n: number): string {
   if (n < 1024) return `${n} B`;
@@ -223,13 +224,7 @@ export default function DeliverablesBar({
             </div>
             <div className="modal-body">
               {loading ? (
-                <div className="loading-row">
-                  <span
-                    className="spinner"
-                    style={{ borderTopColor: "var(--accent)" }}
-                  />{" "}
-                  Loading…
-                </div>
+                <SkeletonLines n={6} />
               ) : viewer.kind === "pdf" ? (
                 <embed
                   src={viewer.url}

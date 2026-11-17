@@ -4,6 +4,7 @@ import { InstallSkill, RemoveSkill, SearchSkills, Skills } from "../../wailsjs/g
 import { backend } from "../../wailsjs/go/models";
 import { toast } from "../lib/toasts";
 import { PuzzleIcon } from "lucide-react";
+import { Skeleton, SkeletonLines, SkeletonRows, SkeletonCards } from "../components/Skeleton";
 
 export default function SkillsView() {
   const { t } = useI18n();
@@ -117,9 +118,7 @@ export default function SkillsView() {
         )}
         {err && <div className="report-error">⚠ {err}</div>}
         {!err && loading && skills.length === 0 && (
-          <div className="loading-row">
-            <span className="spinner" style={{ borderTopColor: "var(--accent)" }} /> Loading skills…
-          </div>
+          <SkeletonRows n={5} />
         )}
         {!err && !loading && skills.length === 0 && (
           <div className="inline-empty">

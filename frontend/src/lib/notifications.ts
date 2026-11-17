@@ -92,6 +92,7 @@ export function useUnreadNotifications(): number {
 export function useNotificationList(open: boolean) {
   const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
@@ -103,6 +104,7 @@ export function useNotificationList(open: boolean) {
       setError("Could not load notifications.");
     } finally {
       setLoading(false);
+      setLoaded(true);
     }
   }, []);
 
@@ -136,5 +138,5 @@ export function useNotificationList(open: boolean) {
     finally { void refreshUnread(); }
   }, []);
 
-  return { items, loading, error, reload: load, markAllRead, clear };
+  return { items, loading, loaded, error, reload: load, markAllRead, clear };
 }

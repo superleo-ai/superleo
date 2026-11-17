@@ -16,6 +16,7 @@ import {
 import { attentionPath, deeplinkPath } from "../lib/routes";
 import { AttentionItem, attentionTitle } from "../canvas/attention";
 import { ToolApproval } from "../lib/useToolApprovals";
+import { SkeletonRows } from "./Skeleton";
 
 /** What needs a decision now: shown above the notices, not on a page of its own. */
 export type NeedsYou = {
@@ -78,7 +79,7 @@ export default function NotificationCenter({
   const { t } = useI18n();
   const unread = useUnreadNotifications();
   const [open, setOpen] = useState(false);
-  const { items, loading, error, reload, markAllRead, clear } = useNotificationList(open);
+  const { items, loading, loaded, error, reload, markAllRead, clear } = useNotificationList(open);
   const wrap = useRef<HTMLDivElement | null>(null);
   const order = ["approval", "bee", "report", "failed", "run", "lost"];
   const needItems = (needs?.items ?? [])
@@ -201,7 +202,7 @@ export default function NotificationCenter({
               );
             })}
             {items.length === 0 && !error && needItems.length === 0 && (
-              <div className="notif-empty">{t(loading ? "Loading…" : "Nothing yet.")}</div>
+              !loaded ? <SkeletonRows n={3} /> : <div className="notif-empty">{t("Nothing yet.")}</div>
             )}
             {items.map((n) => {
               const Icon = ICONS[n.level] ?? InfoIcon;

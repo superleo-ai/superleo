@@ -27,6 +27,7 @@ import remarkGfm from "remark-gfm";
 import { mdComponents } from "../components/Transcript";
 import BrowserCard from "../components/BrowserCard";
 import { BrowserCall, browserOp } from "../lib/browser";
+import { SkeletonLines, SkeletonRows } from "../components/Skeleton";
 
 // Plain shapes: what arrives over events is JSON, not the generated classes.
 type Ev = Omit<app.CLIRunEvent, "convertValues">;
@@ -191,7 +192,8 @@ export default function AgentsView() {
           </button>
         </div>
         <div className="cd-list">
-          {threads.length === 0 && terms.length === 0 && <div className="cd-none">{t("Runs you start, and ones the queen starts, show up here.")}</div>}
+          {choices === null && threads.length === 0 && terms.length === 0 && <SkeletonRows n={5} />}
+          {choices !== null && threads.length === 0 && terms.length === 0 && <div className="cd-none">{t("Runs you start, and ones the queen starts, show up here.")}</div>}
           {terms.length > 0 && <div className="cd-group">{t("In terminals")}</div>}
           {terms.map((x) => (
             <button key={termKey(x)} className={`cd-item${termKey(x) === selected ? " on" : ""}`} onClick={() => setSelected(termKey(x))} data-testid="term-session">
@@ -581,7 +583,7 @@ function TermView({ term }: { term: Term }) {
       </div>
       <div className="cd-log" ref={log} onScroll={(e) => { const el = e.currentTarget; stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 60; }}>
         <div className="cd-log-in">
-          {evs === null && !err && <div className="cd-none">{t("Reading…")}</div>}
+          {evs === null && !err && <SkeletonLines n={5} />}
           {err && <div className="agents-note bad">{err}</div>}
           <div className="agents-run" data-testid="term-log">
             {withBrowserCards(shown.filter((e) => !(e.kind === "result" && e.callId && results.has(e.callId) && shown.some((c) => c.kind === "tool" && c.callId === e.callId))), results, term.state === "running", termKey(term)).map((e) =>

@@ -19,6 +19,7 @@ import { EventsOn } from "../../wailsjs/runtime";
 import { parseTime } from "../lib/format";
 import { useImeGuard } from "@/lib/ime";
 import { toast } from "../lib/toasts";
+import { SkeletonRows } from "../components/Skeleton";
 
 // ---------------------------------------------------------------------------
 // Shapes. Plain objects: what arrives over events is JSON, not the classes.
@@ -138,6 +139,7 @@ export default function StandingView() {
   useEffect(() => { if (picked?.kind === "bee") setOpen(picked.id); }, [picked]);
   const [editing, setEditing] = useState<Spec | null>(null);
   const [error, setError] = useState("");
+  const [loaded, setLoaded] = useState(false);
   const [now, setNow] = useState(Date.now());
 
   const load = useCallback(async () => {
@@ -149,6 +151,8 @@ export default function StandingView() {
       setError("");
     } catch (e) {
       setError(String(e));
+    } finally {
+      setLoaded(true);
     }
   }, []);
 
@@ -197,7 +201,9 @@ export default function StandingView() {
       </div>
       {error && <div className="report-error wt-error">{error}</div>}
 
-      {agents.length === 0 && !error ? (
+      {!loaded && agents.length === 0 && !error ? (
+        <div className="wt-bill"><SkeletonRows n={4} /></div>
+      ) : agents.length === 0 && !error ? (
         <div className="wt-empty">
           <div className="wt-empty-title">{t("Nothing on watch yet")}</div>
           <p>

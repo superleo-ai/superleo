@@ -9,6 +9,7 @@ import ImportPanel from "../components/ImportPanel";
 import { SearchIcon, UploadIcon } from "lucide-react";
 import { useImeGuard } from "@/lib/ime";
 import { useDaylight } from "../lib/useDaylight";
+import { Skeleton, SkeletonLines, SkeletonRows, SkeletonCards } from "../components/Skeleton";
 
 /**
  * One page for what SuperLeo knows.
@@ -242,9 +243,7 @@ export default function KnowledgeView() {
   let body: React.ReactNode;
   if (loading && !status) {
     body = (
-      <div className="loading-row">
-        <span className="spinner" /> Starting the view…
-      </div>
+      <div className="panel-scroll"><SkeletonCards n={3} h={120} /></div>
     );
   } else if (status?.error) {
     body = (

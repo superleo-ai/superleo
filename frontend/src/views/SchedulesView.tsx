@@ -16,6 +16,7 @@ import { ScheduleRunList } from "../components/ScheduleRuns";
 import { notifyNow, notifyPermission, requestNotifyPermission } from "../lib/notify";
 import { toast } from "../lib/toasts";
 import { useI18n } from "../lib/i18n";
+import { Skeleton, SkeletonLines, SkeletonRows, SkeletonCards } from "../components/Skeleton";
 
 type Note = { kind: "ok" | "err"; text: string } | null;
 
@@ -222,10 +223,7 @@ export default function SchedulesView({
         )}
 
         {loading && list.length === 0 && (
-          <div className="loading-row">
-            <span className="spinner" style={{ borderTopColor: "var(--accent)" }} /> Loading
-            schedules…
-          </div>
+          <SkeletonCards n={3} h={88} />
         )}
 
         {!loading && list.length === 0 && (

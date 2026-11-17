@@ -7,6 +7,7 @@ import { backend } from "../../wailsjs/go/models";
 import { AppStatus } from "../lib/types";
 import { ScheduleRunLog } from "../lib/useScheduleRuns";
 import { NotebookPenIcon, UserIcon, type LucideIcon } from "lucide-react";
+import { Skeleton, SkeletonLines, SkeletonRows, SkeletonCards } from "../components/Skeleton";
 
 // The tab keyed "records" is labelled Notes, and used to be keyed that way
 // too — inside a page that is itself called Records. Two different things with
@@ -233,9 +234,7 @@ export default function RecordsView({
       <div className="panel-scroll">
         {err && <div className="report-error">⚠ {err}</div>}
         {!err && loading && !data && (
-          <div className="loading-row">
-            <span className="spinner" style={{ borderTopColor: "var(--accent)" }} /> Loading life data…
-          </div>
+          <SkeletonRows n={6} />
         )}
         {!err && data && (
           <>

@@ -5,6 +5,7 @@ import { mcp } from "../../wailsjs/go/models";
 import { useImeGuard } from "@/lib/ime";
 import { toast } from "../lib/toasts";
 import { PlugIcon } from "lucide-react";
+import { Skeleton, SkeletonLines, SkeletonRows, SkeletonCards } from "../components/Skeleton";
 
 /** One installable server from the registry, as SearchMCPServers returns it. */
 interface Candidate {
@@ -166,9 +167,7 @@ export default function MCPView() {
         )}
         {err && <div className="report-error">⚠ {err}</div>}
         {!err && loading && servers.length === 0 && (
-          <div className="loading-row">
-            <span className="spinner" style={{ borderTopColor: "var(--accent)" }} /> Loading MCP servers…
-          </div>
+          <SkeletonRows n={4} />
         )}
         {!err && !loading && servers.length === 0 && (
           <div className="inline-empty">

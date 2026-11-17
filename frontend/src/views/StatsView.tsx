@@ -16,6 +16,7 @@ import RunTracePanel from "../components/RunTracePanel";
 import { useTween } from "../lib/useTween";
 import { useDaylight } from "../lib/useDaylight";
 import { translate, useI18n } from "../lib/i18n";
+import { Skeleton } from "../components/Skeleton";
 
 /**
  * The control room.
@@ -158,7 +159,8 @@ export default function StatsView() {
   }, []);
   const logRef = useRef<HTMLDivElement | null>(null);
 
-  const loadDash = useCallback(async () => { try { setDash((await Dashboard()) as DashData); } catch { /* keep last */ } }, []);
+  const [dashLoaded, setDashLoaded] = useState(false);
+  const loadDash = useCallback(async () => { try { setDash((await Dashboard()) as DashData); } catch { /* keep last */ } finally { setDashLoaded(true); } }, []);
   const loadList = useCallback(async () => {
     try { const l = ((await LongRunList()) ?? []) as TaskSummary[]; setTasks(l); setTaskId((c) => c || (l[0]?.taskId ?? "")); } catch { /* keep last */ }
   }, []);
@@ -309,6 +311,11 @@ export default function StatsView() {
       </section>
 
       {/* ── the system ── */}
+      {!dashLoaded && !dash ? (
+        <section className="cr-stats" aria-busy="true">
+          {[0, 1, 2].map((i) => <div key={i} className="cr-panel" style={{ display: "flex", flexDirection: "column", gap: 10, padding: 14 }}><Skeleton h={10} w="40%" /><Skeleton h={22} w="60%" /><Skeleton h={10} w="80%" /></div>)}
+        </section>
+      ) : (
       <section className={`cr-stats${d ? " five" : ""}`}>
         <Stat icon={<Cpu size={14} />} label="Model" value={<span className="cr-stat-txt">{dash?.llm?.model || "—"}</span>} sub={<>{dash?.llm?.maxRounds ?? "—"} rounds/turn · {short(dash?.llm?.baseURL || "", 34)}</>} />
         <Stat icon={<Gauge size={14} />} label="Tokens today" value={<Num v={dash?.usage?.today ?? 0} />} sub={<>{fmtK(dash?.usage?.totalTokens ?? 0)} all time · {pct(dash?.usage?.cachedTokens ?? 0, dash?.usage?.totalTokens ?? 0)}% cached · 7d {fmtK(days.reduce((a, x) => a + x.tokens, 0))}</>} tone="cyan" />
@@ -316,6 +323,7 @@ export default function StatsView() {
         <Stat icon={<Activity size={14} />} label="Turns" value={<Num v={dash?.usage?.modelTurns ?? 0} />} sub={<>{dash?.tasks?.length ?? 0} tasks on record · {dash?.activeRuns?.length ?? 0} active</>} />
         {d && st && <Stat icon={<Shield size={14} />} label="Lint gate" value={d ? <span className={d.rejected ? "rose" : "lime"}><Num v={d.rejected} /></span> : <span className="cr-dim">—</span>} sub={d ? `${pct(d.accepted, Math.max(1, d.rs.length))}% clean turns` : "select or start a task"} tone={!d ? undefined : d.rejected ? "rose" : "lime"} />}
       </section>
+      )}
 
       {/* ── health: is the install itself sound ── */}
       <HealthCard />

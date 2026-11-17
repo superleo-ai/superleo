@@ -14,6 +14,7 @@ import { EventsOn } from "../../wailsjs/runtime/runtime";
 import { Response } from "@/components/ai-elements/response";
 import { Dashboard, ageLabel, dashboards } from "../lib/dashboards";
 import { describeCron } from "../lib/cron";
+import { SkeletonCards } from "./Skeleton";
 
 /**
  * The dashboards someone kept, and the state of how fresh each one is.
@@ -251,6 +252,7 @@ export default function DashboardsPanel() {
   const { t } = useI18n();
   const [items, setItems] = useState<Dashboard[]>([]);
   const [openId, setOpenId] = useState("");
+  const [loaded, setLoaded] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -259,6 +261,8 @@ export default function DashboardsPanel() {
       // The list is the whole panel; an empty one with the message below is a
       // better failure than an error banner nobody can act on.
       setItems([]);
+    } finally {
+      setLoaded(true);
     }
   }, []);
 
@@ -309,7 +313,9 @@ export default function DashboardsPanel() {
         <span style={{ color: "var(--text-3)", fontWeight: 400 }}>{items.length}</span>
       </div>
       <div className="trace-list">
-        {items.length === 0 ? (
+        {!loaded && items.length === 0 ? (
+          <SkeletonCards n={3} h={64} />
+        ) : items.length === 0 ? (
           <div className="trace-empty">
             {t("Nothing saved yet.")}
             <br />

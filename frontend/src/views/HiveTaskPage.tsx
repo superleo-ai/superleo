@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { translate } from "../lib/i18n";
 import { Link } from "react-router-dom";
 import { HiveTaskDetail } from "../../wailsjs/go/app/App";
+import { SkeletonCards } from "../components/Skeleton";
 
 /** A step in a task's life, as the backend records it. */
 export interface TaskStep {
@@ -115,11 +116,12 @@ export default function HiveTaskPage({
         <button className="btn ghost sm" onClick={copy}>{copied ? "Copied" : "Copy"}</button>
       </div>
 
-      {!t && (
+      {!t && err && (
         <div className="card">
-          <div className="hive-dim">{err || "Looking for it…"}</div>
+          <div className="hive-dim">{err}</div>
         </div>
       )}
+      {!t && !err && <SkeletonCards n={3} h={90} />}
 
       {t && (
         <>

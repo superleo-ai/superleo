@@ -48,6 +48,7 @@ import { clientKind } from "../lib/hivelink";
 import { useDeskTheme } from "../desk/DeskShell";
 import { COLORS, ColorName } from "../canvas/theme";
 import { Accent, Theme } from "../lib/types";
+import { Skeleton, SkeletonLines, SkeletonRows, SkeletonCards } from "../components/Skeleton";
 
 type ProxyStatus = {
   running: boolean;
@@ -438,7 +439,7 @@ export default function SettingsView({ onSaved, theme, onTheme, accent, onAccent
   if (!s) {
     return (
       <div className="view">
-        <div className="loading-row"><span className="spinner" style={{ borderTopColor: "var(--accent)" }} /> {t("Loading settings…")}</div>
+        <SkeletonCards n={4} h={110} />
       </div>
     );
   }

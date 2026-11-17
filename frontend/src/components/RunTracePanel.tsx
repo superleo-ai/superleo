@@ -7,6 +7,7 @@ import { ChevronDown, ChevronRight, RotateCw, ScrollText, X } from "lucide-react
 import TraceWaterfall from "./TraceWaterfall";
 import ToolStatsPanel from "./ToolStatsPanel";
 import { useI18n } from "../lib/i18n";
+import { SkeletonLines } from "./Skeleton";
 
 /**
  * One task's or one conversation's JSONL trace, a row per event.
@@ -458,7 +459,7 @@ function TraceDetail({ id, row }: { id: string; row: TraceRow }) {
     return <pre className="cr-trace-detail">{[row.event, row.lint ?? row.tool, row.verdict, detail(row)].filter(Boolean).join(" · ")}</pre>;
   }
   if (failed) return <div className="cr-trace-detail cr-note">{t("This call is no longer in the trace.")}</div>;
-  if (!call) return <div className="cr-trace-detail cr-note">Loading…</div>;
+  if (!call) return <div className="cr-trace-detail"><SkeletonLines n={4} /></div>;
 
   const req = call.request;
   const msgs = Array.isArray(req?.messages) ? req.messages : [];

@@ -7,6 +7,7 @@ import { SentMessage } from "../components/SentFiles";
 import { useI18n } from "../lib/i18n";
 import { withoutCallNotes } from "../lib/format";
 import { withConsoleTitles } from "../lib/queenConsole";
+import { SkeletonLines, SkeletonRows } from "../components/Skeleton";
 
 /** How many conversations this Mac kept before it joined a hive; the window
  *  asks its own process, never the hive. */
@@ -47,6 +48,8 @@ export default function EarlierChatsPane({ onClose }: { onClose: () => void }) {
           <small>{open ? new Date(open.updated_at).toLocaleString() : t("Read only")}</small></div>
       </header>
       <div className="dk-msgs">
+        {!open && !list && <SkeletonRows n={5} />}
+        {open && !turns && <SkeletonLines n={5} />}
         {!open && list && list.length === 0 && <div className="dk-empty">{t("No earlier chats")}</div>}
         {!open && list?.map((s) => (
           <button key={s.id} className="dk-rec dk-hist dk-earlier-row" onClick={() => setOpen(s)} data-testid="earlier-row">

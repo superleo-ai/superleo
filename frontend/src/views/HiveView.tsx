@@ -13,6 +13,7 @@ import { useHosts, type Host, type HostAgent } from "../canvas/data";
 import PodConfirm, { type PodChange } from "../components/PodConfirm";
 import { cliName, isCore, isStandby, kindLabel } from "../world/hosts";
 import { useI18n } from "../lib/i18n";
+import { SkeletonCards } from "../components/Skeleton";
 
 const short = (n: string) => n.replace(/^superleo-/, "");
 const fmtK = (n: number) => (n >= 1e6 ? (n / 1e6).toFixed(2) + "M" : n >= 1e3 ? (n / 1e3).toFixed(1) + "k" : String(Math.round(n)));
@@ -281,6 +282,7 @@ export default function HiveView() {
       <div className="panel-scroll">
         {err && <div className="hint err">{err}</div>}
         {note && <div className="hint err">{note}</div>}
+        {!st && !err && <SkeletonCards n={3} h={100} />}
         {st && (
           <>
             {st.role !== "" && (
