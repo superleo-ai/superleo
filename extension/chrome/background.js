@@ -8,6 +8,8 @@
 // membership of the tab it names). Tabs SuperLeo opens are put in that group.
 
 const GROUP_TITLE = "SuperLeo";
+// The group's title while SuperLeo is working in one of its tabs.
+const WORKING_TITLE = "● SuperLeo";
 const GROUP_COLOR = "blue";
 const VERSION = chrome.runtime.getManifest().version;
 
@@ -103,6 +105,7 @@ async function connect() {
     // Traffic every 20s keeps this worker alive (Chrome 116+).
     pingTimer = setInterval(() => send({ type: "ping" }), 20000);
     syncTabs().catch(() => {});
+    showWorking().catch(() => {});
   };
   sock.onmessage = (ev) => {
     let m;
@@ -155,12 +158,17 @@ function onClients(n) {
 }
 
 function releaseAll() {
-  for (const tabId of [...attached]) chrome.debugger.detach({ tabId }).catch(() => {});
+  const tabs = [...attached];
   attached.clear();
   children.clear();
   discover = false;
   autoAttach = false;
-  tidyGroup().catch(() => {});
+  (async () => {
+    // The marks come off while the debugger can still reach the page.
+    await Promise.all(tabs.map((tabId) => unmark(tabId)));
+    for (const tabId of tabs) chrome.debugger.detach({ tabId }).catch(() => {});
+    await tidyGroup();
+  })().catch(() => {});
 }
 
 // With nobody driving, the SuperLeo tab group should not sit in the tab bar:
@@ -209,11 +217,19 @@ connect();
 
 // ---- the group ---------------------------------------------------------------
 
+function isOurTitle(title) {
+  return title === GROUP_TITLE || title === WORKING_TITLE;
+}
+
+async function ourGroups() {
+  return (await chrome.tabGroups.query({})).filter((g) => isOurTitle(g.title));
+}
+
 async function groupOf(tab) {
   if (!tab || tab.groupId === undefined || tab.groupId < 0) return null;
   try {
     const g = await chrome.tabGroups.get(tab.groupId);
-    return g.title === GROUP_TITLE ? g : null;
+    return isOurTitle(g.title) ? g : null;
   } catch {
     return null;
   }
@@ -236,7 +252,7 @@ async function assertOwned(tabId) {
 }
 
 async function ownedTabs() {
-  const groups = await chrome.tabGroups.query({ title: GROUP_TITLE });
+  const groups = await ourGroups();
   const out = [];
   for (const g of groups) out.push(...(await chrome.tabs.query({ groupId: g.id })));
   return out;
@@ -251,7 +267,7 @@ function inGroupLock(fn) {
 
 async function openInGroup(url) {
   return inGroupLock(async () => {
-    const groups = await chrome.tabGroups.query({ title: GROUP_TITLE });
+    const groups = await ourGroups();
     let windowId;
     let groupId;
     if (groups.length) {
@@ -264,7 +280,7 @@ async function openInGroup(url) {
     }
     const tab = await chrome.tabs.create({ windowId, url: url || "about:blank", active: false });
     const gid = await chrome.tabs.group(groupId === undefined ? { tabIds: [tab.id], createProperties: { windowId } } : { tabIds: [tab.id], groupId });
-    if (groupId === undefined) await chrome.tabGroups.update(gid, { title: GROUP_TITLE, color: GROUP_COLOR, collapsed: false });
+    if (groupId === undefined) await chrome.tabGroups.update(gid, { title: marks.size ? WORKING_TITLE : GROUP_TITLE, color: GROUP_COLOR, collapsed: false });
     return tab;
   });
 }
@@ -380,8 +396,213 @@ async function dispatch(m) {
   await assertOwned(s.tabId);
   await attach(s.tabId);
   const target = s.child ? { tabId: s.tabId, sessionId } : { tabId: s.tabId };
-  return chrome.debugger.sendCommand(target, method, params);
+  const run = () => chrome.debugger.sendCommand(target, method, params);
+  const result = method === "Page.captureScreenshot" && !s.child ? await withoutMark(s.tabId, run) : await run();
+  // Drawn after the command ran, so it never stands in its way.
+  afterCommand(s.tabId, method, params);
+  return result;
 }
+
+// ---- the working mark ---------------------------------------------------------
+//
+// While SuperLeo works in a tab, the tab shows it: a blue glow around the page
+// with a small "SuperLeo" tag, a cursor of its own where it points and clicks,
+// and a dot on the group's title. The page parts are drawn by markPage, put in
+// through the debugger (no host permission needed) and re-run on each new
+// document while the mark is on. They never take a click (pointer-events:
+// none), sit in a closed shadow root, and take themselves off if the worker
+// stops telling them it is still working.
+
+const ACTIVE_MS = 20000; // no command for this long: the mark comes off
+const TOUCH_MS = 5000; // how often the page hears it is still on
+const marks = new Map(); // tabId -> { ready, timer, scriptId, touched }
+
+// Commands a CDP client sends when it attaches; they are not work in the page.
+const SETUP = /\.(enable|disable|set[A-Z]\w*|runIfWaitingForDebugger|getFrameTree|addScriptToEvaluateOnNewDocument|removeScriptToEvaluateOnNewDocument|createIsolatedWorld|releaseObject\w*)$/;
+const CURSOR_EVENTS = new Set(["mouseMoved", "mousePressed", "mouseReleased"]);
+
+function afterCommand(tabId, method, params) {
+  if (SETUP.test(method)) return;
+  const ready = markWorking(tabId);
+  if (method === "Input.dispatchMouseEvent" && CURSOR_EVENTS.has(params.type)) {
+    const x = Number(params.x) || 0;
+    const y = Number(params.y) || 0;
+    ready.then(() => pageMark(tabId, `cursor(${x},${y},${JSON.stringify(params.type)})`)).catch(() => {});
+  }
+}
+
+function markWorking(tabId) {
+  let m = marks.get(tabId);
+  if (m) {
+    clearTimeout(m.timer);
+    m.timer = setTimeout(() => unmark(tabId), ACTIVE_MS);
+    if (Date.now() - m.touched > TOUCH_MS) {
+      m.touched = Date.now();
+      m.ready.then(() => pageMark(tabId, "touch()")).catch(() => {});
+    }
+    return m.ready;
+  }
+  m = { timer: setTimeout(() => unmark(tabId), ACTIVE_MS), scriptId: null, touched: Date.now() };
+  marks.set(tabId, m);
+  m.ready = (async () => {
+    try {
+      const r = await chrome.debugger.sendCommand({ tabId }, "Page.addScriptToEvaluateOnNewDocument", {
+        source: `${MARK_SRC}.on();`,
+      });
+      m.scriptId = r?.identifier || null;
+    } catch (_) {}
+    await pageMark(tabId, "on()").catch(() => {});
+    await showWorking().catch(() => {});
+  })();
+  return m.ready;
+}
+
+async function unmark(tabId) {
+  const m = marks.get(tabId);
+  if (!m) return;
+  marks.delete(tabId);
+  clearTimeout(m.timer);
+  await m.ready;
+  if (m.scriptId) {
+    await chrome.debugger.sendCommand({ tabId }, "Page.removeScriptToEvaluateOnNewDocument", { identifier: m.scriptId }).catch(() => {});
+  }
+  await chrome.debugger.sendCommand({ tabId }, "Runtime.evaluate", { expression: "window.__superleoMark && window.__superleoMark.off()", silent: true }).catch(() => {});
+  await showWorking().catch(() => {});
+}
+
+// The tab is gone or the debugger was taken away: nothing left to evaluate in;
+// the page's own watchdog takes the glow off.
+function forgetMark(tabId) {
+  const m = marks.get(tabId);
+  if (!m) return;
+  marks.delete(tabId);
+  clearTimeout(m.timer);
+  showWorking().catch(() => {});
+}
+
+// Screenshots show the page, not the mark.
+async function withoutMark(tabId, run) {
+  const m = marks.get(tabId);
+  if (!m) return run();
+  await m.ready;
+  await pageMark(tabId, "hide()").catch(() => {});
+  try {
+    return await run();
+  } finally {
+    await pageMark(tabId, "show()").catch(() => {});
+  }
+}
+
+function pageMark(tabId, call) {
+  return chrome.debugger.sendCommand({ tabId }, "Runtime.evaluate", {
+    expression: `(window.__superleoMark || ${MARK_SRC}).${call}`,
+    silent: true,
+  });
+}
+
+// The group's title says whether SuperLeo is working in it.
+function showWorking() {
+  return inGroupLock(async () => {
+    const want = marks.size ? WORKING_TITLE : GROUP_TITLE;
+    for (const g of await ourGroups()) {
+      if (g.title !== want) await chrome.tabGroups.update(g.id, { title: want }).catch(() => {});
+    }
+  });
+}
+
+// Runs in the page, never in this worker. Returns the page's mark controller.
+function markPage() {
+  if (window !== window.top) return { on() {}, off() {}, touch() {}, cursor() {}, hide() {}, show() {} };
+  if (window.__superleoMark) return window.__superleoMark;
+  const BLUE = "37, 99, 235";
+  const WATCHDOG_MS = 32000;
+  const host = document.createElement("superleo-mark");
+  host.setAttribute("aria-hidden", "true");
+  host.style.cssText =
+    "all: initial !important; position: fixed !important; inset: 0 !important; z-index: 2147483647 !important;" +
+    "pointer-events: none !important; display: block !important; contain: strict !important;";
+  const root = host.attachShadow({ mode: "closed" });
+  root.innerHTML = `<style>
+  * { box-sizing: border-box; pointer-events: none; }
+  .frame { position: fixed; inset: 0; opacity: 0; transition: opacity .25s ease;
+    box-shadow: inset 0 0 0 2px rgba(${BLUE}, .9), inset 0 0 22px 6px rgba(${BLUE}, .28); }
+  .tag { position: fixed; top: 0; left: 50%; transform: translateX(-50%); padding: 3px 10px 4px 9px;
+    border-radius: 0 0 8px 8px; background: rgb(${BLUE}); color: #fff; opacity: 0; transition: opacity .25s ease;
+    font: 600 11px/14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: .02em; white-space: nowrap; }
+  .tag i { display: inline-block; width: 6px; height: 6px; margin: 0 6px 1px 0; border-radius: 50%; background: #fff;
+    animation: pulse 1.4s ease-in-out infinite; }
+  .on .frame, .on .tag { opacity: 1; }
+  .cursor { position: fixed; left: 0; top: 0; opacity: 0; transition: transform .14s ease-out, opacity .3s ease; }
+  .cursor.shown { opacity: 1; }
+  .halo { position: absolute; left: -14px; top: -14px; width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(${BLUE}, .18); box-shadow: 0 0 0 1px rgba(${BLUE}, .25); }
+  .cursor svg { position: absolute; left: -2px; top: -1px; filter: drop-shadow(0 1px 1.5px rgba(0,0,0,.35)); }
+  .ring { position: absolute; left: -16px; top: -16px; width: 32px; height: 32px; border-radius: 50%;
+    border: 2px solid rgb(${BLUE}); animation: ring .5s ease-out forwards; }
+  .hidden { display: none; }
+  @keyframes ring { from { transform: scale(.35); opacity: .95; } to { transform: scale(1.6); opacity: 0; } }
+  @keyframes pulse { 50% { opacity: .35; } }
+</style>
+<div class="wrap"><div class="frame"></div><div class="tag"><i></i>SuperLeo</div>
+<div class="cursor"><div class="halo"></div>
+<svg width="18" height="22" viewBox="0 0 18 22"><path d="M2 1.5 L2 18 L6.4 14.1 L9.3 20.6 L12.3 19.3 L9.5 12.9 L15.4 12.6 Z"
+ fill="rgb(${BLUE})" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg></div></div>`;
+  const wrap = root.querySelector(".wrap");
+  const cur = root.querySelector(".cursor");
+  let fade = 0;
+  let dog = 0;
+  const mount = () => {
+    if (host.isConnected) return;
+    const parent = document.documentElement;
+    if (parent) parent.appendChild(host);
+    else document.addEventListener("readystatechange", mount, { once: true });
+  };
+  const api = {
+    on() {
+      mount();
+      wrap.classList.add("on");
+      api.touch();
+      return true;
+    },
+    off() {
+      clearTimeout(dog);
+      clearTimeout(fade);
+      host.remove();
+      delete window.__superleoMark;
+      return true;
+    },
+    touch() {
+      clearTimeout(dog);
+      dog = setTimeout(api.off, WATCHDOG_MS);
+      return true;
+    },
+    cursor(x, y, kind) {
+      api.on();
+      cur.style.transform = `translate(${x}px, ${y}px)`;
+      cur.classList.add("shown");
+      if (kind === "mousePressed") {
+        const r = document.createElement("div");
+        r.className = "ring";
+        cur.appendChild(r);
+        setTimeout(() => r.remove(), 600);
+      }
+      clearTimeout(fade);
+      fade = setTimeout(() => cur.classList.remove("shown"), 3000);
+      return true;
+    },
+    hide() {
+      wrap.classList.add("hidden");
+      return true;
+    },
+    show() {
+      wrap.classList.remove("hidden");
+      return true;
+    },
+  };
+  Object.defineProperty(window, "__superleoMark", { value: api, configurable: true, enumerable: false, writable: false });
+  return api;
+}
+const MARK_SRC = `(function(){try{return (${markPage.toString()})();}catch(e){return {on(){},off(){},touch(){},cursor(){},hide(){},show(){}};}})()`;
 
 async function browserLevel(method, params) {
   switch (method) {
@@ -448,6 +669,7 @@ async function browserLevel(method, params) {
     case "Target.detachFromTarget": {
       const s = sessionTab(params.sessionId || "");
       if (s && !s.child) {
+        await unmark(s.tabId);
         await chrome.debugger.detach({ tabId: s.tabId }).catch(() => {});
         attached.delete(s.tabId);
       }
@@ -471,6 +693,7 @@ chrome.debugger.onEvent.addListener((source, method, params) => {
 chrome.debugger.onDetach.addListener((source, reason) => {
   const tabId = source.tabId;
   if (tabId === undefined || !attached.delete(tabId)) return;
+  forgetMark(tabId);
   for (const [sid, t] of children) if (t === tabId) children.delete(sid);
   send({ method: "Target.detachedFromTarget", params: { sessionId: sessionFor(tabId), reason } });
 });
@@ -484,7 +707,9 @@ async function syncTabs() {
   for (const [tabId, targetId] of known) {
     if (ids.has(tabId)) continue;
     known.delete(tabId);
-    if (attached.delete(tabId)) chrome.debugger.detach({ tabId }).catch(() => {});
+    // Dragged out of the group: the mark SuperLeo put there comes off with it.
+    if (attached.delete(tabId)) unmark(tabId).finally(() => chrome.debugger.detach({ tabId }).catch(() => {}));
+    else forgetMark(tabId);
     if (discover) send({ method: "Target.targetDestroyed", params: { targetId } });
   }
   for (const tab of tabs) {
@@ -510,6 +735,7 @@ function resync() {
 
 chrome.tabs.onRemoved.addListener((tabId) => {
   attached.delete(tabId);
+  forgetMark(tabId);
   resync();
 });
 chrome.tabs.onUpdated.addListener((tabId, change) => {

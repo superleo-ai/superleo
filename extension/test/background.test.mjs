@@ -70,7 +70,7 @@ async function world({ tabs, groups = [{ id: 10, title: "SuperLeo", windowId: 1 
         if (!g) throw new Error("No group");
         return g;
       },
-      query: async ({ title }) => w.groups.filter((g) => g.title === title),
+      query: async ({ title } = {}) => w.groups.filter((g) => title === undefined || g.title === title),
       update: async (id, props) => {
         w.groupUpdates.push({ id, ...props });
         Object.assign(w.groups.find((g) => g.id === id), props);
@@ -84,6 +84,7 @@ async function world({ tabs, groups = [{ id: 10, title: "SuperLeo", windowId: 1 
       detach: async () => {},
       sendCommand: async (target, method, params) => {
         w.debugCalls.push({ target, method, params });
+        if (method === "Page.addScriptToEvaluateOnNewDocument") return { identifier: "7" };
         return { ok: true };
       },
       getTargets: async () => w.tabs.map((t) => ({ id: `T${t.id}`, type: "page", tabId: t.id, url: t.url || "", title: t.title || "" })),
@@ -287,4 +288,93 @@ test("with nobody driving, the group leaves the tab bar: blank tabs close, pages
   assert.deepEqual(w.ungrouped, [1]);
   assert.equal(w.tabs.find((t) => t.id === 3).groupId, 99, "other groups are left alone");
   assert.equal(w.tabs.find((t) => t.id === 2).groupId, -1);
+});
+
+// The calls the mark made, as "Method" or "Method:call()" for page evaluations.
+const markCalls = (w) =>
+  w.debugCalls
+    .filter((c) => c.method !== "Page.navigate" && c.method !== "Input.dispatchMouseEvent" && c.method !== "Page.captureScreenshot" && c.method !== "Page.enable")
+    .map((c) => (c.method === "Runtime.evaluate" ? `eval:${/\.(\w+)\([^()]*\)$/.exec(c.params.expression)?.[1]}` : c.method));
+const settle = async () => {
+  for (let i = 0; i < 10; i++) await tick();
+};
+
+test("the working tab is marked, and the mark comes off when SuperLeo stops", async () => {
+  const w = await world({ tabs: mixed(), groups: groups() });
+  await w.call("Target.attachToTarget", { targetId: "T1", flatten: true });
+  await w.call("Page.navigate", { url: "https://example.org" }, "sl1");
+  await settle();
+  assert.equal(w.debugCalls[0].method, "Page.navigate", "the command runs first");
+  assert.deepEqual(markCalls(w), ["Page.addScriptToEvaluateOnNewDocument", "eval:on"]);
+  assert.ok(w.debugCalls.every((c) => c.target.tabId === 1), "only the group tab is touched");
+  assert.match(w.debugCalls[1].params.source, /pointer-events: none/);
+  assert.equal(w.groups.find((g) => g.id === 10).title, "● SuperLeo");
+  assert.equal(w.groups.find((g) => g.id === 99).title, "Work", "other groups keep their title");
+  // Still its tab under the working title.
+  assert.equal((await w.call("Target.getTargets")).result.targetInfos.length, 1);
+  // No command for a while: the mark comes off.
+  w.debugCalls.length = 0;
+  w.timers.filter((t) => t.ms === 20000).at(-1).f();
+  await settle();
+  assert.deepEqual(markCalls(w), ["Page.removeScriptToEvaluateOnNewDocument", "eval:off"]);
+  assert.equal(w.debugCalls[0].params.identifier, "7");
+  assert.equal(w.groups.find((g) => g.id === 10).title, "SuperLeo");
+});
+
+test("attach-time setup commands do not mark the tab", async () => {
+  const w = await world({ tabs: mixed(), groups: groups() });
+  await w.call("Target.attachToTarget", { targetId: "T1", flatten: true });
+  await w.call("Page.enable", {}, "sl1");
+  await w.call("Emulation.setFocusEmulationEnabled", { enabled: true }, "sl1");
+  await settle();
+  assert.deepEqual(markCalls(w).filter((m) => m !== "Emulation.setFocusEmulationEnabled"), []);
+  assert.equal(w.groups.find((g) => g.id === 10).title, "SuperLeo");
+});
+
+test("a mouse event draws SuperLeo's cursor where it pointed, after the event", async () => {
+  const w = await world({ tabs: mixed(), groups: groups() });
+  await w.call("Target.attachToTarget", { targetId: "T1", flatten: true });
+  await w.call("Input.dispatchMouseEvent", { type: "mousePressed", x: 120, y: 80.5, button: "left", clickCount: 1 }, "sl1");
+  await settle();
+  assert.equal(w.debugCalls[0].method, "Input.dispatchMouseEvent");
+  const cur = w.debugCalls.find((c) => c.method === "Runtime.evaluate" && c.params.expression.includes(".cursor("));
+  assert.ok(cur, "a cursor is drawn");
+  assert.ok(cur.params.expression.endsWith('.cursor(120,80.5,"mousePressed")'));
+  assert.ok(w.debugCalls.indexOf(cur) > w.debugCalls.findIndex((c) => c.params?.expression?.endsWith(".on()")), "after the mark is on");
+  // A wheel event moves nothing.
+  w.debugCalls.length = 0;
+  await w.call("Input.dispatchMouseEvent", { type: "mouseWheel", x: 1, y: 1, deltaY: 100 }, "sl1");
+  await settle();
+  assert.ok(!w.debugCalls.some((c) => c.params?.expression?.includes(".cursor(")));
+});
+
+test("screenshots are taken with the mark hidden", async () => {
+  const w = await world({ tabs: mixed(), groups: groups() });
+  await w.call("Target.attachToTarget", { targetId: "T1", flatten: true });
+  await w.call("Page.navigate", { url: "https://example.org" }, "sl1");
+  await settle();
+  w.debugCalls.length = 0;
+  await w.call("Page.captureScreenshot", { format: "png" }, "sl1");
+  await settle();
+  const seq = w.debugCalls.map((c) => (c.method === "Runtime.evaluate" ? /\.(\w+)\(\)$/.exec(c.params.expression)[1] : c.method));
+  assert.deepEqual(seq, ["hide", "Page.captureScreenshot", "show"]);
+});
+
+test("when SuperLeo lets go, the mark comes off before the debugger does", async () => {
+  const w = await world({ tabs: mixed(), groups: groups() });
+  const detached = [];
+  w.chrome.debugger.detach = async (t) => {
+    detached.push({ tabId: t.tabId, after: w.debugCalls.length });
+  };
+  await w.call("Target.attachToTarget", { targetId: "T1", flatten: true });
+  await w.call("Page.navigate", { url: "https://example.org" }, "sl1");
+  await settle();
+  w.sock.onmessage({ data: JSON.stringify({ type: "clients", n: 0 }) });
+  await tick();
+  w.timers.find((t) => t.ms === 15000).f();
+  await settle();
+  const off = w.debugCalls.findIndex((c) => c.params?.expression?.endsWith(".off()"));
+  assert.ok(off >= 0, "the page mark is taken off");
+  assert.equal(detached[0].tabId, 1);
+  assert.ok(detached[0].after > off, "before the debugger detaches");
 });
