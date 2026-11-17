@@ -390,16 +390,6 @@ export default function HiveView() {
               </div>
             )}
 
-            {st.role === "" && (
-              <div className="card">
-                <div className="card-title">{t("Joining a hive")}</div>
-                <div className="hive-dim">
-                  This instance is complete by itself. To make it a queen, set <code>hive.role: "queen"</code>. To make
-                  it a worker, set <code>hive.role: "worker"</code>, <code>hive.join_url</code> and{" "}
-                  <code>hive.advertise_url</code>. Either way it keeps working alone if the hive is gone.
-                </div>
-              </div>
-            )}
           </>
         )}
       </div>
