@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { AlarmClockIcon, SquareIcon } from "lucide-react";
+import { AlarmClockIcon, ChevronRightIcon, SquareIcon } from "lucide-react";
 import {
   CancelScheduledRun,
   DeleteScheduledPrompt,
@@ -61,6 +61,15 @@ export default function SchedulesView({
   const [busy, setBusy] = useState("");
   const [confirmDelete, setConfirmDelete] = useState("");
   const [fresh, setFresh] = useState("");
+  // Folded to one line each; the prompt can run to a page.
+  const [open, setOpen] = useState<Set<string>>(() => new Set());
+  const toggle = (id: string) =>
+    setOpen((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   // Whether this browser will draw a banner when a run finishes while the page
   // is in the background. Read once: it only changes when the button below is
   // pressed, or in browser settings, which reloads anyway.
@@ -354,6 +363,7 @@ export default function SchedulesView({
               // look finished the moment the click returned.
               const acting = busy === s.id;
               const running = !!s.running;
+              const isOpen = open.has(s.id);
               return (
                 <div
                   className={`record-card${s.enabled ? "" : " paused"}${
@@ -361,17 +371,40 @@ export default function SchedulesView({
                   }`}
                   key={s.id}
                 >
-                  <div className="rc-title" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div
+                    className="rc-title sched-head"
+                    style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}
+                    role="button"
+                    tabIndex={0}
+                    aria-expanded={isOpen}
+                    onClick={() => toggle(s.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        toggle(s.id);
+                      }
+                    }}
+                  >
+                    <ChevronRightIcon
+                      size={15}
+                      style={{ flexShrink: 0, transition: "transform .15s", transform: isOpen ? "rotate(90deg)" : "none", color: "var(--text-3)" }}
+                    />
                     <span className={`status-dot ${s.enabled ? "ok" : "unknown"}`} />
                     <span className="sched-name">{title}</span>
-                    {!s.enabled && <span className="chip">paused</span>}
+                    {!s.enabled && <span className="chip">{t("Paused")}</span>}
                     {running && (
                       <span className="chip">
                         <span className="spinner" style={{ borderTopColor: "var(--text-1)" }} />{" "}
-                        running
+                        {t("Running")}
                       </span>
                     )}
-                    <span className="sched-actions">
+                    {!isOpen && s.enabled && !running && (
+                      <span className="sched-when">
+                        {words || s.schedule}
+                        {next ? ` · ${fromNow(next)}` : ""}
+                      </span>
+                    )}
+                    <span className="sched-actions" onClick={(e) => e.stopPropagation()}>
                       {/* Run now is the only way to find out whether a schedule
                           does what was meant without waiting for the hour. It
                           starts the run and returns; while the run is in flight
@@ -388,7 +421,7 @@ export default function SchedulesView({
                             })
                           }
                         >
-                          <SquareIcon className="size-3 fill-current" /> Stop
+                          <SquareIcon className="size-3 fill-current" /> {t("Stop")}
                         </button>
                       ) : (
                         <button
@@ -403,10 +436,10 @@ export default function SchedulesView({
                                 className="spinner"
                                 style={{ borderTopColor: "var(--text-1)" }}
                               />{" "}
-                              Starting…
+                              {t("Starting…")}
                             </>
                           ) : (
-                            "Run now"
+                            t("Run now")
                           )}
                         </button>
                       )}
@@ -419,7 +452,7 @@ export default function SchedulesView({
                           )
                         }
                       >
-                        {s.enabled ? "Pause" : "Resume"}
+                        {s.enabled ? t("Pause") : t("Resume")}
                       </button>
                       <button
                         className="btn ghost sm"
@@ -433,12 +466,13 @@ export default function SchedulesView({
                           act(s.id, "Delete", () => DeleteScheduledPrompt(s.id));
                         }}
                       >
-                        {confirmDelete === s.id ? "Click again to delete" : "Delete"}
+                        {confirmDelete === s.id ? t("Click again to delete") : t("Delete")}
                       </button>
                     </span>
                   </div>
+                  {isOpen && (<>
                   <div className="rc-row">
-                    <span className="rc-key">When</span>
+                    <span className="rc-key">{t("When")}</span>
                     <span className="rc-val">
                       {words !== "" && <>{words} </>}
                       <span className="mono">{s.schedule}</span>
@@ -448,7 +482,7 @@ export default function SchedulesView({
                     <span className="rc-key">{t("Next run")}</span>
                     <span className="rc-val">
                       {!s.enabled
-                        ? "— paused"
+                        ? "—"
                         : next
                           ? `${formatStamp(next)} · ${fromNow(next)}`
                           : "unknown — “Run now” tests it without waiting"}
@@ -470,7 +504,7 @@ export default function SchedulesView({
                   )}
                   {!!s.session && (
                     <div className="rc-row">
-                      <span className="rc-key">Conversation</span>
+                      <span className="rc-key">{t("Conversation")}</span>
                       <span className="rc-val">
                         <button className="link-btn" onClick={() => onOpenConversation(s.session!)}>
                           {s.session}
@@ -478,6 +512,7 @@ export default function SchedulesView({
                       </span>
                     </div>
                   )}
+                  </>)}
                 </div>
               );
             })}

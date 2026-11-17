@@ -1102,5 +1102,7 @@
  "Finance": "Finanzas",
  "Scheduled tasks": "Tareas programadas",
  "New scheduled task": "Nueva tarea programada",
- "No scheduled tasks.": "Sin tareas programadas."
+ "No scheduled tasks.": "Sin tareas programadas.",
+ "Run now": "Ejecutar ahora",
+ "Click again to delete": "Haz clic otra vez para eliminar"
 }
