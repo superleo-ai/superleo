@@ -128,7 +128,7 @@ func (a *App) RefreshDashboard(id string) map[string]any {
 		// Its own session, the same one the scheduled refresh uses, so a
 		// dashboard's history is its own and a manual refresh sees what the
 		// last automatic one did.
-		answer, err := svc.Stream(ctx, backend.DashboardSession(id), d.Prompt, nil, func(*agent.Event) {})
+		answer, err := svc.Stream(ctx, backend.DashboardSession(id), backend.DashboardRefreshPrompt(d.Prompt), nil, func(*agent.Event) {})
 		a.finishDashboardRefresh(id, answer, err)
 	}()
 	return okData(nil)
@@ -194,7 +194,7 @@ func (a *App) SetDashboardCron(id, cronExpr string) map[string]any {
 		// reason otherwise — not the empty string. Reading it as "empty means
 		// fine" arms the cron and then reports a failure, which leaves a
 		// schedule firing for a dashboard that does not know it has one.
-		if msg := a.SchedulePrompt(d.Prompt, cronExpr, "Refresh dashboard: "+d.Name, backend.DashboardSession(id)); msg != scheduleOK {
+		if msg := a.SchedulePrompt(backend.DashboardRefreshPrompt(d.Prompt), cronExpr, "Refresh dashboard: "+d.Name, backend.DashboardSession(id)); msg != scheduleOK {
 			return failWith(msg)
 		}
 	}

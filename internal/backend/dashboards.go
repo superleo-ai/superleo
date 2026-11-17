@@ -441,3 +441,15 @@ func firstWords(s string, n int) string {
 	}
 	return s
 }
+
+// DashboardRefreshPrompt is what a refresh asks: the saved question, plus the
+// one rule a refresh has that a first ask does not. A model short of a number
+// wrote a paragraph asking for it, and a board that comes back as a question
+// is not stored, so the card kept failing until the person supplied data the
+// board never needed to be drawn.
+func DashboardRefreshPrompt(prompt string) string {
+	return strings.TrimSpace(prompt) + "\n\n" +
+		"(Refreshing a saved dashboard: answer with the dashboard itself, the same kind of panel blocks as before, " +
+		"drawn from whatever data you can get now. A number you cannot get is shown as \"—\" or left out, " +
+		"with a short note in the subtitle; do not ask the person for anything and do not answer with only text.)"
+}

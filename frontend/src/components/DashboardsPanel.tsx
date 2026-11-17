@@ -66,7 +66,9 @@ function Card({
             </span>
           )}
         </span>
-        {d.last_error && <span className="dcard-err">⚠ {d.last_error}</span>}
+        {d.last_error && !d.refreshing && (
+          <span className="dcard-err" title={d.last_error}>⚠ {t("Last refresh failed; showing the previous board")}</span>
+        )}
       </button>
       <div className="dcard-actions">
         <button
