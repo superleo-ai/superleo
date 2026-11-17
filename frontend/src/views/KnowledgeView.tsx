@@ -6,8 +6,7 @@ import { ClipboardSetText } from "../../wailsjs/runtime";
 import { GraphView as startGraphView, MemoryRecall } from "../../wailsjs/go/app/App";
 import { openExternal } from "../lib/openExternal";
 import ImportPanel from "../components/ImportPanel";
-import { SearchIcon, UploadIcon, UserRoundIcon } from "lucide-react";
-import AboutYou from "../components/AboutYou";
+import { SearchIcon, UploadIcon } from "lucide-react";
 import { useImeGuard } from "@/lib/ime";
 import { useDaylight } from "../lib/useDaylight";
 
@@ -75,7 +74,6 @@ const SERVED = Boolean((window as unknown as Record<string, unknown>).superleoSe
 export default function KnowledgeView() {
   const { t } = useI18n();
   const ime = useImeGuard();
-  const [aboutOpen, setAboutOpen] = useState(false);
   // Search and import are occasional; the graph is why the page exists. Both
   // used to hold a full row apiece above it — a search bar with two buttons and
   // an import link — so the thing people came to look at started below the
@@ -207,13 +205,6 @@ export default function KnowledgeView() {
           <span className="graph-meta">
             {status.nodes} nodes · {status.edges} edges
           </span>
-          <button
-            className={`btn ghost sm${aboutOpen ? " on" : ""}`}
-            aria-pressed={aboutOpen}
-            onClick={() => setAboutOpen((v) => !v)}
-          >
-            <UserRoundIcon size={15} /> About you
-          </button>
           <button
             className={`btn ghost sm icon-only${searchOpen ? " on" : ""}`}
             title="Recall from memory"
@@ -388,7 +379,6 @@ export default function KnowledgeView() {
     <div className="view kn-view">
       {header}
       {body}
-      {aboutOpen && <AboutYou onClose={() => setAboutOpen(false)} />}
     </div>
   );
 }
