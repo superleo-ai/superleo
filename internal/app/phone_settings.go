@@ -101,7 +101,7 @@ func phoneSettingsOf(s backend.Settings) PhoneSettingsView {
 		RemoteAgents:    PhoneRemoteAgents{Enabled: s.RemoteAgents.Enabled, Agents: []PhoneRemoteAgent{}},
 		HiveRole:        s.Hive.Role,
 		PhoneRelay:      s.PhoneRelay, PhoneURLs: nonNilStrings(s.PhoneURLs),
-		Features:        s.Features(),
+		Features: s.Features(),
 		Secrets: map[string]bool{
 			"llm_key":             s.LLMKey != "",
 			"embed_key":           s.EmbedKey != "",
