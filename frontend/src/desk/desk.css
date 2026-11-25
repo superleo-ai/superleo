@@ -681,6 +681,12 @@ html[data-desk] body { background: transparent; }
 /* The same frame as every other page (6px 72px 14px 4px): its cards
    carry 10px of right and 12px of bottom margin themselves. */
 .dk-shell.dk-flat.on-home > .dk { margin: 6px 62px 0 4px; }
+/* In Menu mode the list and the conversation are one card, the way the
+   Conversations page is: a hairline between them, round corners only on
+   the outside, and neither casts its shadow across the seam. */
+.dk-shell.dk-flat.on-home > .dk > .dk-side { margin: 0 0 14px 0; border-radius: 20px 0 0 20px; box-shadow: inset -1px 0 0 var(--border), 0 18px 50px rgba(22, 32, 43, 0.10); clip-path: inset(-60px 0 -60px -60px); }
+.dk-shell.dk-flat.on-home > .dk > .dk-chat { margin: 0 10px 14px 0; border-radius: 0 20px 20px 0; box-shadow: 0 18px 50px rgba(22, 32, 43, 0.10); clip-path: inset(-60px -60px -60px 0); }
+.dk-shell.dk-flat.on-home > .dk.side-folded > .dk-chat { border-radius: 20px; clip-path: none; }
 .dk-shell > .fab-stack { position: fixed; z-index: 9; }
 /* Menu mode in a narrow window: the live pane floats over the conversation,
    so it is solid, controls included. */

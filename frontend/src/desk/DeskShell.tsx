@@ -58,11 +58,11 @@ const loadMode = (): "world" | "menu" => {
 };
 
 const RAIL: { key: ViewKey; label: string; Icon: typeof HexagonIcon; cls: string }[] = [
+  { key: "hive", label: "Dashboard", Icon: GaugeIcon, cls: "dk-a-hive" },
   { key: "home", label: "The queen", Icon: MessageSquareIcon, cls: "dk-a-chat" },
   { key: "conversations", label: "Conversations", Icon: MessagesSquareIcon, cls: "dk-a-rec" },
   { key: "schedule", label: "Schedule", Icon: CalendarDaysIcon, cls: "dk-a-sched" },
   { key: "wellbeing", label: "Wellbeing", Icon: HeartPulseIcon, cls: "dk-a-sched" },
-  { key: "hive", label: "Dashboard", Icon: GaugeIcon, cls: "dk-a-hive" },
   { key: "routines", label: "Automation", Icon: WorkflowIcon, cls: "dk-a-sched" },
   { key: "coding", label: "Coding", Icon: TerminalIcon, cls: "dk-a-code" },
   { key: "knowledge", label: "Knowledge", Icon: BookOpenIcon, cls: "dk-a-know" },
