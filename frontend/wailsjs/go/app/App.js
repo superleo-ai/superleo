@@ -102,6 +102,14 @@ export function CancelChat(arg1) {
   return window['go']['app']['App']['CancelChat'](arg1);
 }
 
+export function CancelDebate(arg1) {
+  return window['go']['app']['App']['CancelDebate'](arg1);
+}
+
+export function CancelImplementReview(arg1) {
+  return window['go']['app']['App']['CancelImplementReview'](arg1);
+}
+
 export function CancelRemoteAsk(arg1) {
   return window['go']['app']['App']['CancelRemoteAsk'](arg1);
 }
@@ -146,6 +154,10 @@ export function CodingSessions() {
   return window['go']['app']['App']['CodingSessions']();
 }
 
+export function ContinueDebate(arg1) {
+  return window['go']['app']['App']['ContinueDebate'](arg1);
+}
+
 export function ConversationThread(arg1) {
   return window['go']['app']['App']['ConversationThread'](arg1);
 }
@@ -168,6 +180,14 @@ export function Dashboard() {
 
 export function Dashboards() {
   return window['go']['app']['App']['Dashboards']();
+}
+
+export function DebateDetail(arg1) {
+  return window['go']['app']['App']['DebateDetail'](arg1);
+}
+
+export function Debates() {
+  return window['go']['app']['App']['Debates']();
 }
 
 export function DeleteApprovalRule(arg1) {
@@ -368,6 +388,18 @@ export function HostStatus() {
 
 export function Hosts() {
   return window['go']['app']['App']['Hosts']();
+}
+
+export function ImplementReviewDetail(arg1) {
+  return window['go']['app']['App']['ImplementReviewDetail'](arg1);
+}
+
+export function ImplementReviewDiff(arg1) {
+  return window['go']['app']['App']['ImplementReviewDiff'](arg1);
+}
+
+export function ImplementReviews() {
+  return window['go']['app']['App']['ImplementReviews']();
 }
 
 export function ImportCSV(arg1, arg2) {
@@ -884,6 +916,14 @@ export function StandingWakes(arg1) {
 
 export function StartCLIRun(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['app']['App']['StartCLIRun'](arg1, arg2, arg3, arg4, arg5);
+}
+
+export function StartDebate(arg1) {
+  return window['go']['app']['App']['StartDebate'](arg1);
+}
+
+export function StartImplementReview(arg1) {
+  return window['go']['app']['App']['StartImplementReview'](arg1);
 }
 
 export function StartQueenCLIRun(arg1) {

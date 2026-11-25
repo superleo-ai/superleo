@@ -799,6 +799,8 @@ export namespace app {
 	    pid?: number;
 	    resumed?: number;
 	    paused?: string;
+	    base?: string;
+	    readOnly?: boolean;
 	    state: string;
 	    // Go type: time
 	    started: any;
@@ -835,6 +837,8 @@ export namespace app {
 	        this.pid = source["pid"];
 	        this.resumed = source["resumed"];
 	        this.paused = source["paused"];
+	        this.base = source["base"];
+	        this.readOnly = source["readOnly"];
 	        this.state = source["state"];
 	        this.started = this.convertValues(source["started"], null);
 	        this.ended = this.convertValues(source["ended"], null);
@@ -1347,6 +1351,222 @@ export namespace app {
 		    return a;
 		}
 	}
+	export class DebateDisagreement {
+	    text: string;
+	    who?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new DebateDisagreement(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.text = source["text"];
+	        this.who = source["who"];
+	    }
+	}
+	export class DebateConclusion {
+	    verdict: string;
+	    agreed: string[];
+	    disagreements: DebateDisagreement[];
+	    nextSteps: string[];
+	    raw: string;
+	    judge: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new DebateConclusion(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.verdict = source["verdict"];
+	        this.agreed = source["agreed"];
+	        this.disagreements = this.convertValues(source["disagreements"], DebateDisagreement);
+	        this.nextSteps = source["nextSteps"];
+	        this.raw = source["raw"];
+	        this.judge = source["judge"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class DebateStance {
+	    kind: string;
+	    text: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new DebateStance(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.text = source["text"];
+	    }
+	}
+	export class DebateStep {
+	    id: string;
+	    phase: string;
+	    round: number;
+	    agent: string;
+	    side: number;
+	    run?: string;
+	    state: string;
+	    // Go type: time
+	    started: any;
+	    // Go type: time
+	    ended?: any;
+	    in: number;
+	    out: number;
+	    costUsd: number;
+	    text?: string;
+	    stances?: DebateStance[];
+	    error?: string;
+	    readOnly: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new DebateStep(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.phase = source["phase"];
+	        this.round = source["round"];
+	        this.agent = source["agent"];
+	        this.side = source["side"];
+	        this.run = source["run"];
+	        this.state = source["state"];
+	        this.started = this.convertValues(source["started"], null);
+	        this.ended = this.convertValues(source["ended"], null);
+	        this.in = source["in"];
+	        this.out = source["out"];
+	        this.costUsd = source["costUsd"];
+	        this.text = source["text"];
+	        this.stances = this.convertValues(source["stances"], DebateStance);
+	        this.error = source["error"];
+	        this.readOnly = source["readOnly"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Debate {
+	    id: string;
+	    topic: string;
+	    cwd: string;
+	    agents: string[];
+	    models?: string[];
+	    rounds: number;
+	    judge: string;
+	    judgeAgent: string;
+	    state: string;
+	    steps: DebateStep[];
+	    conclusion?: DebateConclusion;
+	    reviews?: string[];
+	    // Go type: time
+	    started: any;
+	    // Go type: time
+	    ended?: any;
+	    error?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Debate(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.topic = source["topic"];
+	        this.cwd = source["cwd"];
+	        this.agents = source["agents"];
+	        this.models = source["models"];
+	        this.rounds = source["rounds"];
+	        this.judge = source["judge"];
+	        this.judgeAgent = source["judgeAgent"];
+	        this.state = source["state"];
+	        this.steps = this.convertValues(source["steps"], DebateStep);
+	        this.conclusion = this.convertValues(source["conclusion"], DebateConclusion);
+	        this.reviews = source["reviews"];
+	        this.started = this.convertValues(source["started"], null);
+	        this.ended = this.convertValues(source["ended"], null);
+	        this.error = source["error"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
+	export class DebateRequest {
+	    topic: string;
+	    cwd: string;
+	    agents: string[];
+	    models: string[];
+	    rounds: number;
+	    judge: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new DebateRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.topic = source["topic"];
+	        this.cwd = source["cwd"];
+	        this.agents = source["agents"];
+	        this.models = source["models"];
+	        this.rounds = source["rounds"];
+	        this.judge = source["judge"];
+	    }
+	}
+	
+	
 	export class DesktopResident {
 	    startAtLogin: boolean;
 	    keepRunning: boolean;
@@ -1437,6 +1657,24 @@ export namespace app {
 		    }
 		    return a;
 		}
+	}
+	export class DiffStat {
+	    files: number;
+	    add: number;
+	    del: number;
+	    paths?: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new DiffStat(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.files = source["files"];
+	        this.add = source["add"];
+	        this.del = source["del"];
+	        this.paths = source["paths"];
+	    }
 	}
 	export class DirectReply {
 	    conversation: string;
@@ -1959,6 +2197,170 @@ export namespace app {
 	        this.about = source["about"];
 	        this.pid = source["pid"];
 	        this.lastExit = source["lastExit"];
+	    }
+	}
+	export class ReviewFinding {
+	    file?: string;
+	    line?: number;
+	    text: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ReviewFinding(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.file = source["file"];
+	        this.line = source["line"];
+	        this.text = source["text"];
+	    }
+	}
+	export class ReviewStep {
+	    id: string;
+	    kind: string;
+	    cycle: number;
+	    agent: string;
+	    run?: string;
+	    state: string;
+	    // Go type: time
+	    started: any;
+	    // Go type: time
+	    ended?: any;
+	    in: number;
+	    out: number;
+	    costUsd: number;
+	    text?: string;
+	    verdict?: string;
+	    findings?: ReviewFinding[];
+	    diff?: DiffStat;
+	    error?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ReviewStep(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.kind = source["kind"];
+	        this.cycle = source["cycle"];
+	        this.agent = source["agent"];
+	        this.run = source["run"];
+	        this.state = source["state"];
+	        this.started = this.convertValues(source["started"], null);
+	        this.ended = this.convertValues(source["ended"], null);
+	        this.in = source["in"];
+	        this.out = source["out"];
+	        this.costUsd = source["costUsd"];
+	        this.text = source["text"];
+	        this.verdict = source["verdict"];
+	        this.findings = this.convertValues(source["findings"], ReviewFinding);
+	        this.diff = this.convertValues(source["diff"], DiffStat);
+	        this.error = source["error"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class ImplementReview {
+	    id: string;
+	    cwd: string;
+	    prompt: string;
+	    implementer: string;
+	    reviewer: string;
+	    cycles: number;
+	    debate?: string;
+	    fromRun?: string;
+	    base?: string;
+	    baseHead?: string;
+	    head?: string;
+	    state: string;
+	    steps: ReviewStep[];
+	    // Go type: time
+	    started: any;
+	    // Go type: time
+	    ended?: any;
+	    error?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ImplementReview(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.cwd = source["cwd"];
+	        this.prompt = source["prompt"];
+	        this.implementer = source["implementer"];
+	        this.reviewer = source["reviewer"];
+	        this.cycles = source["cycles"];
+	        this.debate = source["debate"];
+	        this.fromRun = source["fromRun"];
+	        this.base = source["base"];
+	        this.baseHead = source["baseHead"];
+	        this.head = source["head"];
+	        this.state = source["state"];
+	        this.steps = this.convertValues(source["steps"], ReviewStep);
+	        this.started = this.convertValues(source["started"], null);
+	        this.ended = this.convertValues(source["ended"], null);
+	        this.error = source["error"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class ImplementReviewRequest {
+	    cwd: string;
+	    prompt: string;
+	    implementer: string;
+	    reviewer: string;
+	    cycles: number;
+	    debate: string;
+	    fromRun: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ImplementReviewRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.cwd = source["cwd"];
+	        this.prompt = source["prompt"];
+	        this.implementer = source["implementer"];
+	        this.reviewer = source["reviewer"];
+	        this.cycles = source["cycles"];
+	        this.debate = source["debate"];
+	        this.fromRun = source["fromRun"];
 	    }
 	}
 	export class IntegrationToken {
@@ -2769,6 +3171,8 @@ export namespace app {
 	        this.ms = source["ms"];
 	    }
 	}
+	
+	
 	export class SessionLog {
 	    cli: string;
 	    session: string;

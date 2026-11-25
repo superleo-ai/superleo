@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { PATHS } from "../lib/routes";
 import { focusInWorld } from "../world/bus";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { SquareIcon, ChevronRightIcon, PlusIcon, ArrowUpIcon, TerminalIcon, FolderIcon, FolderOpenIcon, PaperclipIcon } from "lucide-react";
+import { SquareIcon, ChevronRightIcon, PlusIcon, ArrowUpIcon, TerminalIcon, FolderIcon, FolderOpenIcon, PaperclipIcon, SwordsIcon, ClipboardCheckIcon } from "lucide-react";
 import { useAttachments } from "../lib/useAttachments";
 import AttachmentChips from "../components/AttachmentChips";
 import { WorkspaceAbsPath } from "../../wailsjs/go/app/App";
@@ -34,6 +34,7 @@ import { mdComponents } from "../components/Transcript";
 import BrowserCard from "../components/BrowserCard";
 import { BrowserCall, browserOp } from "../lib/browser";
 import { SkeletonLines, SkeletonRows } from "../components/Skeleton";
+import { DebateForm, DebateView, ReviewTrack, ReviewView, ReviewWith, useDebates, type ReviewRec } from "./DebateParts";
 
 // Plain shapes: what arrives over events is JSON, not the generated classes.
 type Ev = Omit<app.CLIRunEvent, "convertValues">;
@@ -170,6 +171,24 @@ export default function AgentsView() {
 
   const threads = useMemo(() => threadsOf(runs), [runs]);
   const thread = threads.find((t) => t.id === selected) ?? null;
+  const { debates, reviews, putDebate, putReview } = useDebates();
+  const debate = selected.startsWith("debate:") ? debates.find((d) => `debate:${d.id}` === selected) ?? null : null;
+  const review = selected.startsWith("review:") ? reviews.find((r) => `review:${r.id}` === selected) ?? null : null;
+  const cwds = useMemo(() => [...new Set(runs.map((r) => r.cwd).filter(Boolean))].slice(0, 8), [runs]);
+  const openRun = useCallback((id: string) => {
+    const r = runs.find((x) => x.id === id);
+    if (r) setSelected(r.thread);
+  }, [runs]);
+  const startedReview = useCallback((r: ReviewRec) => { putReview(r); setSelected(`review:${r.id}`); }, [putReview]);
+  // One list: conversations with a CLI, debates and reviews, newest first.
+  const feed = useMemo(() => {
+    const at = (s: string) => +(parseTime(s) ?? 0);
+    return [
+      ...threads.map((x) => ({ at: at(x.latest.started), kind: "thread" as const, key: x.id, thread: x })),
+      ...debates.map((d) => ({ at: at(d.started), kind: "debate" as const, key: `debate:${d.id}`, debate: d })),
+      ...reviews.map((r) => ({ at: at(r.started), kind: "review" as const, key: `review:${r.id}`, review: r })),
+    ].sort((a, b) => b.at - a.at);
+  }, [threads, debates, reviews]);
   const term = terms.find((x) => termKey(x) === selected) ?? null;
 
   // Load each run of the open thread once; live events extend it after.
@@ -193,13 +212,18 @@ export default function AgentsView() {
       <aside className="cd-side">
         <div className="cd-side-h">
           <span>Coding</span>
-          <button className={`cd-new${thread ? "" : " on"}`} onClick={() => setSelected("")}>
-            <PlusIcon size={14} /> New run
-          </button>
+          <span className="cd-side-b">
+            <button className={`cd-ico${selected === "debate:new" ? " on" : ""}`} onClick={() => setSelected("debate:new")} title={t("Debate")} aria-label={t("Debate")}>
+              <SwordsIcon size={15} />
+            </button>
+            <button className={`cd-new${selected === "" ? " on" : ""}`} onClick={() => setSelected("")}>
+              <PlusIcon size={14} /> New run
+            </button>
+          </span>
         </div>
         <div className="cd-list">
-          {choices === null && threads.length === 0 && terms.length === 0 && <SkeletonRows n={5} />}
-          {choices !== null && threads.length === 0 && terms.length === 0 && <div className="cd-none">{t("Runs you start, and ones the queen starts, show up here.")}</div>}
+          {choices === null && feed.length === 0 && terms.length === 0 && <SkeletonRows n={5} />}
+          {choices !== null && feed.length === 0 && terms.length === 0 && <div className="cd-none">{t("Runs you start, and ones the queen starts, show up here.")}</div>}
           {terms.length > 0 && <div className="cd-group">{t("In terminals")}</div>}
           {terms.map((x) => (
             <button key={termKey(x)} className={`cd-item${termKey(x) === selected ? " on" : ""}`} onClick={() => setSelected(termKey(x))} data-testid="term-session">
@@ -212,8 +236,37 @@ export default function AgentsView() {
               <span className="cd-item-p">{x.project || x.session}{x.tool ? ` · ${x.tool}` : ""}</span>
             </button>
           ))}
-          {threads.length > 0 && terms.length > 0 && <div className="cd-group">{t("Started by SuperLeo")}</div>}
-          {threads.map((t) => {
+          {feed.length > 0 && terms.length > 0 && <div className="cd-group">{t("Started by SuperLeo")}</div>}
+          {feed.map((row) => {
+            if (row.kind === "debate") {
+              const d = row.debate;
+              return (
+                <button key={row.key} className={`cd-item${row.key === selected ? " on" : ""}`} onClick={() => setSelected(row.key)} data-testid="debate-item">
+                  <span className="cd-item-top">
+                    <i className={`cd-dot ${d.state}`} />
+                    <SwordsIcon size={12} />
+                    <b>{d.agents.join(" · ")}</b>
+                    <time>{fromNow(parseTime(d.started) ?? new Date())}</time>
+                  </span>
+                  <span className="cd-item-p">{d.topic}</span>
+                </button>
+              );
+            }
+            if (row.kind === "review") {
+              const r = row.review;
+              return (
+                <button key={row.key} className={`cd-item${row.key === selected ? " on" : ""}`} onClick={() => setSelected(row.key)} data-testid="review-item">
+                  <span className="cd-item-top">
+                    <i className={`cd-dot ${r.state === "approved" ? "done" : r.state}`} />
+                    <ClipboardCheckIcon size={12} />
+                    <b>{r.implementer} → {r.reviewer}</b>
+                    <time>{fromNow(parseTime(r.started) ?? new Date())}</time>
+                  </span>
+                  <span className="cd-item-p">{r.prompt}</span>
+                </button>
+              );
+            }
+            const t = row.thread;
             const { cli, host } = partsOf(t.agent);
             return (
               <button key={t.id} className={`cd-item${t.id === selected ? " on" : ""}`} onClick={() => { setSelected(t.id); focusInWorld("machine", t.latest.remote || host || "core"); }}>
@@ -233,8 +286,14 @@ export default function AgentsView() {
       <main className="cd-main">
         {term ? (
           <TermView key={termKey(term)} term={term} />
+        ) : debate ? (
+          <DebateView key={debate.id} debate={debate} reviews={reviews} choices={choices ?? []} onDetail={putDebate} onRun={openRun} onReview={startedReview} onReviewDetail={putReview} />
+        ) : review ? (
+          <ReviewView key={review.id} review={review} onDetail={putReview} onRun={openRun} />
+        ) : selected === "debate:new" ? (
+          <DebateForm choices={choices ?? []} cwds={cwds} onStarted={(d) => { putDebate(d); setSelected(`debate:${d.id}`); }} />
         ) : thread ? (
-          <ThreadView thread={thread} events={events} />
+          <ThreadView thread={thread} events={events} choices={choices ?? []} reviews={reviews} onReview={startedReview} onReviewDetail={putReview} onRun={openRun} />
         ) : (
           <Start
             choices={choices}
@@ -482,7 +541,10 @@ function Composer({
   );
 }
 
-function ThreadView({ thread, events }: { thread: Thread; events: Record<string, Ev[]> }) {
+function ThreadView({ thread, events, choices, reviews, onReview, onReviewDetail, onRun }: {
+  thread: Thread; events: Record<string, Ev[]>; choices: string[]; reviews: ReviewRec[];
+  onReview: (r: ReviewRec) => void; onReviewDetail: (r: ReviewRec) => void; onRun: (id: string) => void;
+}) {
   const [follow, setFollow] = useState("");
   const [sending, setSending] = useState(false);
   const end = useRef<HTMLDivElement>(null);
@@ -490,6 +552,11 @@ function ThreadView({ thread, events }: { thread: Thread; events: Record<string,
   const total = thread.runs.reduce((n, r) => n + r.costUsd, 0);
   const count = thread.runs.reduce((n, r) => n + (events[r.id]?.length ?? 0), 0);
   const { cli, host } = partsOf(thread.agent);
+  // A finished run on this machine can be reviewed by the other of claude and codex.
+  const own = !thread.runs[0].readOnly && thread.runs[0].origin !== "review" && thread.runs[0].origin !== "debate";
+  const canReview = own && !running && thread.latest.state === "done" && !host && (thread.agent === "claude" || thread.agent === "codex")
+    && choices.includes(thread.agent === "claude" ? "codex" : "claude");
+  const mine = reviews.filter((r) => !!r.fromRun && thread.runs.some((x) => x.id === r.fromRun));
 
   useEffect(() => {
     end.current?.scrollIntoView({ block: "end" });
@@ -519,12 +586,14 @@ function ThreadView({ thread, events }: { thread: Thread; events: Record<string,
           {thread.latest.ask ? "asks before tools" : "unattended"}
           {total > 0 && ` · ${cost(total)}`}
         </span>
+        {canReview && <ReviewWith agent={thread.agent} fromRun={thread.runs[0].id} onStarted={onReview} />}
       </div>
       <div className="cd-log">
         <div className="cd-log-in">
           {thread.runs.map((r) => (
             <RunBlock key={r.id} run={r} events={events[r.id] ?? []} />
           ))}
+          {mine.map((r) => <ReviewTrack key={r.id} review={r} onDetail={onReviewDetail} onRun={onRun} />)}
           <div ref={end} />
         </div>
       </div>

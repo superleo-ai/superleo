@@ -87,18 +87,24 @@ type CLIRun struct {
 	Resumed int `json:"resumed,omitempty"`
 	// Paused says why a run on another machine is waiting: the line to it
 	// dropped and this side is waiting for it to come back.
-	Paused  string        `json:"paused,omitempty"`
-	State   string        `json:"state"`
-	Started time.Time     `json:"started"`
-	Ended   *time.Time    `json:"ended,omitempty"`
-	Summary string        `json:"summary,omitempty"`
-	Error   string        `json:"error,omitempty"`
-	In      int           `json:"in"`
-	Out     int           `json:"out"`
-	Cache   int           `json:"cache"`
-	CostUSD float64       `json:"costUsd"`
-	Tools   int           `json:"tools"`
-	Events  []CLIRunEvent `json:"events,omitempty"`
+	Paused string `json:"paused,omitempty"`
+	// Base is the commit the repository was at when a run started from a
+	// page began, so a review can read what the run changed (app_review.go).
+	Base string `json:"base,omitempty"`
+	// ReadOnly marks a run that was started unable to change anything: a
+	// debate step (app_debate.go).
+	ReadOnly bool          `json:"readOnly,omitempty"`
+	State    string        `json:"state"`
+	Started  time.Time     `json:"started"`
+	Ended    *time.Time    `json:"ended,omitempty"`
+	Summary  string        `json:"summary,omitempty"`
+	Error    string        `json:"error,omitempty"`
+	In       int           `json:"in"`
+	Out      int           `json:"out"`
+	Cache    int           `json:"cache"`
+	CostUSD  float64       `json:"costUsd"`
+	Tools    int           `json:"tools"`
+	Events   []CLIRunEvent `json:"events,omitempty"`
 }
 
 const (
@@ -122,7 +128,9 @@ type cliRunStore struct {
 type cliStart struct {
 	Agent, Prompt, Cwd, Model string
 	Ask                       bool
-	Thread, Session, Chat     string
+	// ReadOnly runs the CLI unable to change files (cliReadOnlyArgs).
+	ReadOnly              bool
+	Thread, Session, Chat string
 	// Origin is who handed the run out, kept with it.
 	Origin string
 	// Prev is the run this one continues, if any.
@@ -236,6 +244,12 @@ func (a *App) StartCLIRun(agent, prompt, cwd, model string, ask bool) (CLIRun, e
 
 // FollowUpCLIRun continues a run's CLI session with another prompt.
 func (a *App) FollowUpCLIRun(id, prompt string) (CLIRun, error) {
+	return a.followUpCLIRun(id, prompt, func(*cliStart) {})
+}
+
+// followUpCLIRun is FollowUpCLIRun with a say in how the next turn starts:
+// tune changes the start before it goes out (read-only, hooks).
+func (a *App) followUpCLIRun(id, prompt string, tune func(*cliStart)) (CLIRun, error) {
 	s := a.cliStore()
 	s.mu.Lock()
 	prev := s.runs[id]
@@ -259,8 +273,10 @@ func (a *App) FollowUpCLIRun(id, prompt string) (CLIRun, error) {
 	if p.Session == "" && p.RemoteRun == "" {
 		return CLIRun{}, fmt.Errorf("%s did not report a session to continue", p.Agent)
 	}
-	return a.startCLIRun(cliStart{Agent: p.Agent, Prompt: prompt, Cwd: p.Cwd, Model: p.Model, Ask: p.Ask,
-		Thread: p.Thread, Session: p.Session, Chat: p.Chat, Origin: p.Origin, Prev: &p})
+	o := cliStart{Agent: p.Agent, Prompt: prompt, Cwd: p.Cwd, Model: p.Model, Ask: p.Ask,
+		Thread: p.Thread, Session: p.Session, Chat: p.Chat, Origin: p.Origin, Prev: &p}
+	tune(&o)
+	return a.startCLIRun(o)
 }
 
 // CancelCLIRun stops a running CLI.
@@ -286,7 +302,7 @@ func (a *App) startCLIRun(o cliStart) (CLIRun, error) {
 	agent, prompt, cwd, model, ask, thread, session := strings.TrimSpace(o.Agent), strings.TrimSpace(o.Prompt), o.Cwd, o.Model, o.Ask, o.Thread, o.Session
 	// With YOLO on, or the gate switched off, nobody is asked: the agent runs
 	// in its own no-prompt mode rather than forwarding prompts to a card.
-	if ask && a.terminalYolo() != "" {
+	if (ask && a.terminalYolo() != "") || o.ReadOnly {
 		ask = false
 	}
 	if prompt == "" {
@@ -330,7 +346,11 @@ func (a *App) startCLIRun(o cliStart) (CLIRun, error) {
 		thread = id
 	}
 	run := &CLIRun{ID: id, Thread: thread, Agent: agent, Prompt: prompt, Cwd: dir, Model: model,
-		Session: session, Ask: ask, Chat: o.Chat, Queen: o.Queen != nil, Origin: o.Origin, State: "running", Started: time.Now()}
+		Session: session, Ask: ask, Chat: o.Chat, Queen: o.Queen != nil, Origin: o.Origin, State: "running", Started: time.Now(),
+		ReadOnly: o.ReadOnly}
+	if o.Prev == nil && o.Queen == nil && !o.ReadOnly {
+		run.Base = gitHead(dir)
+	}
 
 	req := agentexec.Request{
 		RunID: id, Prompt: prompt, WorkspacePath: dir, Model: model,
@@ -409,6 +429,9 @@ func (a *App) startCLIRun(o cliStart) (CLIRun, error) {
 				req.ExtraArgs = append(req.ExtraArgs, codexXcodeArgs(approve+"/xcode")...)
 			}
 		}
+	}
+	if o.ReadOnly {
+		cliReadOnlyArgs(&req, agent)
 	}
 	if agent == "codex" {
 		// Live web search: by default codex reads the web from a cache, and a

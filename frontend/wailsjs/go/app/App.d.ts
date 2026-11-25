@@ -57,6 +57,10 @@ export function CancelCLIRun(arg1:string):Promise<string>;
 
 export function CancelChat(arg1:string):Promise<string>;
 
+export function CancelDebate(arg1:string):Promise<string>;
+
+export function CancelImplementReview(arg1:string):Promise<string>;
+
 export function CancelRemoteAsk(arg1:string):Promise<string>;
 
 export function CancelScheduledRun(arg1:string):Promise<string>;
@@ -79,6 +83,8 @@ export function CodingSessionLog(arg1:string,arg2:string,arg3:string):Promise<ap
 
 export function CodingSessions():Promise<Array<app.CodingSession>>;
 
+export function ContinueDebate(arg1:string):Promise<app.Debate>;
+
 export function ConversationThread(arg1:string):Promise<app.ConversationThread>;
 
 export function Conversations(arg1:app.ConversationFilter):Promise<app.ConversationList>;
@@ -90,6 +96,10 @@ export function CreateQueenToken(arg1:string):Promise<app.NewIntegrationToken>;
 export function Dashboard():Promise<Record<string, any>>;
 
 export function Dashboards():Promise<Array<backend.Dashboard>>;
+
+export function DebateDetail(arg1:string):Promise<app.Debate>;
+
+export function Debates():Promise<Array<app.Debate>>;
 
 export function DeleteApprovalRule(arg1:string):Promise<Record<string, any>>;
 
@@ -190,6 +200,12 @@ export function HostServices():Promise<Array<app.HostService>>;
 export function HostStatus():Promise<app.HostInfo>;
 
 export function Hosts():Promise<Array<app.Host>>;
+
+export function ImplementReviewDetail(arg1:string):Promise<app.ImplementReview>;
+
+export function ImplementReviewDiff(arg1:string):Promise<string>;
+
+export function ImplementReviews():Promise<Array<app.ImplementReview>>;
 
 export function ImportCSV(arg1:string,arg2:string):Promise<string>;
 
@@ -448,6 +464,10 @@ export function StandingReports(arg1:string):Promise<Array<app.AgentReportEntry>
 export function StandingWakes(arg1:number):Promise<Array<app.WakeMark>>;
 
 export function StartCLIRun(arg1:string,arg2:string,arg3:string,arg4:string,arg5:boolean):Promise<app.CLIRun>;
+
+export function StartDebate(arg1:app.DebateRequest):Promise<app.Debate>;
+
+export function StartImplementReview(arg1:app.ImplementReviewRequest):Promise<app.ImplementReview>;
 
 export function StartQueenCLIRun(arg1:app.QueenRunRequest):Promise<app.CLIRun>;
 

@@ -275,6 +275,11 @@ type App struct {
 	// loopback MCP server their permission prompts come through.
 	cli     *cliRunStore
 	cliOnce sync.Once
+	// Debates and implement-review tracks (app_debate.go, app_review.go);
+	// stepRun, when set, runs their steps in place of real CLIs (tests).
+	debates    *debateStore
+	debateOnce sync.Once
+	stepRun    stepRunner
 	// cliDetached is set while SuperLeo stops: its coding runs carry on
 	// without it (cli_live.go).
 	cliDetached atomic.Bool
