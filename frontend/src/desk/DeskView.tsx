@@ -8,6 +8,7 @@ import {
 import RunTracePanel from "../components/RunTracePanel";
 import TraceChip from "../components/TraceChip";
 import { useI18n } from "../lib/i18n";
+import { usePinnedConvs } from "../lib/pinnedConvs";
 import { getQueenName, queenNamed, queenRef, queenTitle, useQueenName } from "../lib/queenName";
 import { useChat } from "../lib/useChat";
 import { useAttachments } from "../lib/useAttachments";
@@ -180,6 +181,7 @@ export default function DeskView({ approvals, openSession, onSessionOpened, atte
   const workerList = useWorkers();
   const [traceOpen, setTraceOpen] = useState(false);
   const queenId = useQueenSession();
+  const pinnedConvs = usePinnedConvs();
   const pulse = usePulse();
   const recents = useRecents(chat.sending);
   const cutOff = useHiveCutOff();
@@ -417,7 +419,13 @@ export default function DeskView({ approvals, openSession, onSessionOpened, atte
           ) : null)}
         </div>
 
-        {pins.length > 0 && <div className="dk-sec">{t("Pinned")}</div>}
+        {(pins.length > 0 || pinnedConvs.length > 0) && <div className="dk-sec">{t("Pinned")}</div>}
+        {pinnedConvs.map((p) => (
+          <button key={p.id} className={!onQueen && p.kind === "queen" && p.session === chat.sessionId ? "dk-rec on" : "dk-rec"} data-testid="pinned-conversation"
+            onClick={() => (p.kind === "queen" ? pickSession(p.session) : navigate(`${PATHS.conversations}?open=${encodeURIComponent(p.id)}`))}>
+            <MessagesSquareIcon size={14} /><span>{p.title || t("Untitled")}</span>
+          </button>
+        ))}
         {pins.slice(0, 6).map((d) => (
           <button key={d.id} className={current === "dash:" + d.id ? "dk-rec on" : "dk-rec"} onClick={() => open("dash:" + d.id)}>
             <LayoutDashboardIcon size={14} /><span>{d.name}</span>

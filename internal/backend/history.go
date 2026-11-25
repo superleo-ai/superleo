@@ -102,6 +102,7 @@ func (s *Service) Sessions(limit int) []ChatSessionInfo {
 	}
 
 	out := make([]ChatSessionInfo, 0, len(sessions))
+	named := readTitles(s.dataDir)
 	for _, sess := range sessions {
 		if sess == nil {
 			continue
@@ -124,9 +125,13 @@ func (s *Service) Sessions(limit int) []ChatSessionInfo {
 		if said == 0 {
 			continue
 		}
+		title := sessionTitle(turns)
+		if n := named[sess.ID]; n != "" {
+			title = n
+		}
 		out = append(out, ChatSessionInfo{
 			ID:        sess.ID,
-			Title:     sessionTitle(turns),
+			Title:     title,
 			Turns:     said,
 			UpdatedAt: sess.UpdatedAt.Format(time.RFC3339),
 			Last:      previewLine(last, 160),
@@ -178,7 +183,11 @@ func (s *Service) DeleteSession(id string) error {
 		return fmt.Errorf("open agent database: %w", err)
 	}
 	defer db.Close()
-	return db.DeleteSession(id)
+	if err := db.DeleteSession(id); err != nil {
+		return err
+	}
+	s.forgetTitle(id)
+	return nil
 }
 
 // visibleTurns strips everything the user never typed or saw: tool traffic, and

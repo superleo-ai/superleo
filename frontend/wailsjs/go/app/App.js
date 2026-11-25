@@ -726,6 +726,10 @@ export function RemoveWorkerSkill(arg1, arg2) {
   return window['go']['app']['App']['RemoveWorkerSkill'](arg1, arg2);
 }
 
+export function RenameChatSession(arg1, arg2) {
+  return window['go']['app']['App']['RenameChatSession'](arg1, arg2);
+}
+
 export function RenameDashboard(arg1, arg2) {
   return window['go']['app']['App']['RenameDashboard'](arg1, arg2);
 }

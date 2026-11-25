@@ -369,6 +369,8 @@ export function RemoveWorkerMCP(arg1:string,arg2:string):Promise<backend.WorkerK
 
 export function RemoveWorkerSkill(arg1:string,arg2:string):Promise<backend.WorkerKit>;
 
+export function RenameChatSession(arg1:string,arg2:string):Promise<string>;
+
 export function RenameDashboard(arg1:string,arg2:string):Promise<Record<string, any>>;
 
 export function ReplyToCCSession(arg1:app.CCReplyRequest):Promise<app.CCDelivery>;

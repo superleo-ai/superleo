@@ -156,8 +156,8 @@
   background: rgba(var(--glass-rgb), calc(var(--ga) + .4)); box-shadow: inset 0 1px 0 rgba(255,255,255,var(--hl)), inset 0 0 0 1px rgba(255,255,255,calc(var(--hl) * .5)), 0 6px 18px rgba(40,60,80,.08); }
 .dk-comp textarea { flex: 1; resize: none; border: 0; outline: none; background: none; font: 14.5px/1.5 var(--font-sans); color: var(--ink); padding: 8px 0; max-height: 150px; field-sizing: content; }
 .dk-comp textarea::placeholder { color: var(--ink-3); }
-.dk-shell .dk-send { width: 38px; height: 38px; flex: none; border-radius: 50%; background: var(--honey); color: #fff; display: grid; place-items: center; box-shadow: 0 3px 10px rgba(var(--honey-rgb), .35); }
-.dk-shell .dk-send:disabled { opacity: .45; box-shadow: none; cursor: default; }
+.dk-shell .dk-send, .cv2-pane .dk-send { width: 38px; height: 38px; flex: none; border-radius: 50%; background: var(--honey); color: #fff; display: grid; place-items: center; box-shadow: 0 3px 10px rgba(var(--honey-rgb), .35); }
+.dk-shell .dk-send:disabled, .cv2-pane .dk-send:disabled { opacity: .45; box-shadow: none; cursor: default; }
 .dk-shell .dk-send.stop { background: var(--ink); }
 .dk-dark .dk-send.stop { color: #1d1a16; }
 .dk-shell .dk-clip { width: 38px; height: 38px; flex: none; border-radius: 50%; display: grid; place-items: center; color: var(--ink-2); background: transparent; }

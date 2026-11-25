@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ArrowLeftIcon, BotIcon, CpuIcon, HexagonIcon, PlusIcon, SearchIcon, SendIcon, TerminalIcon, Trash2Icon, XIcon, type LucideIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowUpIcon, BotIcon, CpuIcon, HexagonIcon, MoreHorizontalIcon, PencilIcon, PinIcon, PinOffIcon, PlusIcon, SearchIcon, TerminalIcon, Trash2Icon, XIcon, type LucideIcon } from "lucide-react";
 import {
-  AskIn, ConversationThread, Conversations, DeleteChatSession, FollowUpCLIRun, ReplyToCodingSession, SendChat, StartCLIRun,
+  AskIn, ConversationThread, Conversations, DeleteChatSession, FollowUpCLIRun, RenameChatSession, ReplyToCodingSession, SendChat, StartCLIRun,
 } from "../../wailsjs/go/app/App";
 import { app, backend } from "../../wailsjs/go/models";
 import { EventsOn } from "../../wailsjs/runtime";
@@ -14,6 +14,7 @@ import { visibleAnswer, withoutCallNotes } from "../lib/format";
 import { queenTitle, useQueenName } from "../lib/queenName";
 import { isLegacyConsole, legacyConsoleTitle, pairedDeviceNames, queenSession, useQueenSession } from "../lib/queenConsole";
 import { useStickToBottom } from "../lib/useStickToBottom";
+import { renamePinned, togglePin, unpin, usePinnedConvs } from "../lib/pinnedConvs";
 import "./conversations.css";
 import { SkeletonLines, SkeletonRows } from "../components/Skeleton";
 
@@ -34,6 +35,20 @@ function when(iso: string): string {
   if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
   if (d.getFullYear() === now.getFullYear()) return d.toLocaleDateString([], { month: "numeric", day: "numeric" });
   return d.toLocaleDateString();
+}
+
+/** The day a message was said on, for the line between days. */
+function dayKey(iso?: string): string {
+  const d = iso ? new Date(iso) : null;
+  return d && !isNaN(d.getTime()) ? d.toDateString() : "";
+}
+function dayLabel(iso: string, t: (k: string) => string): string {
+  const d = new Date(iso);
+  const now = new Date();
+  if (d.toDateString() === now.toDateString()) return t("Today");
+  const y = new Date(now); y.setDate(now.getDate() - 1);
+  if (d.toDateString() === y.toDateString()) return t("Yesterday");
+  return d.getFullYear() === now.getFullYear() ? d.toLocaleDateString([], { month: "long", day: "numeric" }) : d.toLocaleDateString();
 }
 
 const bare = (m?: string) => (m ?? "").replace(/^https?:\/\//, "").replace(/\/+$/, "");
@@ -59,6 +74,9 @@ export default function ConversationsView() {
   const [data, setData] = useState<app.ConversationList | null>(null);
   const [failed, setFailed] = useState("");
   const consoleId = useQueenSession();
+  const pinned = usePinnedConvs();
+  const [menu, setMenu] = useState<{ c: Conv; x: number; y: number } | null>(null);
+  const [renaming, setRenaming] = useState("");
 
   useEffect(() => {
     const h = window.setTimeout(() => setNeedle(query.trim()), 250);
@@ -128,27 +146,33 @@ export default function ConversationsView() {
           {failed && <div className="cv2-empty" role="alert">{failed}</div>}
           {!failed && !data && <SkeletonRows n={7} />}
           {!failed && data && items.length === 0 && <div className="cv2-empty">{t("No conversations")}</div>}
-          {items.map((c) => {
-            const Icon = KIND[c.kind]?.Icon ?? BotIcon;
-            const main = c.kind === "queen" && c.session === consoleId;
-            return (
-              <button key={c.id} className={`cv2-row k-${c.kind}${openId === c.id ? " on" : ""}`} onClick={() => set({ open: c.id })} data-testid="conv-row">
-                <span className="cv2-ico"><Icon size={15} /></span>
-                <span className="cv2-main">
-                  <span className="cv2-top">
-                    <b>{who.name(c)}</b>
-                    {c.machine && <i>{bare(c.machine)}</i>}
-                    <span className="cv2-kind">{who.kind(c)}</span>
-                    <em>{c.state === "running" ? <span className="cv2-live" title={t("Working…")} /> : when(c.at)}</em>
-                  </span>
-                  <span className="cv2-title">{main ? t("Main conversation") : withoutCallNotes(c.title) || t("Untitled")}</span>
-                  {c.last && <span className="cv2-last">{withoutCallNotes(c.last)}</span>}
-                </span>
-              </button>
-            );
-          })}
+          {items.map((c) => (
+            <Row key={c.id} c={c} on={openId === c.id} main={c.kind === "queen" && c.session === consoleId}
+              pinned={pinned.some((p) => p.id === c.id)}
+              onOpen={() => set({ open: c.id })}
+              onMenu={(x, y) => setMenu({ c, x, y })}
+              renaming={renaming === c.id}
+              onRename={async (name) => {
+                setRenaming("");
+                if (name === null) return;
+                await RenameChatSession(c.session, name);
+                renamePinned(c.id, name || c.title);
+                load();
+              }} />
+          ))}
         </div>
       </aside>
+      {menu && <RowMenu c={menu.c} x={menu.x} y={menu.y} main={menu.c.kind === "queen" && menu.c.session === consoleId}
+        pinned={pinned.some((p) => p.id === menu.c.id)} onClose={() => setMenu(null)}
+        onRename={() => { setRenaming(menu.c.id); setMenu(null); }}
+        onDelete={async () => {
+          const c = menu.c;
+          setMenu(null);
+          await DeleteChatSession(c.session);
+          unpin(c.id);
+          if (openId === c.id) set({ open: "" });
+          load();
+        }} />}
       <section className="cv2-thread">
         {openId ? (
           <Thread key={openId} id={openId} onBack={() => set({ open: "" })} onOpen={(id) => set({ open: id })} onChanged={load} />
@@ -156,6 +180,94 @@ export default function ConversationsView() {
           <div className="cv2-none">{t("Pick a conversation")}</div>
         )}
       </section>
+    </div>
+  );
+}
+
+/** Only the person's own queen conversations are kept by the core, so only those can be renamed or deleted. */
+const keptByCore = (c: Conv, main: boolean) => c.kind === "queen" && !main;
+
+function Row({ c, on, main, pinned, onOpen, onMenu, renaming, onRename }: {
+  c: Conv; on: boolean; main: boolean; pinned: boolean; onOpen: () => void; onMenu: (x: number, y: number) => void;
+  renaming: boolean; onRename: (name: string | null) => void;
+}) {
+  const { t } = useI18n();
+  const who = useWho();
+  const Icon = KIND[c.kind]?.Icon ?? BotIcon;
+  const [name, setName] = useState(c.title);
+  useEffect(() => { if (renaming) setName(withoutCallNotes(c.title)); }, [renaming, c.title]);
+  const body = (
+    <>
+      <span className="cv2-ico"><Icon size={15} /></span>
+      <span className="cv2-main">
+        <span className="cv2-top">
+          <b>{who.name(c)}</b>
+          {c.machine && <i>{bare(c.machine)}</i>}
+          <span className="cv2-kind">{who.kind(c)}</span>
+          {pinned && <PinIcon size={11} className="cv2-pin" />}
+          <em>{c.state === "running" ? <span className="cv2-live" title={t("Working…")} /> : when(c.at)}</em>
+        </span>
+        {renaming ? (
+          <input className="cv2-rename" autoFocus value={name} aria-label={t("Rename")} onChange={(e) => setName(e.target.value)}
+            onFocus={(e) => e.currentTarget.select()}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) onRename(name); if (e.key === "Escape") onRename(null); }}
+            onBlur={() => onRename(name)} data-testid="conv-rename" />
+        ) : (
+          <span className="cv2-title">{main ? t("Main conversation") : withoutCallNotes(c.title) || t("Untitled")}</span>
+        )}
+        {c.last && <span className="cv2-last">{withoutCallNotes(c.last)}</span>}
+      </span>
+    </>
+  );
+  return (
+    <div className={`cv2-rowwrap${on ? " on" : ""}`} onContextMenu={(e) => { e.preventDefault(); onMenu(e.clientX, e.clientY); }}>
+      {renaming ? <div className={`cv2-row k-${c.kind}`}>{body}</div> : (
+        <button className={`cv2-row k-${c.kind}${on ? " on" : ""}`} onClick={onOpen} data-testid="conv-row">{body}</button>
+      )}
+      {!renaming && (
+        <button className="cv2-more" title={t("More")} aria-label={t("More")} data-testid="conv-more"
+          onClick={(e) => { e.stopPropagation(); const r = e.currentTarget.getBoundingClientRect(); onMenu(r.right, r.bottom + 4); }}>
+          <MoreHorizontalIcon size={15} />
+        </button>
+      )}
+    </div>
+  );
+}
+
+function RowMenu({ c, x, y, main, pinned, onClose, onRename, onDelete }: {
+  c: Conv; x: number; y: number; main: boolean; pinned: boolean; onClose: () => void; onRename: () => void; onDelete: () => void;
+}) {
+  const { t } = useI18n();
+  const [confirm, setConfirm] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const away = (e: Event) => { if (!ref.current?.contains(e.target as Node)) onClose(); };
+    window.addEventListener("keydown", key);
+    window.addEventListener("mousedown", away, true);
+    window.addEventListener("contextmenu", away, true);
+    window.addEventListener("blur", onClose);
+    return () => {
+      window.removeEventListener("keydown", key);
+      window.removeEventListener("mousedown", away, true);
+      window.removeEventListener("contextmenu", away, true);
+      window.removeEventListener("blur", onClose);
+    };
+  }, [onClose]);
+  const left = Math.max(8, Math.min(x - 180, window.innerWidth - 196));
+  const top = Math.max(8, Math.min(y, window.innerHeight - 140));
+  const kept = keptByCore(c, main);
+  return (
+    <div className="cv2-menu" ref={ref} role="menu" style={{ left, top }} data-testid="conv-menu">
+      <button role="menuitem" onClick={() => { togglePin({ id: c.id, kind: c.kind, session: c.session, title: main ? "" : withoutCallNotes(c.title) }); onClose(); }}>
+        {pinned ? <PinOffIcon size={14} /> : <PinIcon size={14} />}{pinned ? t("Unpin") : t("Pin to sidebar")}
+      </button>
+      {kept && <button role="menuitem" onClick={onRename}><PencilIcon size={14} />{t("Rename")}</button>}
+      {kept && (
+        <button role="menuitem" className={confirm ? "danger arm" : "danger"} onClick={() => (confirm ? onDelete() : setConfirm(true))}>
+          <Trash2Icon size={14} />{confirm ? t("Delete this conversation?") : t("Delete")}
+        </button>
+      )}
     </div>
   );
 }
@@ -263,6 +375,7 @@ export function Thread({ id, onBack, onOpen, onChanged }: { id: string; onBack: 
   const del = async () => {
     if (!confirm) { setConfirm(true); window.setTimeout(() => setConfirm(false), 4000); return; }
     await DeleteChatSession(c!.session).catch((e) => setError(String(e?.message ?? e)));
+    unpin(c!.id);
     onChanged();
     onBack();
   };
@@ -288,24 +401,28 @@ export function Thread({ id, onBack, onOpen, onChanged }: { id: string; onBack: 
         )}
       </header>
       <div className="cv2-msgs" ref={stick.ref} onScroll={stick.onScroll}>
-        {turns.length === 0 && !pending && <div className="cv2-empty">{t("No messages")}</div>}
-        {turns.map((m: backend.ChatTurn, i: number) => m.role === "user" ? (
-          <div key={i} className="cv2-u"><SentMessage content={withoutCallNotes(m.content)} />{m.at && <small>{when(m.at)}</small>}</div>
-        ) : (
-          <div key={i} className={`cv2-a${m.kind === "error" ? " bad" : ""}`}>
-            {m.steps && m.steps.length > 0 && (
-              <details className="cv2-steps"><summary>{t("Steps")} · {m.steps.length}</summary>{m.steps.map((s, n) => <div key={n}>{s}</div>)}</details>
-            )}
-            {m.kind === "error" ? <span>{m.content}</span> : <Response>{withoutCallNotes(m.content)}</Response>}
-            {m.at && <small>{when(m.at)}</small>}
-          </div>
-        ))}
+        {turns.length === 0 && !pending && <div className="dk-empty">{t("No messages")}</div>}
+        {turns.map((m: backend.ChatTurn, i: number) => {
+          const day = dayKey(m.at) && dayKey(m.at) !== dayKey(turns[i - 1]?.at) ? <div className="cv2-day">{dayLabel(m.at!, t)}</div> : null;
+          return m.role === "user" ? (
+            <Fragment key={i}>{day}<div className="dk-u"><SentMessage content={withoutCallNotes(m.content)} /></div></Fragment>
+          ) : (
+            <Fragment key={i}>{day}
+              <div className={m.kind === "error" ? "dk-q bad" : "dk-q"}>
+                {m.steps && m.steps.length > 0 && (
+                  <details className="cv2-steps"><summary>{t("Steps")} · {m.steps.length}</summary>{m.steps.map((s, n) => <div key={n}>{s}</div>)}</details>
+                )}
+                {m.kind === "error" ? <span>{m.content}</span> : <Response>{withoutCallNotes(m.content)}</Response>}
+              </div>
+            </Fragment>
+          );
+        })}
         {pending && !turns.slice(-2).some((m: backend.ChatTurn) => m.role === "user" && m.content.trim() === pending) && (
-          <div className="cv2-u"><SentMessage content={pending} /></div>
+          <div className="dk-u"><SentMessage content={pending} /></div>
         )}
-        {streamed && <div className="cv2-a"><Response>{streamed}</Response></div>}
-        {(busy || running) && !streamed && <div className="cv2-a cv2-busy">{c!.kind === "coding" ? t("Working…") : t("Thinking…")}</div>}
-        {error && <div className="cv2-a bad" role="alert">{error}</div>}
+        {streamed && <div className="dk-q"><Response>{streamed}</Response></div>}
+        {(busy || running) && !streamed && <div className="dk-q"><span className="dk-thinking">{c!.kind === "coding" ? t("Working…") : t("Thinking…")}</span></div>}
+        {error && <div className="dk-err" role="alert">{error}</div>}
       </div>
       {startNew && !fresh && (
         <div className="cv2-readonly">
@@ -314,12 +431,12 @@ export function Thread({ id, onBack, onOpen, onChanged }: { id: string; onBack: 
         </div>
       )}
       {(canReply || (startNew && fresh)) && (
-        <form className="cv2-say" onSubmit={(e) => { e.preventDefault(); void send(); }}>
-          <input value={text} onChange={(e) => setText(e.target.value)} data-testid="conv-input" autoFocus
+        <form className="dk-comp" onSubmit={(e) => { e.preventDefault(); void send(); }}>
+          <textarea rows={1} value={text} onChange={(e) => setText(e.target.value)} data-testid="conv-input" autoFocus
             placeholder={fresh ? t("New conversation with {name}", { name: who.name(c!) }) : t("Message {name}", { name: who.name(c!) })}
             onCompositionStart={ime.handlers.onCompositionStart} onCompositionEnd={ime.handlers.onCompositionEnd}
-            onKeyDown={(e) => { if (e.key === "Enter" && ime.composing(e)) e.preventDefault(); }} />
-          <button type="submit" disabled={!text.trim() || busy} title={t("Send")} aria-label={t("Send")} data-testid="conv-send"><SendIcon size={15} /></button>
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); if (!ime.composing(e)) void send(); } }} />
+          <button type="submit" className="dk-send" disabled={!text.trim() || busy} title={t("Send")} aria-label={t("Send")} data-testid="conv-send"><ArrowUpIcon size={18} /></button>
         </form>
       )}
     </div>

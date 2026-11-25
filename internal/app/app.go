@@ -1770,6 +1770,20 @@ func (a *App) DeleteChatSession(sessionID string) string {
 	return "ok"
 }
 
+// RenameChatSession names a past conversation; an empty name clears it.
+func (a *App) RenameChatSession(sessionID, title string) string {
+	a.mu.Lock()
+	svc := a.svc
+	a.mu.Unlock()
+	if svc == nil {
+		return "backend not ready"
+	}
+	if err := svc.RenameSession(sessionID, title); err != nil {
+		return err.Error()
+	}
+	return "ok"
+}
+
 // ReadWorkspaceFileDataURL returns a workspace file as a data: URL so the
 // webview can render PDFs and images natively instead of showing raw bytes.
 func (a *App) ReadWorkspaceFileDataURL(path string) string {
