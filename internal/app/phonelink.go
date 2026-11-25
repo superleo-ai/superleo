@@ -352,9 +352,9 @@ func (a *App) startPhoneLinkIfPaired() {
 }
 
 // urls are where a phone can reach this computer: the local network first,
-// then the person's own addresses, then the relay.
+// then its Tailscale address, then the person's own addresses, then the relay.
 func (p *phoneLink) urls() []string {
-	return phoneURLs(lanAddrs(), p.port, p.extra, p.id, p.relays...)
+	return phoneURLs(append(lanAddrs(), tailnetAddrs()...), p.port, p.extra, p.id, p.relays...)
 }
 
 func phoneURLs(lan []string, port int, extra []string, id string, relays ...string) []string {
@@ -433,6 +433,47 @@ func lanAddrs() []string {
 		}
 		if len(out) >= 3 {
 			break
+		}
+	}
+	return out
+}
+
+// tailnetAddrs are this computer's Tailscale IPv4 addresses (100.64.0.0/10),
+// on whatever interface carries them: utun on a Mac, "Tailscale" on Windows.
+// A phone on the same tailnet reaches the computer there from anywhere.
+func tailnetAddrs() []string {
+	ifs, err := net.Interfaces()
+	if err != nil {
+		return nil
+	}
+	sort.SliceStable(ifs, func(i, j int) bool { return ifs[i].Index < ifs[j].Index })
+	var out []string
+	for _, ifc := range ifs {
+		if ifc.Flags&net.FlagUp == 0 || ifc.Flags&net.FlagLoopback != 0 {
+			continue
+		}
+		addrs, err := ifc.Addrs()
+		if err != nil {
+			continue
+		}
+		out = append(out, tailnetIPs(addrs)...)
+		if len(out) >= 2 {
+			return out[:2]
+		}
+	}
+	return out
+}
+
+// tailnetIPs picks the Tailscale IPv4 addresses out of an interface's.
+func tailnetIPs(addrs []net.Addr) []string {
+	var out []string
+	for _, a := range addrs {
+		n, ok := a.(*net.IPNet)
+		if !ok {
+			continue
+		}
+		if ip4 := n.IP.To4(); ip4 != nil && cgnatNet.Contains(ip4) {
+			out = append(out, ip4.String())
 		}
 	}
 	return out

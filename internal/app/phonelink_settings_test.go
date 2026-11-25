@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"net"
 	"reflect"
 	"strings"
 	"testing"
@@ -120,5 +121,22 @@ func TestPhoneLinkPicksUpNewSettings(t *testing.T) {
 	}
 	if info.Relay != info.URLs[n-1] {
 		t.Fatalf("relay %q, urls %q", info.Relay, info.URLs)
+	}
+}
+
+// Only Tailscale's 100.64.0.0/10 is a tailnet address: not the LAN, not a
+// public address just outside the range, not IPv6.
+func TestTailnetIPs(t *testing.T) {
+	var addrs []net.Addr
+	for _, c := range []string{"192.168.1.5/24", "100.101.2.3/32", "100.128.0.1/32", "fd7a:115c:a1e0::1/128", "100.64.0.9/10"} {
+		ip, n, err := net.ParseCIDR(c)
+		if err != nil {
+			t.Fatal(err)
+		}
+		n.IP = ip
+		addrs = append(addrs, n)
+	}
+	if got, want := tailnetIPs(addrs), []string{"100.101.2.3", "100.64.0.9"}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("tailnet ips %q, want %q", got, want)
 	}
 }
