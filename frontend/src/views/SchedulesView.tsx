@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { AlarmClockIcon, ChevronRightIcon, SquareIcon } from "lucide-react";
+import { ChevronRightIcon, SquareIcon, WorkflowIcon } from "lucide-react";
 import {
   CancelScheduledRun,
   DeleteScheduledPrompt,
@@ -228,7 +228,7 @@ export default function SchedulesView({
 
         {!loading && list.length === 0 && (
           <div className="inline-empty">
-            <AlarmClockIcon className="ie-icon" size={22} strokeWidth={1.6} />
+            <WorkflowIcon className="ie-icon" size={22} strokeWidth={1.6} />
             <div>{t("No scheduled tasks.")}</div>
           </div>
         )}
@@ -417,7 +417,7 @@ export default function SchedulesView({
     <div className="view">
       <div className="view-header with-action">
         <div>
-          <div className="view-title">{t("Scheduled tasks")}{list.length > 0 ? ` (${list.length})` : ""}</div>
+          <div className="view-title">{t("Automation")}{list.length > 0 ? ` (${list.length})` : ""}</div>
         </div>
         {actions}
       </div>

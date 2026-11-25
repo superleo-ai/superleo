@@ -4,7 +4,7 @@ import {
   LayoutDashboardIcon, ChartColumnIcon, PanelRightOpenIcon, PanelRightCloseIcon, BookOpenIcon, HexagonIcon, MessageSquareIcon, PaletteIcon,
   MessagesSquareIcon, PuzzleIcon, SlidersHorizontalIcon, TerminalIcon, XIcon,
   MoonIcon, SunIcon, CalendarDaysIcon, GlobeIcon,
-  HeartPulseIcon, AlarmClockIcon,
+  HeartPulseIcon, WorkflowIcon,
 } from "lucide-react";
 import DeskStatusBar from "./DeskStatusBar";
 import World from "../world/World";
@@ -62,7 +62,7 @@ const RAIL: { key: ViewKey; label: string; Icon: typeof HexagonIcon; cls: string
   { key: "schedule", label: "Schedule", Icon: CalendarDaysIcon, cls: "dk-a-sched" },
   { key: "wellbeing", label: "Wellbeing", Icon: HeartPulseIcon, cls: "dk-a-sched" },
   { key: "hive", label: "Hive", Icon: HexagonIcon, cls: "dk-a-hive" },
-  { key: "routines", label: "Scheduled tasks", Icon: AlarmClockIcon, cls: "dk-a-sched" },
+  { key: "routines", label: "Automation", Icon: WorkflowIcon, cls: "dk-a-sched" },
   { key: "coding", label: "Coding", Icon: TerminalIcon, cls: "dk-a-code" },
   { key: "knowledge", label: "Knowledge", Icon: BookOpenIcon, cls: "dk-a-know" },
   { key: "skills", label: "Extensions", Icon: PuzzleIcon, cls: "dk-a-later" },
@@ -72,7 +72,7 @@ const RAIL: { key: ViewKey; label: string; Icon: typeof HexagonIcon; cls: string
 const SIDE: ViewKey[] = ["dashboards", "stats"];
 
 export const TITLES: Record<ViewKey, string> = {
-  home: "", chat: "Chat", conversations: "Conversations", tasks: "Needs your attention", schedule: "Schedule", dashboards: "Dashboards", wellbeing: "Wellbeing", hive: "Hive", agents: "Bees", routines: "Scheduled tasks", coding: "Coding", knowledge: "Knowledge",
+  home: "", chat: "Chat", conversations: "Conversations", tasks: "Needs your attention", schedule: "Schedule", dashboards: "Dashboards", wellbeing: "Wellbeing", hive: "Hive", agents: "Bees", routines: "Automation", coding: "Coding", knowledge: "Knowledge",
   skills: "Skills", mcp: "MCP", stats: "Stats", records: "Records", settings: "Settings",
 };
 

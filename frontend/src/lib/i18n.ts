@@ -324,6 +324,7 @@ const zh: Record<string,string> = { "Dismiss":"忽略", "Dismiss all":"全部忽
   "Prompt": "提示词",
   "Nothing on watch yet": "还没有值守的智能体",
   "Scheduled tasks": "定时任务",
+  "Automation": "自动化",
   "Features": "功能",
   "Mac apps": "Mac 应用",
   "Finance": "财务",

@@ -19,7 +19,7 @@ import {
   PuzzleIcon,
   SettingsIcon,
   HeartPulseIcon,
-  AlarmClockIcon,
+  WorkflowIcon,
 } from "lucide-react";
 import { ViewKey } from "../lib/types";
 import { openBrowserPanel } from "../lib/browser";
@@ -57,7 +57,7 @@ const NAV: {
       { key: "conversations", label: "Conversations", Icon: MessagesSquareIcon },
       { key: "stats", label: "Stats", Icon: ChartColumnIcon, shortcut: "2" },
       { key: "hive", label: "Hive", Icon: HexagonIcon },
-      { key: "routines", label: "Scheduled tasks", Icon: AlarmClockIcon },
+      { key: "routines", label: "Automation", Icon: WorkflowIcon },
       { key: "coding", label: "Coding", Icon: TerminalIcon },
       { key: "browser", label: "Browser", Icon: GlobeIcon },
     ],
