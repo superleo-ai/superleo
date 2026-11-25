@@ -1,74 +1,255 @@
-/* Wellbeing: daylight instrument — cool white, ink, one signal blue, fine lines. */
+/* Wellbeing, after Vita: white cards with a hairline, ink text, and Vita's
+   three like-lightness accents (green, blue, orange) for what they mean there:
+   green is good, orange asks for attention, blue is information. */
 .wb-view {
-  --wb-blue: #2f6bff;
-  --wb-good: #2f6bff;
-  --wb-mid: #6f96ff;
-  --wb-low: #d9822b;
-  --wb-t0: var(--text-0, var(--ink, #1d1a16));
-  --wb-t2: var(--text-2, var(--ink-2, rgba(29, 26, 22, 0.62)));
-  --wb-t3: var(--ink-3, rgba(29, 26, 22, 0.42));
-  --wb-line: var(--border, var(--line, rgba(29, 26, 22, 0.08)));
-  --wb-card: var(--bg-1, rgba(255, 255, 255, 0.72));
+  --wb-t0: var(--ink, var(--text-0));
+  --wb-t2: var(--ink-2, var(--text-2));
+  --wb-t3: var(--ink-3, var(--text-3));
+  --wb-line: var(--line, var(--border));
+  --wb-card: var(--bg-1, #fff);
+  --wb-pop: var(--popover, #fff);
+  --wb-track: color-mix(in srgb, var(--wb-t0) 7%, transparent);
+  --wb-silhouette: color-mix(in srgb, var(--wb-t0) 14%, transparent);
+
+  --wb-green: #3f9d5a; --wb-green-t: #2e7a45; --wb-green-bg: #e6f3e9;
+  --wb-blue: #4a6cd9; --wb-blue-t: #3b58b8; --wb-blue-bg: #e8edfb;
+  --wb-orange: #d9822b; --wb-orange-t: #b5661a; --wb-orange-bg: #fbeedf;
+  --wb-red: #c9463d; --wb-red-t: #b03a32; --wb-red-bg: #fae5e3;
+
+  /* Sleep stages: one blue, light to dark by depth; awake in orange. */
+  --wb-s-deep: #3448b0; --wb-s-core: #6d8ae6; --wb-s-rem: #a9c3f5; --wb-s-awake: #e0a160;
+  /* The figure (Vita's silhouette greys). */
+  --wb-skin-1: #eeece7; --wb-skin-2: #e4e1da; --wb-skin-3: #d9d5cc; --wb-hair: #cfc9bd;
+
   display: flex; flex-direction: column; gap: 16px;
   flex: 1; min-width: 0; min-height: 0; overflow-y: auto;
   padding: 20px 24px 28px;
   color: var(--wb-t0);
   font-family: var(--font-sans, "Geist Variable", system-ui, sans-serif);
 }
-.wb-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-.wb-head h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
-.wb-meta { display: flex; gap: 14px; color: var(--wb-t2); font-size: 12.5px; font-family: "Geist Mono Variable", ui-monospace, monospace; }
-.wb-error { color: #c0392b; font-size: 13px; }
-
-.wb-scores { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-.wb-stat, .wb-ring, .wb-card {
-  background: var(--wb-card); border: 1px solid var(--wb-line); border-radius: 12px;
+.dk-shell .wb-view { --wb-card: rgba(255, 255, 255, 0.92); --wb-pop: #fff; }
+:root[data-theme="dark"] .wb-view {
+  --wb-card: rgba(255, 255, 255, 0.035);
+  --wb-pop: #222a33;
+  --wb-green: #58b874; --wb-green-t: #7cd093; --wb-green-bg: rgba(88, 184, 116, 0.16);
+  --wb-blue: #7891ec; --wb-blue-t: #9fb2f3; --wb-blue-bg: rgba(120, 145, 236, 0.17);
+  --wb-orange: #e39a4f; --wb-orange-t: #f0b277; --wb-orange-bg: rgba(227, 154, 79, 0.16);
+  --wb-red: #e5716a; --wb-red-t: #f19590; --wb-red-bg: rgba(229, 113, 106, 0.16);
+  --wb-s-deep: #4f63d4; --wb-s-core: #7f9af0; --wb-s-rem: #b7cdf8; --wb-s-awake: #e6a868;
+  --wb-skin-1: #4a5058; --wb-skin-2: #3d424a; --wb-skin-3: #33373e; --wb-hair: #2a2d33;
 }
-.wb-stat { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; min-height: 104px; }
-.wb-label { font-size: 12px; color: var(--wb-t2); letter-spacing: 0.02em; }
-.wb-value { font-family: "Geist Mono Variable", ui-monospace, monospace; font-size: 28px; font-weight: 600; line-height: 1.1; color: var(--wb-t0); }
-.wb-unit { font-size: 13px; font-weight: 500; color: var(--wb-t2); margin-left: 4px; }
-.wb-sub { font-size: 11.5px; color: var(--wb-t3); font-family: "Geist Mono Variable", ui-monospace, monospace; }
+:root[data-theme="dark"] .dk-shell .wb-view { --wb-card: rgba(255, 255, 255, 0.045); --wb-pop: #24262a; }
 
-.wb-ring { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 8px 10px; gap: 4px; min-height: 104px; }
-.wb-ring svg { display: block; }
-.wb-ring-track { fill: none; stroke: var(--wb-line); stroke-width: 5; }
-.wb-ring-fill { fill: none; stroke: var(--wb-blue); stroke-width: 5; stroke-linecap: round; transition: stroke-dasharray 0.5s ease; }
-.wb-ring.mid .wb-ring-fill { stroke: var(--wb-mid); }
-.wb-ring.low .wb-ring-fill { stroke: var(--wb-low); }
-.wb-ring-val { position: absolute; top: 38px; font-family: "Geist Mono Variable", ui-monospace, monospace; font-size: 20px; font-weight: 600; }
+.wb-mono, .wb-big, .wb-s, .wb-meta, .wb-sums b, .wb-time { font-family: var(--font-mono, "Geist Mono Variable", ui-monospace, monospace); }
 
-.wb-card { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-.wb-card-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.wb-card-title { font-size: 13px; font-weight: 600; color: var(--wb-t0); }
-.wb-tabs { display: flex; gap: 2px; flex-wrap: wrap; }
-.wb-tabs button {
-  border: 0; background: transparent; color: var(--wb-t2); font: inherit; font-size: 12.5px;
-  padding: 5px 10px; border-radius: 7px; cursor: pointer;
+/* ── Head ── */
+.wb-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.wb-head h1 { margin: 0; font-size: 22px; font-weight: 650; letter-spacing: -0.015em; }
+.wb-meta { display: flex; gap: 8px; flex-wrap: wrap; font-size: 12px; }
+.wb-chip { height: 28px; padding: 0 12px; border-radius: 999px; display: inline-flex; align-items: center; font-weight: 550; color: var(--wb-t0); background: var(--wb-card); box-shadow: inset 0 0 0 1px var(--wb-line); }
+.wb-chip.ghost { background: transparent; color: var(--wb-t2); font-weight: 450; }
+.wb-seg { margin-left: auto; display: inline-flex; gap: 2px; padding: 3px; border-radius: 10px; background: var(--wb-track); }
+.wb-seg button { border: 0; background: none; font: inherit; font-size: 12.5px; font-weight: 550; color: var(--wb-t2); padding: 4px 11px; border-radius: 7px; cursor: pointer; }
+.wb-seg button:hover:not(.on) { color: var(--wb-t0); }
+.wb-seg button.on { background: var(--wb-pop); color: var(--wb-t0); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), inset 0 0 0 1px var(--wb-line); }
+.wb-seg button:focus-visible { outline: 2px solid var(--wb-blue); outline-offset: 1px; }
+.wb-error { color: var(--wb-red-t, #c0392b); font-size: 13px; }
+
+/* ── Columns ── */
+.wb-cols { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(320px, 1fr); gap: 16px; align-items: start; }
+.wb-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+/* ── Cards ── */
+.wb-card {
+  position: relative; background: var(--wb-card); border-radius: 18px; box-shadow: inset 0 0 0 1px var(--wb-line);
+  padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 14px; min-width: 0;
 }
-.wb-tabs button:hover { color: var(--wb-t0); }
-.wb-tabs button.on { background: rgba(47, 107, 255, 0.1); color: var(--wb-blue); font-weight: 600; }
-.wb-trend-sum { display: flex; gap: 18px; font-size: 12.5px; color: var(--wb-t2); }
-.wb-trend-sum b { color: var(--wb-t0); font-family: "Geist Mono Variable", ui-monospace, monospace; font-weight: 600; }
-.wb-chart { width: 100%; height: 240px; }
-.wb-none { color: var(--wb-t3); font-size: 13px; padding: 40px 0; text-align: center; }
+.wb-card-head { display: flex; align-items: center; gap: 10px; min-height: 24px; }
+.wb-card-head h2 { margin: 0; font-size: 15px; font-weight: 650; letter-spacing: -0.01em; }
+.wb-card-aside { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 
-.wb-notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
-.wb-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
-.wb-list li { display: flex; flex-direction: column; gap: 2px; padding-left: 10px; border-left: 2px solid var(--wb-line); font-size: 13px; }
-.wb-list li b { font-weight: 600; }
-.wb-list li span { color: var(--wb-t2); font-size: 12.5px; line-height: 1.45; }
-.wb-list li.wb-tone-good { border-left-color: var(--wb-blue); }
-.wb-list li.wb-tone-caution { border-left-color: var(--wb-low); }
+.wb-k { font-size: 12px; color: var(--wb-t2); letter-spacing: 0.01em; }
+.wb-s { font-size: 11.5px; color: var(--wb-t3); display: inline-flex; align-items: center; gap: 4px; }
+.wb-big { font-weight: 650; letter-spacing: -0.03em; line-height: 1.05; color: var(--wb-t0); white-space: nowrap; }
+.wb-big.l { font-size: 34px; } .wb-big.m { font-size: 26px; } .wb-big.s { font-size: 19px; letter-spacing: -0.02em; }
+.wb-big small { font-family: var(--font-sans); font-size: 12px; font-weight: 500; color: var(--wb-t2); margin-left: 4px; letter-spacing: 0; }
 
+.wb-pill { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 9px; border-radius: 999px; font-size: 11.5px; font-weight: 650; white-space: nowrap; }
+.wb-pill i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.wb-pill.t-good { color: var(--wb-green-t); background: var(--wb-green-bg); }
+.wb-pill.t-fair { color: var(--wb-orange-t); background: var(--wb-orange-bg); }
+.wb-pill.t-low { color: var(--wb-red-t); background: var(--wb-red-bg); }
+.wb-pill.t-info { color: var(--wb-blue-t); background: var(--wb-blue-bg); }
+.wb-pill.t-muted { color: var(--wb-t2); background: var(--wb-track); }
+.wb-st { font-weight: 600; font-family: var(--font-sans); }
+.wb-st.t-good, .wb-delta.t-good { color: var(--wb-green-t); }
+.wb-st.t-fair, .wb-delta.t-fair { color: var(--wb-orange-t); }
+.wb-st.t-low, .wb-delta.t-low { color: var(--wb-red-t); }
+.wb-st.t-muted { color: var(--wb-t3); }
+
+.wb-stat { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.wb-row4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; }
+.wb-row2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+
+.wb-chartbox { width: 100%; }
+.wb-subchart { display: flex; flex-direction: column; gap: 6px; padding-top: 12px; border-top: 1px solid var(--wb-line); }
+.wb-subhead { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.wb-sums { margin-left: auto; display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--wb-t2); }
+.wb-sums b { color: var(--wb-t0); font-weight: 600; }
+.wb-sums b.up { color: var(--wb-green-t); } .wb-sums b.down { color: var(--wb-orange-t); }
+
+/* ── Rings and gauge ── */
+.wb-ring { position: relative; display: grid; place-items: center; flex: none; }
+.wb-ring svg { position: absolute; inset: 0; }
+.wb-ring .trk { fill: none; stroke: var(--wb-track); }
+.wb-ring .arc { fill: none; stroke-linecap: round; stroke: var(--wb-blue); transition: stroke-dasharray 0.5s ease; }
+.wb-ring.t-good .arc { stroke: var(--wb-green); } .wb-ring.t-fair .arc { stroke: var(--wb-orange); } .wb-ring.t-low .arc { stroke: var(--wb-red); }
+.wb-ring b { font-family: var(--font-mono); font-size: 40px; font-weight: 650; letter-spacing: -0.04em; }
+.wb-gauge .trk { fill: none; stroke: var(--wb-track); stroke-width: 7; stroke-linecap: round; }
+.wb-gauge .arc { fill: none; stroke: var(--wb-blue); stroke-width: 7; stroke-linecap: round; }
+.wb-gauge .knob { fill: var(--wb-pop); stroke: var(--wb-blue); stroke-width: 2.5; }
+.wb-gauge.t-good .arc, .wb-gauge.t-good .knob { stroke: var(--wb-green); }
+.wb-gauge.t-fair .arc, .wb-gauge.t-fair .knob { stroke: var(--wb-orange); }
+.wb-gauge.t-low .arc, .wb-gauge.t-low .knob { stroke: var(--wb-red); }
+
+/* ── Readiness ── */
+.wb-ready-grid { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 22px; align-items: center; }
+.wb-ready-ring { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.wb-drivers { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.wb-drivers li { display: grid; grid-template-columns: 82px 64px minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 10px; row-gap: 5px; align-items: baseline; }
+.wb-drivers b { font-size: 13.5px; font-weight: 600; }
+.wb-delta { font-size: 11.5px; font-family: var(--font-mono); text-align: right; }
+.wb-drivers .wb-div { grid-column: 1 / -1; }
+.wb-div { position: relative; display: block; height: 4px; border-radius: 2px; background: var(--wb-track); }
+.wb-div::after { content: ""; position: absolute; left: 50%; top: -3px; width: 1px; height: 10px; background: var(--wb-t3); }
+.wb-div i { position: absolute; top: 0; bottom: 0; border-radius: 2px; }
+.wb-div i.pos { background: var(--wb-green); } .wb-div i.neg { background: var(--wb-orange); }
+.wb-ready-side { display: flex; flex-direction: column; gap: 12px; padding-left: 20px; border-left: 1px solid var(--wb-line); min-width: 150px; }
+.wb-stress { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.wb-stress > div { display: flex; align-items: baseline; gap: 6px; margin-top: -24px; }
+.wb-ready-mini { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.wb-ready-trend { display: flex; flex-direction: column; gap: 2px; padding-top: 10px; border-top: 1px solid var(--wb-line); }
+.wb-ready-trend b { color: var(--wb-t0); font-weight: 600; }
+
+/* ── Sleep ── */
+.wb-stages { display: flex; flex-direction: column; gap: 10px; }
+.wb-stack { display: flex; gap: 2px; border-radius: 5px; overflow: hidden; }
+.wb-stack span { min-width: 3px; }
+.s-deep { background: var(--wb-s-deep); } .s-core { background: var(--wb-s-core); } .s-rem { background: var(--wb-s-rem); } .s-awake { background: var(--wb-s-awake); }
+.m-p { background: var(--wb-blue); } .m-c { background: var(--wb-green); } .m-f { background: var(--wb-orange); }
+.wb-legend { list-style: none; margin: 0; padding: 0; display: flex; gap: 22px; flex-wrap: wrap; font-size: 12px; color: var(--wb-t2); }
+.wb-legend li { display: flex; align-items: center; gap: 6px; }
+.wb-legend i { width: 9px; height: 9px; border-radius: 3px; }
+.wb-legend b { color: var(--wb-t0); font-weight: 600; }
+.wb-legend em { font-style: normal; color: var(--wb-t3); font-family: var(--font-mono); font-size: 11px; }
+
+/* ── Heart ── */
+.wb-halves { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; }
+.wb-half { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding-right: 18px; }
+.wb-half + .wb-half { padding: 0 0 0 18px; border-left: 1px solid var(--wb-line); }
+.wb-half-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.wb-half-top > div:first-child { display: flex; flex-direction: column; gap: 4px; }
+.wb-half-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+
+/* ── Activity ── */
+.wb-act { display: grid; grid-template-columns: minmax(180px, 0.8fr) minmax(0, 1.4fr); gap: 24px; align-items: stretch; }
+.wb-act-left { display: flex; flex-direction: column; gap: 8px; }
+.wb-act-left .wb-row2 { margin-top: 8px; }
+.wb-progress { height: 6px; border-radius: 3px; background: var(--wb-track); overflow: hidden; }
+.wb-progress i { display: block; height: 100%; border-radius: 3px; background: var(--wb-green); }
+.wb-week { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.wb-bars { position: relative; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; height: 132px; padding-top: 4px; }
+.wb-goal-zone { position: absolute; left: 0; right: 0; top: 20px; bottom: 18px; pointer-events: none; z-index: 1; }
+.wb-goal { position: absolute; left: 0; right: 0; height: 0; border-top: 1px dashed var(--wb-t3); }
+.wb-goal em { position: absolute; left: 0; top: 2px; font-style: normal; font-family: var(--font-mono); font-size: 10px; color: var(--wb-t3); }
+.wb-bar { display: grid; grid-template-rows: 14px 1fr 16px; gap: 2px; min-width: 0; text-align: center; }
+.wb-bar-v { font-family: var(--font-mono); font-size: 10px; color: var(--wb-t3); }
+.wb-bar-track { position: relative; display: flex; align-items: flex-end; justify-content: center; }
+.wb-bar-track i { width: min(22px, 70%); border-radius: 4px 4px 2px 2px; background: var(--wb-silhouette); min-height: 2px; }
+.wb-bar-track i.met { background: color-mix(in srgb, var(--wb-green) 45%, transparent); }
+.wb-bar-track i.last { background: var(--wb-green); }
+.wb-bar-d { font-size: 11px; color: var(--wb-t2); }
+.wb-workouts { display: flex; flex-direction: column; gap: 8px; padding-top: 12px; border-top: 1px solid var(--wb-line); }
+.wb-workouts ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.wb-workouts li { display: grid; grid-template-columns: 28px minmax(70px, auto) 1fr auto; gap: 10px; align-items: center; font-size: 13px; }
+.wb-workouts li b { font-weight: 600; }
+.wb-w-nums { display: flex; gap: 14px; font-size: 12px; color: var(--wb-t2); }
+
+/* ── Icon circles (Vita's 40pt tinted circles) ── */
+.wb-ico { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+.wb-workouts .wb-ico { width: 28px; height: 28px; }
+.wb-ico.t-good { color: var(--wb-green-t); background: var(--wb-green-bg); }
+.wb-ico.t-fair { color: var(--wb-orange-t); background: var(--wb-orange-bg); }
+.wb-ico.t-low { color: var(--wb-red-t); background: var(--wb-red-bg); }
+.wb-ico.t-info { color: var(--wb-blue-t); background: var(--wb-blue-bg); }
+.wb-ico.t-plain { color: var(--wb-t0); background: var(--wb-track); }
+
+.wb-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.wb-items li { display: flex; align-items: center; gap: 12px; min-height: 38px; }
+.wb-items li > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.wb-items b { font-size: 13.5px; font-weight: 600; line-height: 1.3; }
+.wb-items span { font-size: 12px; color: var(--wb-t2); line-height: 1.4; }
+.wb-time { font-style: normal; font-size: 11px; font-weight: 650; padding: 3px 8px; border-radius: 999px; background: var(--wb-track); color: var(--wb-t0); flex: none; }
+
+/* ── Body map ── */
+.wb-map { height: 350px; padding: 0; overflow: hidden; }
+.wb-fig-at { position: absolute; top: 0; }
+.wb-fig .s1 { stop-color: var(--wb-skin-1); } .wb-fig .s2 { stop-color: var(--wb-skin-2); } .wb-fig .s3 { stop-color: var(--wb-skin-3); }
+.wb-fig .gap { stroke: var(--wb-pop); stroke-width: 2.5; }
+.wb-fig .jaw { fill: var(--wb-skin-3); opacity: 0.35; }
+.wb-fig .ear { fill: var(--wb-skin-3); }
+.wb-fig .hair { fill: var(--wb-hair); }
+.wb-fig .band { fill: var(--wb-t0); opacity: 0.55; }
+.wb-fig .face { fill: var(--wb-t0); opacity: 0.85; }
+.wb-fig .det { fill: none; stroke: var(--wb-t0); stroke-opacity: 0.08; stroke-width: 1.4; stroke-linecap: round; }
+.wb-leaders { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+.wb-leaders polyline { fill: none; stroke: var(--wb-t0); stroke-opacity: 0.5; stroke-width: 1; stroke-dasharray: 3 3; }
+.wb-leaders .ring { fill: var(--wb-pop); stroke: var(--wb-line); stroke-width: 1; }
+.c-blue .dot { fill: var(--wb-blue); } .c-orange .dot { fill: var(--wb-orange); } .c-green .dot { fill: var(--wb-green); }
+.wb-callout { position: absolute; left: 20px; display: flex; flex-direction: column; gap: 3px; max-width: 140px; }
+.wb-callout .wb-st { font-size: 12px; }
+.wb-live { position: absolute; top: 16px; right: 16px; }
+
+/* ── Timeline ── */
+.wb-track { display: flex; flex-direction: column; gap: 6px; padding-top: 18px; }
+.wb-track-bar { position: relative; height: 10px; border-radius: 5px; background: var(--wb-track); }
+.wb-track-bar .seg { position: absolute; top: 0; bottom: 0; border-radius: 5px; min-width: 6px; }
+.wb-track-bar .pin { position: absolute; top: -3px; width: 4px; height: 16px; margin-left: -2px; border-radius: 2px; box-shadow: 0 0 0 2px var(--wb-pop); }
+.c-sleep { background: var(--wb-s-core); } .c-work { background: var(--wb-blue); } .c-heart { background: var(--wb-orange); } .c-read { background: var(--wb-t3); }
+.wb-now { position: absolute; top: -18px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--wb-t0); }
+.wb-now em { position: absolute; top: -4px; left: 50%; transform: translateX(-50%); font-style: normal; font-family: var(--font-mono); font-size: 10px; font-weight: 650; color: var(--wb-pop); background: var(--wb-t0); padding: 1px 6px; border-radius: 999px; }
+.wb-ticks { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 10px; color: var(--wb-t3); }
+.wb-evs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.wb-evs li { display: flex; align-items: center; gap: 12px; }
+.wb-evs li > div { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
+.wb-evs b { font-size: 13.5px; font-weight: 600; }
+.wb-evs .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+
+/* ── Body readings ── */
+.wb-vitals { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.wb-vitals li { display: grid; grid-template-columns: 34px minmax(0, 1fr) 72px minmax(112px, auto); align-items: center; gap: 12px; padding: 9px 0; }
+.wb-vitals li + li { border-top: 1px solid var(--wb-line); }
+.wb-v-name { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.wb-v-name b { font-size: 13.5px; font-weight: 600; }
+.wb-v-name .wb-s { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wb-vitals .wb-big { text-align: right; }
+.wb-v-spark { display: flex; align-items: center; }
+.wb-spark polyline { fill: none; stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; stroke: var(--wb-t3); }
+.wb-spark circle { fill: var(--wb-t2); }
+
+/* ── Not connected ── */
 .wb-empty { display: flex; flex-direction: column; gap: 12px; padding: 28px 24px; border: 1px dashed var(--wb-line); border-radius: 12px; max-width: 640px; }
 .wb-empty-title { font-size: 15px; font-weight: 600; }
 .wb-steps { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; color: var(--wb-t2); font-size: 13px; }
-.wb-steps code { font-family: "Geist Mono Variable", ui-monospace, monospace; font-size: 12px; color: var(--wb-t0); background: rgba(47, 107, 255, 0.07); padding: 2px 6px; border-radius: 5px; user-select: all; }
 .wb-foot { color: var(--wb-t3); font-size: 11.5px; }
 
-@media (max-width: 640px) {
+@media (max-width: 1100px) {
+  .wb-cols { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 720px) {
   .wb-view { padding: 14px 16px 24px; }
-  .wb-scores { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .wb-chart { height: 200px; }
+  .wb-ready-grid { grid-template-columns: auto minmax(0, 1fr); }
+  .wb-ready-side { grid-column: 1 / -1; padding-left: 0; border-left: 0; flex-direction: row; justify-content: space-between; }
+  .wb-halves, .wb-act { grid-template-columns: minmax(0, 1fr); }
+  .wb-half + .wb-half { padding: 14px 0 0; border-left: 0; border-top: 1px solid var(--wb-line); }
 }
