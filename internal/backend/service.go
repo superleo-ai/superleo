@@ -231,6 +231,12 @@ func NewService(s *Settings) (*Service, error) {
 
 	// --- Config / home layout. ---
 	cfg := &config.Config{Home: DataDir()}
+	if noModel {
+		// Without an API model a "model call" is a whole CLI turn (codex,
+		// claude) with its own tool calls inside, so agent-go's 180s per call
+		// cut scheduled prompts off mid-work.
+		cfg.Agent.LLMTurnTimeoutSeconds = int(cliTurnTimeout / time.Second)
+	}
 	// Discovery, now that being deferred no longer means being invisible.
 	//
 	// This used to be off — the whole catalogue went straight into the schema —
@@ -1625,3 +1631,6 @@ var deferredToolPatterns = []string{
 	// Only live during an import, which is a thing the user starts.
 	"importflow_*", "connector_*",
 }
+
+// cliTurnTimeout bounds one turn of a CLI engine standing in for the model.
+const cliTurnTimeout = 20 * time.Minute
