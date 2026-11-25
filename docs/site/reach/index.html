@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SuperLeo · 在外面也能连 · Reach your desktop from anywhere</title>
-<meta name="description" content="How the SuperLeo phone app reaches your desktop when it is not on the same network: directly on the same Wi-Fi, through an end-to-end encrypted relay elsewhere, or through a relay or tunnel of your own.">
+<meta name="description" content="How the SuperLeo phone app reaches your computer: same Wi-Fi, Tailscale, or an encrypted relay that can't read anything.">
 <link rel="icon" href="/media/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/media/apple-touch-icon.png">
 <script>
@@ -55,7 +55,6 @@
   code { font-family: "Geist Mono", ui-monospace, Menlo, monospace; font-size: .86em; background: var(--paper); border: 1px solid var(--hair); border-radius: 4px; padding: 1px 5px; overflow-wrap: anywhere; }
   pre { font-family: "Geist Mono", ui-monospace, Menlo, monospace; font-size: 13px; line-height: 1.6; background: var(--paper); border: 1px solid var(--hair); border-radius: 6px; padding: 12px 14px; margin: 0 0 16px; overflow-x: auto; }
 
-  /* The three ways a phone gets through, as a measured list. */
   .ways { list-style: none; margin: 0 0 8px; padding: 0; border-top: 1px solid var(--ink); }
   .ways li { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 4px 24px; padding: 18px 0; border-bottom: 1px solid var(--hair); }
   .ways .k { font-weight: 600; }
@@ -86,26 +85,26 @@
 <div class="col intro">
   <h1><span lang="zh">在外面也能连</span><span lang="en">Reach your desktop from anywhere</span></h1>
   <p class="lead">
-    <span lang="zh">SuperLeo 装在你的电脑上，手机连接这台电脑。</span>
-    <span lang="en">SuperLeo runs on your computer. Your phone connects to that computer.</span>
+    <span lang="zh">SuperLeo 跑在你的电脑上，手机连的是这台电脑。</span>
+    <span lang="en">SuperLeo runs on your computer. Your phone talks to that computer.</span>
   </p>
 </div>
 
 <section>
   <div class="col">
-    <h2><span lang="zh">怎么连过去</span><span lang="en">How the phone gets there</span></h2>
+    <h2><span lang="zh">手机怎么连过去</span><span lang="en">How the phone gets there</span></h2>
     <ul class="ways">
       <li>
         <span class="k"><span lang="zh">同一个 Wi-Fi</span><span lang="en">Same Wi-Fi</span></span>
-        <span class="v"><span lang="zh">手机直接连电脑，不经过任何别的机器。</span><span lang="en">The phone connects to the computer directly. Nothing else is involved.</span></span>
+        <span class="v"><span lang="zh">直接连电脑。</span><span lang="en">Straight to the computer.</span></span>
       </li>
       <li>
-        <span class="k"><span lang="zh">在别的地方</span><span lang="en">Anywhere else</span></span>
-        <span class="v"><span lang="zh">经过 <strong>gateway.superleo.cn</strong> 或 <strong>gateway.superleo.app</strong> 中转，端口 443。不用注册。</span><span lang="en">Through <strong>gateway.superleo.cn</strong> or <strong>gateway.superleo.app</strong>, on port 443. No sign-up.</span></span>
+        <span class="k">Tailscale</span>
+        <span class="v"><span lang="zh">手机和电脑在同一个 tailnet 里，就走 Tailscale，不用设置。</span><span lang="en">If the phone and the computer are on the same tailnet, it goes over Tailscale. Nothing to set up.</span></span>
       </li>
       <li>
-        <span class="k"><span lang="zh">你自己的方式</span><span lang="en">Your own way</span></span>
-        <span class="v"><span lang="zh">自己跑一个中转，或者用你已有的隧道。见下文。</span><span lang="en">Run a relay yourself, or use a tunnel you already have. See below.</span></span>
+        <span class="k"><span lang="zh">其他情况</span><span lang="en">Anywhere else</span></span>
+        <span class="v"><span lang="zh">经 <strong>gateway.superleo.cn</strong> 或 <strong>gateway.superleo.app</strong> 中转。不用注册。</span><span lang="en">Through <strong>gateway.superleo.cn</strong> or <strong>gateway.superleo.app</strong>. No sign-up.</span></span>
       </li>
     </ul>
   </div>
@@ -113,63 +112,41 @@
 
 <section>
   <div class="col">
-    <h2><span lang="zh">中转看不到内容</span><span lang="en">The relay cannot read anything</span></h2>
+    <h2><span lang="zh">中转看不到内容</span><span lang="en">The relay can't read anything</span></h2>
     <p>
-      <span lang="zh">配对时，手机从二维码里拿到电脑证书的指纹。之后每次连接，加密都是在手机和电脑之间完成的，手机只认这张证书。中转只按地址把加密后的数据转给对应的电脑，看不到内容，也不保存。</span>
-      <span lang="en">When you pair, the phone takes the fingerprint of the computer's certificate from the QR code. Every connection after that is encrypted between the phone and the computer, and the phone accepts only that certificate. The relay forwards the encrypted bytes to the right computer by name. It cannot read them and does not store them.</span>
-    </p>
-    <p>
-      <span lang="zh">每台电脑在中转上的地址是用它自己的密钥算出来的，形如 <code>https://&lt;id&gt;.gateway.superleo.cn</code> 和 <code>https://&lt;id&gt;.gateway.superleo.app</code>，<code>&lt;id&gt;</code> 是 16 个字符。电脑连上中转时用同一把密钥签名，证明这个地址属于它，所以不需要账号。</span>
-      <span lang="en">Each computer's address at the relay is derived from its own key and looks like <code>https://&lt;id&gt;.gateway.superleo.cn</code> and <code>https://&lt;id&gt;.gateway.superleo.app</code>, where <code>&lt;id&gt;</code> is 16 characters. When the computer connects to the relay it signs with that key to prove the address is its own, so no account is needed.</span>
-    </p>
-    <p>
-      <span lang="zh">两个地址后面是同一组中转服务器，彼此互为备份。电脑连上其中任何一台，手机从任何一个地址都能连到它。</span>
-      <span lang="en">Both addresses lead to the same set of relay servers, which back each other up. Once the computer is linked to any one of them, the phone reaches it through either address.</span>
-    </p>
-    <p>
-      <span lang="zh">桌面版的「设置 › 通知中心 › 在外面也能连」里能看到这台电脑的中转地址，以及它现在有没有连上中转。</span>
-      <span lang="en">The desktop app shows this computer's relay address, and whether it is linked to the relay, under Settings › Notifications › Away from home.</span>
+      <span lang="zh">配对时手机记下电脑证书的指纹，之后只认这张证书。加密在手机和电脑之间完成，中转只负责转发，看不到内容，也不保存。电脑用自己的密钥证明身份，所以不需要账号。</span>
+      <span lang="en">When you pair, the phone keeps the fingerprint of the computer's certificate and trusts only that. Encryption runs between the phone and the computer; the relay just passes bytes along, can't read them and keeps nothing. The computer proves who it is with its own key, so there's no account.</span>
     </p>
   </div>
 </section>
 
 <section>
   <div class="col">
-    <h2><span lang="zh">换成你自己的方式</span><span lang="en">Use your own provider</span></h2>
+    <h2><span lang="zh">用你自己的</span><span lang="en">Use your own</span></h2>
     <p>
-      <span lang="zh">在同一个设置里可以选：SuperLeo 中转、自己的中转、或者仅局域网。另外可以加上你自己的地址，手机会依次尝试：先局域网，再你自己的地址，最后中转。</span>
-      <span lang="en">The same settings let you choose the SuperLeo relay, your own relay, or the local network only. You can also add addresses of your own. The phone tries them in order: the local network first, then your own addresses, then the relay.</span>
+      <span lang="zh">在桌面版「设置 › 通知中心 › 在外面也能连」里换。</span>
+      <span lang="en">Change it in the desktop app under Settings › Notifications › Away from home.</span>
     </p>
 
-    <h3><span lang="zh">自己跑一个中转</span><span lang="en">Run the relay yourself</span></h3>
+    <h3><span lang="zh">自己的中转</span><span lang="en">Your own relay</span></h3>
     <p>
-      <span lang="zh">中转是开源的，代码在 <a href="https://github.com/superleo-ai/superleo/tree/main/cmd/superleo-relay">cmd/superleo-relay</a>。准备一个域名，加一条泛解析 <code>*.relay.example.com</code> 指向你的服务器，然后运行：</span>
-      <span lang="en">The relay is open source, in <a href="https://github.com/superleo-ai/superleo/tree/main/cmd/superleo-relay">cmd/superleo-relay</a>. Point a wildcard DNS record, <code>*.relay.example.com</code>, at your server and run:</span>
+      <span lang="zh">中转是开源的（<a href="https://github.com/superleo-ai/superleo/tree/main/cmd/superleo-relay">cmd/superleo-relay</a>）。把 <code>*.relay.example.com</code> 解析到你的服务器，运行：</span>
+      <span lang="en">The relay is open source (<a href="https://github.com/superleo-ai/superleo/tree/main/cmd/superleo-relay">cmd/superleo-relay</a>). Point <code>*.relay.example.com</code> at your server and run:</span>
     </p>
     <pre>superleo-relay -addr :43443 -domain relay.example.com</pre>
     <p>
-      <span lang="zh">在桌面版选「自己的中转」，填 <code>relay.example.com:43443</code>。中转需要域名，不能只用 IP 地址，因为每台电脑都在它下面有一个自己的子域名。</span>
-      <span lang="en">In the desktop app choose My own relay and enter <code>relay.example.com:43443</code>. A relay needs a domain name, not just an IP address, because each computer gets a subdomain of its own under it.</span>
+      <span lang="zh">然后在桌面版填 <code>relay.example.com:43443</code>。</span>
+      <span lang="en">Then enter <code>relay.example.com:43443</code> in the desktop app.</span>
     </p>
 
-    <h3><span lang="zh">用你已有的隧道</span><span lang="en">Use a tunnel you already have</span></h3>
+    <h3><span lang="zh">自己的隧道</span><span lang="en">Your own tunnel</span></h3>
     <p>
-      <span lang="zh">按 TCP 原样转发的隧道都可以，比如 frp 的 TCP 代理，或者 Tailscale Funnel 的 TCP 转发。把它指向电脑的 <code>43561</code> 端口，再把它给你的地址（例如 <code>https://desk.example.com:7443</code>）加到「自己的地址」里。手机也装了 Tailscale 的话，可以直接加电脑的 Tailscale 地址，例如 <code>https://100.101.102.103:43561</code>。</span>
-      <span lang="en">Any tunnel that passes TCP through unchanged works, such as an frp TCP proxy or Tailscale Funnel's TCP forwarding. Point it at port <code>43561</code> on the computer, and add the address it gives you (for example <code>https://desk.example.com:7443</code>) under Own addresses. If your phone is on Tailscale too, you can add the computer's Tailscale address, for example <code>https://100.101.102.103:43561</code>.</span>
+      <span lang="zh">frp 的 TCP 代理这类原样转发 TCP 的隧道都行：指向电脑的 <code>43561</code> 端口，把得到的地址加到「自己的地址」里。</span>
+      <span lang="en">Any tunnel that passes TCP through as is, like an frp TCP proxy, works: point it at port <code>43561</code> on the computer and add the address it gives you under Own addresses.</span>
     </p>
     <p class="no">
-      <span lang="zh">在中间解开 TLS 的隧道不支持，比如 Cloudflare Tunnel。它能读到经过的内容，手机核对证书指纹时也会失败。</span>
-      <span lang="en">Tunnels that terminate TLS, such as Cloudflare Tunnel, are not supported. They can read the traffic, and the phone's certificate check fails through them.</span>
-    </p>
-  </div>
-</section>
-
-<section>
-  <div class="col">
-    <h2><span lang="zh">目前能用到哪里</span><span lang="en">What works today</span></h2>
-    <p>
-      <span lang="zh">桌面版已支持自己的中转和自己的地址。iPhone 和 Android 版从下一个版本开始支持；在此之前，手机在外面使用 SuperLeo 中转。</span>
-      <span lang="en">The desktop app supports your own relay and your own addresses. The iPhone and Android apps support them from their next versions. Until then, phones use the SuperLeo relay away from home.</span>
+      <span lang="zh">Cloudflare Tunnel 这类会解开 TLS 的隧道不行，手机的证书校验过不去。</span>
+      <span lang="en">Tunnels that open up TLS, like Cloudflare Tunnel, don't work: the phone's certificate check fails.</span>
     </p>
   </div>
 </section>
