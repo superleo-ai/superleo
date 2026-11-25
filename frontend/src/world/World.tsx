@@ -6,7 +6,7 @@ import { translate } from "../lib/i18n";
 import { EventsOn } from "../../wailsjs/runtime";
 import { useBees, useCodingRuns, useHive, useHosts, useLinkedAgents, useWorkers } from "../canvas/data";
 import { useAttentionState } from "../canvas/attention";
-import { useHiveMeter } from "../components/HiveMeter";
+import { useEngineUsage, useHiveMeter } from "../components/HiveMeter";
 import { useI18n } from "../lib/i18n";
 import { useDaylight } from "../lib/useDaylight";
 import type { ViewKey } from "../lib/types";
@@ -273,6 +273,11 @@ function Hud({ data, on }: { view: ViewKey; data: WorldData; on: boolean }) {
   const hist = useRef<number[]>([]);
   const last = useRef(-1);
   const tt = data.meter.total;
+  // On a subscription the CLI spends the tokens, not this app: show the plan.
+  const usage = useEngineUsage();
+  const plan = usage.mode === "subscription" && !!usage.cli;
+  const win = usage.windows ?? [];
+  const resets = (w?: { resetsAt?: number }) => w?.resetsAt ? new Date(w.resetsAt * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";
   useEffect(() => {
     if (last.current > 0) { hist.current.push(Math.max(0, tt.tokens - last.current)); if (hist.current.length > 90) hist.current.shift(); }
     last.current = tt.tokens;
@@ -292,14 +297,25 @@ function Hud({ data, on }: { view: ViewKey; data: WorldData; on: boolean }) {
   return (
     <div className={`wl-holo tl wl-hive${open ? " open" : ""}${on ? "" : " off"}`} aria-hidden={!on}>
       <button className="wh-hive-top" onClick={toggle} aria-expanded={open} title={t(open ? "Fold" : "Show the figures")}>
-        <div className="wh-fig big main">
-          <b><i className={tt.tokPerSec > 0.5 ? "wh-dot on" : "wh-dot"} />{fmt(tt.tokens)}</b>
-          <span>{t("hive tokens")}</span>
-        </div>
+        {plan ? (
+          <div className="wh-fig big main">
+            <b><i className={tt.tokPerSec > 0.5 ? "wh-dot on" : "wh-dot"} />{win[0] ? `${Math.round(win[0].percent)}%` : usage.cli === "claude" && !usage.remote ? fmt(usage.tokens ?? 0) : "—"}</b>
+            <span>{t(`${usage.cli} plan`)}{win[0] ? ` · ${t(win[0].label)}` : usage.cli === "claude" && !usage.remote ? ` · ${t("tokens today")}` : ""}</span>
+          </div>
+        ) : (
+          <div className="wh-fig big main">
+            <b><i className={tt.tokPerSec > 0.5 ? "wh-dot on" : "wh-dot"} />{fmt(tt.tokens)}</b>
+            <span>{t("hive tokens")}</span>
+          </div>
+        )}
         <ChevronDownIcon size={14} className="wh-hive-chev" />
       </button>
       <div className="wh-row">
-        <div className="wh-fig"><b>{Math.round(tt.tokPerSec)}</b><span>tok/s</span></div>
+        {plan && win[1]
+          ? <div className="wh-fig"><b>{Math.round(win[1].percent)}%</b><span>{t(win[1].label)}</span></div>
+          : plan ? null : <div className="wh-fig"><b>{Math.round(tt.tokPerSec)}</b><span>tok/s</span></div>}
+        {plan && resets(win[0]) && <div className="wh-fig"><b>{resets(win[0])}</b><span>{t("resets")}</span></div>}
+        {plan && tt.tokens > 0 && <div className="wh-fig"><b>{fmt(tt.tokens)}</b><span>{t("hive tokens")}</span></div>}
         <div className={`wh-fig${live < workers.list.length ? " bad" : ""}`}><b>{live}/{workers.list.length}</b><span>{t("workers")}</span></div>
         {needs > 0 && <div className="wh-fig bad"><b>{needs}</b><span>{t("need you")}</span></div>}
       </div>

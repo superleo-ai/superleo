@@ -137,6 +137,8 @@ export function EarlierChats():Promise<Array<backend.ChatSessionInfo>>;
 
 export function EmitAvatarTest(arg1:string):Promise<void>;
 
+export function EngineUsage():Promise<app.EngineUsage>;
+
 export function ExportWorkspaceFile(arg1:string):Promise<string>;
 
 export function ExternalAgentsStatus():Promise<Array<backend.ExternalAgentStatus>>;

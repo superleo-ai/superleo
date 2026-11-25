@@ -262,6 +262,10 @@ export function EmitAvatarTest(arg1) {
   return window['go']['app']['App']['EmitAvatarTest'](arg1);
 }
 
+export function EngineUsage() {
+  return window['go']['app']['App']['EngineUsage']();
+}
+
 export function ExportWorkspaceFile(arg1) {
   return window['go']['app']['App']['ExportWorkspaceFile'](arg1);
 }

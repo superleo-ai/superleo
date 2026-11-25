@@ -1460,6 +1460,60 @@ export namespace app {
 	        this.host = source["host"];
 	    }
 	}
+	export class UsageWindow {
+	    label: string;
+	    percent: number;
+	    resetsAt?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new UsageWindow(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.label = source["label"];
+	        this.percent = source["percent"];
+	        this.resetsAt = source["resetsAt"];
+	    }
+	}
+	export class EngineUsage {
+	    mode: string;
+	    cli?: string;
+	    remote?: boolean;
+	    windows?: UsageWindow[];
+	    tokens?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new EngineUsage(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.mode = source["mode"];
+	        this.cli = source["cli"];
+	        this.remote = source["remote"];
+	        this.windows = this.convertValues(source["windows"], UsageWindow);
+	        this.tokens = source["tokens"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class HiveLinkInfo {
 	    linked: boolean;
 	    url?: string;
@@ -2889,6 +2943,7 @@ export namespace app {
 		    return a;
 		}
 	}
+	
 	export class WakeMark {
 	    agent: string;
 	    kind: string;

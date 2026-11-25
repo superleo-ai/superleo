@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { HivePulse } from "../../wailsjs/go/app/App";
+import { EngineUsage, HivePulse } from "../../wailsjs/go/app/App";
 import { EventsOn } from "../../wailsjs/runtime";
 
 /** One member's meter, as the core reports it (app.MemberPulse). */
@@ -48,4 +48,24 @@ export function useHiveMeter(): { members: Member[]; total: Member } {
   const sorted = [...members].sort((a, b) =>
     a.name === "queen" ? -1 : b.name === "queen" ? 1 : a.live !== b.live ? (a.live ? -1 : 1) : b.tokens - a.tokens);
   return { members: sorted, total: total(members) };
+}
+
+/** What the queen's engine costs: her own key's tokens (the meter), or a
+ *  subscription's usage, read from the CLI's logs (app.EngineUsage). */
+export interface Usage {
+  mode: "key" | "subscription"; cli?: string; remote?: boolean;
+  windows?: { label: string; percent: number; resetsAt?: number }[]; tokens?: number;
+}
+
+export function useEngineUsage(): Usage {
+  const [u, setU] = useState<Usage>({ mode: "key" });
+  useEffect(() => {
+    let alive = true;
+    const load = () => EngineUsage().then((r) => { if (alive) setU(r as unknown as Usage); }).catch(() => {});
+    load();
+    const t = window.setInterval(load, 30000);
+    const off = EventsOn("queen:engine", load);
+    return () => { alive = false; window.clearInterval(t); if (typeof off === "function") off(); };
+  }, []);
+  return u;
 }
