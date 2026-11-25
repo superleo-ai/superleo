@@ -285,6 +285,7 @@ export default function Inspector({ picked, data, onClose, open, openDash, full,
       if (it?.detail) rows.push(["Detail", it.detail]);
       body = (
         <div className="wi-acts">
+          <button onClick={() => open(PATHS.schedule, true)}>{t("Open Schedule")}</button>
           {picked.kind === "event" && (
             <button className="danger" onClick={twice("del", () => act("del", () => ForgetLife("schedule", picked.id), "Deleted").then(onClose))}><Trash2Icon size={14} />{t(confirm === "del" ? "Delete it?" : "Delete")}</button>
           )}
@@ -369,6 +370,9 @@ export default function Inspector({ picked, data, onClose, open, openDash, full,
             ))}
             {data.agenda.length === 0 && <li className="wi-none">{t("Nothing else planned today.")}</li>}
           </ul>
+          <div className="wi-acts">
+            <button onClick={() => open(PATHS.schedule, true)}>{t("Open Schedule")}</button>
+          </div>
           <Talk who={{ kind: "queen" }} placeholder="Tell noted something…" />
         </>
       );
@@ -410,7 +414,7 @@ export default function Inspector({ picked, data, onClose, open, openDash, full,
     hall: PATHS.home, worker: PATHS.hive, node: PATHS.hive, order: taskPath(picked.id),
     bee: PATHS.agents + "?agent=" + encodeURIComponent(picked.id), machine: PATHS.coding, cli: PATHS.coding, agent: PATHS.coding,
     brain: PATHS.knowledge, skills: PATHS.skills, skill: PATHS.skills, mcphub: PATHS.mcp, mcp: PATHS.mcp,
-    dashboard: PATHS.dashboards, records: PATHS.records, event: PATHS.records, reminder: PATHS.records,
+    dashboard: PATHS.dashboards, records: PATHS.schedule, event: PATHS.schedule, reminder: PATHS.schedule,
     figure: PATHS.stats, settings: PATHS.settings, host: PATHS.hive, service: PATHS.hive,
   };
   const screen = fullPaths[picked.kind] ?? PATHS.tasks;

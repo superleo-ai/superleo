@@ -21,7 +21,6 @@ import MCPView from "./views/MCPView";
 import { useAttentionState } from "./canvas/attention";
 import DashboardsPanel from "./components/DashboardsPanel";
 import TasksView from "./views/TasksView";
-import RecordsView from "./views/RecordsView";
 import ConversationsView from "./views/ConversationsView";
 import ScheduleView from "./views/ScheduleView";
 import CanvasView from "./canvas/CanvasView";
@@ -213,10 +212,7 @@ export default function App() {
       <Route path="/knowledge" element={<KnowledgeView />} />
       <Route path="/skills" element={clientKind() === "desktop" ? <ExtensionsView /> : <SkillsView />} />
       <Route path="/mcp" element={clientKind() === "desktop" ? <ExtensionsView /> : <MCPView />} />
-      <Route
-        path="/records"
-        element={<RecordsView status={status} log={runs} onOpenConversation={openConversation} />}
-      />
+      <Route path="/records" element={<Navigate to="/schedule" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
@@ -227,12 +223,12 @@ export default function App() {
   if (clientKind() === "desktop") {
     return (
       <>
-        <DeskShell needs={{ items: attention.items, approvals: approvals.pending, onResolve: approvals.resolve }} overlay={<CardStack runs={runs} approvals={approvals.pending} note={approvals.note} onDismissNote={approvals.dismissNote} onResolve={approvals.resolve} onOpenConversation={openConversation} />} status={status} loading={loading} view={view} badges={{ records: runs.unseen, tasks: attention.items.filter(i => i.level === "needs").length }} onOpenConversation={openConversation}>
+        <DeskShell needs={{ items: attention.items, approvals: approvals.pending, onResolve: approvals.resolve }} overlay={<CardStack runs={runs} approvals={approvals.pending} note={approvals.note} onDismissNote={approvals.dismissNote} onResolve={approvals.resolve} onOpenConversation={openConversation} />} status={status} loading={loading} view={view} badges={{ tasks: attention.items.filter(i => i.level === "needs").length }} onOpenConversation={openConversation}>
           {view === "home" || view === "chat" ? (
             <DeskView attentionItems={attention.items} attentionError={attention.error} approvals={world3d ? { ...approvals, pending: [] } : approvals} openSession={pendingSession} onSessionOpened={() => setPendingSession("")} />
           ) : routes}
         </DeskShell>
-        {!world3d && view !== "records" && <ScheduleRunToasts log={runs} onOpenConversation={openConversation} />}
+        {!world3d && <ScheduleRunToasts log={runs} onOpenConversation={openConversation} />}
         {!world3d && <Toaster onOpenConversation={openConversation} />}
         <SetupBanner status={status} loading={loading} />
         <BrowserPanelHost />
@@ -269,7 +265,7 @@ export default function App() {
             // has to close it or the destination is behind it.
             if (window.matchMedia("(max-width: 640px)").matches) setNavOpen(false);
           }}
-          badges={{ records: runs.unseen, tasks: attention.items.filter(i => i.level === "needs").length }}
+          badges={{ tasks: attention.items.filter(i => i.level === "needs").length }}
           open={navOpen && room !== "narrow"}
           onToggle={() => setNavOpen((v) => !v)}
         />
@@ -297,11 +293,7 @@ export default function App() {
       {petOpen && status && status.avatarPort > 0 && (
         <Pet port={status.avatarPort} view={view} onDismiss={() => setPetOpen(false)} />
       )}
-      {/* Records lists the same runs, so a toast there would only repeat what
-          is already on screen. */}
-      {view !== "records" && (
-        <ScheduleRunToasts log={runs} onOpenConversation={openConversation} />
-      )}
+      <ScheduleRunToasts log={runs} onOpenConversation={openConversation} />
       {/* The conversation, a thumb away from every page but its own. A phone
           has no 3D, so the mode button stays with the desktop shell. */}
       {view !== "chat" && <FabStack lifted><ChatFab onClick={() => setView("chat")} /></FabStack>}

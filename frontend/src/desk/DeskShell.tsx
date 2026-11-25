@@ -73,7 +73,7 @@ const SIDE: ViewKey[] = ["dashboards", "stats"];
 
 export const TITLES: Record<ViewKey, string> = {
   home: "", chat: "Chat", conversations: "Conversations", tasks: "Needs your attention", schedule: "Schedule", dashboards: "Dashboards", wellbeing: "Wellbeing", hive: "Hive", agents: "Bees", routines: "Automation", coding: "Coding", knowledge: "Knowledge",
-  skills: "Skills", mcp: "MCP", stats: "Stats", records: "Records", settings: "Settings",
+  skills: "Skills", mcp: "MCP", stats: "Stats", settings: "Settings",
 };
 
 /**

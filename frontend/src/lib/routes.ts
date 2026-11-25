@@ -26,7 +26,6 @@ export const PATHS: Record<ViewKey, string> = {
   knowledge: "/knowledge",
   skills: "/skills",
   mcp: "/mcp",
-  records: "/records",
   settings: "/settings",
 };
 
@@ -54,6 +53,6 @@ export function attentionPath(item: { kind: string; open?: string; ref?: string 
   if (item.open === "agents") return PATHS.agents + (item.ref ? `?agent=${encodeURIComponent(item.ref)}` : "");
   if (item.open === "coding") return PATHS.coding + (item.ref ? `?run=${encodeURIComponent(item.ref)}` : "");
   if (item.kind === "reminder") return PATHS.routines;
-  if (item.open === "records") return PATHS.records;
+  if (item.open === "records") return PATHS.schedule;
   return PATHS.hive;
 }

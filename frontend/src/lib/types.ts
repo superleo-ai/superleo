@@ -11,7 +11,6 @@ export type ViewKey =
   | "knowledge"
   | "skills"
   | "mcp"
-  | "records"
   | "hive"
   | "agents"
   | "routines"
