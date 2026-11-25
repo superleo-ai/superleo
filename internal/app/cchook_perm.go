@@ -185,7 +185,7 @@ func permissionOutput(a ccPermAnswer) []byte {
 }
 
 // ccDeniedMessage is what Claude is told when the phone says no.
-const ccDeniedMessage = "The user denied this from their phone (SuperLeo). Do not retry the same call; ask what to do instead or try something else."
+const ccDeniedMessage = "The user denied this from their phone. Do not retry the same call; ask what to do instead or try something else."
 
 // ---- the machine
 

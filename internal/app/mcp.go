@@ -340,8 +340,7 @@ the cron rather than explaining it.
 A schedule's prompt is an instruction to SuperLeo, written the way it would be
 typed into chat. It is not a description of a schedule.`
 
-const queenMCPInstructions = `You are the queen of a SuperLeo hive, and these tools are how you command it.
-SuperLeo carries out every action; dangerous ones (machine_act, forced retire,
+const queenMCPInstructions = `These tools command the hive. Dangerous ones (machine_act, forced retire,
 task cancel, schedule delete) wait for the person to approve them on the phone.
 
 Hand concrete work to workers with superleo_hive_delegate (it returns a

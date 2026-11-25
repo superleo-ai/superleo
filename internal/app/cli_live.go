@@ -81,7 +81,7 @@ type cliLiveEvent struct {
 const cliResumes = 3
 
 // cliResumePrompt is what a resumed CLI is told.
-const cliResumePrompt = "SuperLeo, which runs you, was restarted while you were working on this task, and your process was stopped part way. " +
+const cliResumePrompt = "Your process was stopped part way through this task. " +
 	"Carry on with the same task from where you left off — check what is already done rather than redoing it — finish it, " +
 	"and end with the final answer you would have given."
 

@@ -64,7 +64,7 @@ func TestUIRulesRoundTrip(t *testing.T) {
 	if strings.Contains(persona, "```chart") {
 		t.Error("the full rendering rules went into the prompt")
 	}
-	if !strings.Contains(persona, "You are SuperLeo") {
+	if !strings.Contains(persona, "You are a warm everyday assistant") {
 		t.Error("persona must keep its original instructions")
 	}
 }

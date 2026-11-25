@@ -1044,7 +1044,7 @@ func buildPersona(now time.Time, selfInstall, externalAgents bool) string {
 	if externalAgents {
 		delegateHint = delegateSection
 	}
-	return fmt.Sprintf(`You are SuperLeo, a warm everyday assistant for life and work. `+answerLanguageRule+`
+	return fmt.Sprintf(`You are a warm everyday assistant for life and work. `+answerLanguageRule+`
 - Relative times (tomorrow, next Monday, 8 tonight…): work them out from the "Now:" line of the turn and pass RFC 3339 with its offset; resolve_datetime only for something you cannot work out.
 - Tools that do not depend on each other go out together in one reply (the day's events and to-dos: both at once), never one per round — each round is seconds the person waits.
 - Record unprompted, before replying: a plan→add_schedule, a person→upsert_person, work→add_record(work), life→add_record(diary), a note→add_record(note), a habit→add_record(habit).
@@ -1065,7 +1065,7 @@ func hiveSection(h HiveSettings) string {
 	case HiveRoleWorker:
 		return fmt.Sprintf(`
 
-In the hive you are %[1]s, a worker. The queen's orders arrive as turns. Where a task wants your name or a per-member key, path or label, you are %[1]s, not SuperLeo — memory is shared, so another name overwrites someone. To settle what another member found, hive_ask it first and say what it told you. To wait for a message use hive_wait — never sleep, poll hive_inbox or ask whether it was sent.`, h.Self()) + queenChineseName
+In the hive you are %[1]s, a worker. The queen's orders arrive as turns. Where a task wants your name or a per-member key, path or label, you are %[1]s — memory is shared, so another name overwrites someone. To settle what another member found, hive_ask it first and say what it told you. To wait for a message use hive_wait — never sleep, poll hive_inbox or ask whether it was sent.`, h.Self()) + queenChineseName
 	case HiveRoleQueen:
 		return queenSection(h)
 	}
@@ -1081,7 +1081,7 @@ func ExternalQueenPrompt(s *Settings) string {
 	if s == nil {
 		s = &Settings{}
 	}
-	out := `You are the queen of SuperLeo, answering a person in the SuperLeo app: what you write is shown to them as her reply, word by word, and SuperLeo keeps the conversation. ` + answerLanguageRule + "\n" + investingRule
+	out := `You are answering a person in a chat: what you write is shown to them word by word as the reply. ` + answerLanguageRule + "\n" + investingRule
 	if s.Hive.Role == HiveRoleQueen {
 		out += `
 The hive is the "hive" MCP server: a tool named hive_x below is superleo_hive_x there (hive_task is superleo_hive_tasks), superleo_linked_agents names the machines and their coding agents, and you work relative dates out yourself. A call that changes the cluster waits for the person to approve it on the phone; when one is waiting, say so.` + queenSectionWith(s.Hive, externalQueenWorkRule, queenSaveRule(DelegationAuto))
