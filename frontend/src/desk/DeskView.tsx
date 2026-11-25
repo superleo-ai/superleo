@@ -591,7 +591,7 @@ export default function DeskView({ approvals, openSession, onSessionOpened, atte
             )}
           </div>
         </div>
-        <Controls current={current} run={runOf(current)} dash={dashOf(current)} busy={busyWorkers} onOpenHive={() => navigate(PATHS.hive)} onOpenStats={() => navigate(PATHS.stats)} />
+        <Controls current={current} run={runOf(current)} dash={dashOf(current)} busy={busyWorkers} onOpenHive={() => navigate(PATHS.hive)} onOpenStats={() => navigate(PATHS.hive)} />
       </section>
       )}
 

@@ -6,7 +6,6 @@ import Pet from "./components/Pet";
 import { useRoom } from "./lib/useViewport";
 import StatusBar from "./components/StatusBar";
 import ChatView from "./views/ChatView";
-import StatsView from "./views/StatsView";
 import WellbeingView from "./views/WellbeingView";
 import DashboardView from "./views/DashboardView";
 import AgentsView from "./views/AgentsView";
@@ -200,7 +199,7 @@ export default function App() {
       <Route path="/dashboards" element={<div className="dashboards-view"><DashboardsPanel /></div>} />
       <Route path="/tasks" element={<TasksView attention={attention} approvals={approvals.pending} onOpenConversation={openConversation} onResolve={approvals.resolve} />} />
       <Route path="/schedule" element={<ScheduleView />} />
-      <Route path="/stats" element={<StatsView />} />
+      <Route path="/stats" element={<Navigate to="/hive" replace />} />
       <Route path="/wellbeing" element={<FeatureGate feature="wellbeing"><WellbeingView /></FeatureGate>} />
       {/* Everything under /hive is the Dashboard's own to route: the
           overview, and one page per hive task. */}

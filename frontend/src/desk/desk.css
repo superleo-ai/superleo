@@ -601,7 +601,7 @@ html[data-desk] body { background: transparent; }
 /* Over the world a page is a panel, not a sheet: narrow, floating, with the
    world all around it. Pages that need room get more of it. */
 .dk-world .dk-page { width: 440px; margin: 6px 0 14px 4px; border-radius: 20px; box-shadow: 0 18px 50px rgba(22, 32, 43, 0.16), 0 0 0 1px rgba(22, 32, 43, 0.05); }
-.dk-world .dk-page.page-settings, .dk-world .dk-page.page-knowledge, .dk-world .dk-page.page-stats,
+.dk-world .dk-page.page-settings, .dk-world .dk-page.page-knowledge,
 .dk-world .dk-page.page-records, .dk-world .dk-page.page-dashboards, .dk-world .dk-page.page-skills,
 .dk-world .dk-page.page-mcp, .dk-world .dk-page.page-coding { width: 600px; }
 .dk-world .dk-page.page-hive { width: min(1180px, calc(100% - 90px)); }

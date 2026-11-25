@@ -6,7 +6,6 @@ export type ViewKey =
   | "home"
   | "chat"
   | "conversations"
-  | "stats"
   | "settings"
   | "knowledge"
   | "skills"

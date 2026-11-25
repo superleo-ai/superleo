@@ -237,7 +237,7 @@ export default function CanvasView({ approvals }: { approvals: { pending: ToolAp
             <button className="cv-pill glassy round" onClick={() => setMenu((m) => !m)} aria-label="Menu" data-testid="canvas-menu"><MenuIcon size={17} /></button>
             {menu && (
               <div className="cv-menu cv-glass" onMouseLeave={() => setMenu(false)}>
-                {([["Conversations", PATHS.chat], ["Bees", PATHS.agents], ["Hive", PATHS.hive], ...(coding ? [["Coding", PATHS.coding]] as const : []), ["Stats", PATHS.stats], ["Knowledge", PATHS.knowledge], ["Skills", PATHS.skills], ["MCP", PATHS.mcp], ["Settings", PATHS.settings]] as const).map(([label, path]) => (
+                {([["Conversations", PATHS.chat], ["Bees", PATHS.agents], ["Hive", PATHS.hive], ...(coding ? [["Coding", PATHS.coding]] as const : []), ["Knowledge", PATHS.knowledge], ["Skills", PATHS.skills], ["MCP", PATHS.mcp], ["Settings", PATHS.settings]] as const).map(([label, path]) => (
                   <button key={label} onClick={() => navigate(path)}>{label}</button>
                 ))}
                 <button onClick={() => { setMenu(false); setAttention(true); }}>{t("Attention")}</button>

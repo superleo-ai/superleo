@@ -1742,7 +1742,6 @@ export const LENSES: Record<string, { x: number; z: number; zoom: number }> = {
   mcp: { x: 16, z: 14, zoom: 1.8 },
   dashboards: { x: -21, z: -3, zoom: 2.2 },
   records: { x: -3.5, z: -19, zoom: 2.6 },
-  stats: { x: 0, z: 3, zoom: 1.35 },
   tasks: { x: 0, z: 4, zoom: 1.15 },
   settings: { x: 0, z: -2.2, zoom: 2.4 },
 };
@@ -1753,14 +1752,13 @@ let hostBounds: HostPlan["bounds"] | null = null;
 const HOST_LENSES: Record<string, { x: number; z: number; zoom: number }> = {
   home: { x: 3, z: -6, zoom: 1.08 },
   hive: { x: 0, z: -8, zoom: 1.12 },
-  stats: { x: 3, z: -6, zoom: 1.08 },
   tasks: { x: 0, z: -2, zoom: 0.95 },
 };
 export const lensOf = (view: string, byHost = false) => {
   const v = view === "chat" ? "home" : view;
   // The whole hive in view: its circle across the window's width (the
   // camera stands 104 / zoom away, 30° high, the window about 16:10).
-  if (byHost && hostBounds && (v === "home" || v === "hive" || v === "stats")) {
+  if (byHost && hostBounds && (v === "home" || v === "hive")) {
     return { x: hostBounds.x, z: hostBounds.z, zoom: Math.min(1.35, Math.max(0.75, 104 / ((hostBounds.r + 10) / 0.43))) };
   }
   return (byHost ? HOST_LENSES[v] : undefined) ?? LENSES[v] ?? LENSES.home;

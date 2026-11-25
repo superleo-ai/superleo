@@ -201,7 +201,7 @@ const zh: Record<string,string> = { "Dismiss":"忽略", "Dismiss all":"全部忽
   "Search what the hive knows…": "搜索蜂群知道的内容…",
   "Open the graph": "打开图谱",
   "Open Records": "打开记录", "Open Schedule": "打开日程",
-  "Open Stats": "打开统计",
+  "Open Stats": "打开统计", "Open Dashboard": "打开仪表盘",
   "Go to the bee": "前往智能体",
   "Go to the worker": "前往 worker",
   "Open full screen": "全屏打开",

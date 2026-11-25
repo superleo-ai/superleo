@@ -1,4 +1,4 @@
-/* The dashboard: figures along the top, then the hive, what is next, what
+/* The dashboard: the reactor and a strip of figures, then the hive, what is next, what
    runs and the latest conversations side by side. Daylight instrument:
    ink on the ground, hairlines for structure, the signal blue only for
    live or needs you, red only for errors. */
@@ -17,12 +17,17 @@
 .dsh button { font: inherit; color: inherit; }
 .dsh button:focus-visible { outline: 2px solid var(--dsh-signal); outline-offset: 1px; }
 
-.dsh-head { flex: none; display: flex; align-items: center; gap: 14px; padding: 18px 20px 12px; }
+.dsh-head { flex: none; display: flex; align-items: center; gap: 14px; padding: 16px 20px 10px; }
 .dsh-head h1 { margin: 0; font-size: 20px; font-weight: 650; letter-spacing: -0.01em; }
 .dsh-state { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--dsh-ink-2); }
 .dsh-state i { width: 7px; height: 7px; border-radius: 50%; background: var(--dsh-ink-3); }
 .dsh-state.on i { background: var(--dsh-signal); box-shadow: 0 0 0 3px color-mix(in srgb, var(--dsh-signal) 20%, transparent); }
 .dsh-head .dsh-link { margin-left: auto; }
+.dsh-chips { flex: 1 1 auto; min-width: 0; display: flex; gap: 6px; overflow: hidden; }
+.dsh-chip { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 9px; border: 1px solid var(--dsh-line); border-radius: 999px; font: 500 11.5px var(--font-mono); color: var(--dsh-ink); white-space: nowrap; }
+.dsh-chip svg { color: var(--dsh-ink-3); }
+.dsh-clock { flex: none; margin-left: auto; display: inline-flex; align-items: center; gap: 7px; font: 600 14px var(--font-mono); font-variant-numeric: tabular-nums; color: var(--dsh-ink); }
+.dsh-clock svg { color: var(--dsh-ink-3); }
 .dsh-link { display: inline-flex; align-items: center; gap: 2px; height: 26px; padding: 0 6px 0 9px; border: 1px solid var(--dsh-line); border-radius: 8px; background: transparent; font-size: 12px !important; color: var(--dsh-ink-2) !important; cursor: pointer; }
 .dsh-link:hover { color: var(--dsh-ink) !important; border-color: color-mix(in srgb, var(--dsh-ink) 25%, transparent); }
 
@@ -31,11 +36,11 @@
 /* Cells wrap onto a second row in a narrow window; each carries its own
    rules, shifted a pixel left so the row's first rule falls outside. */
 .dsh-figs { flex: none; display: flex; flex-wrap: wrap; overflow: hidden; margin: 0 20px; border-top: 1px solid var(--dsh-line); }
-.dsh-fig { position: relative; flex: 1 0 112px; min-width: 0; display: flex; flex-direction: column; gap: 3px; padding: 11px 14px 12px; margin-left: -1px; border-left: 1px solid var(--dsh-line); border-bottom: 1px solid var(--dsh-line); }
+.dsh-fig { position: relative; flex: 1 0 150px; min-width: 0; display: flex; flex-direction: column; gap: 2px; padding: 7px 14px 8px; margin-left: -1px; border-left: 1px solid var(--dsh-line); border-bottom: 1px solid var(--dsh-line); }
 .dsh-fig:first-child { padding-left: 2px; }
 .dsh-fig::after { content: ""; position: absolute; left: 0; bottom: -1px; width: 1px; height: 5px; background: color-mix(in srgb, var(--dsh-ink) 45%, transparent); }
 .dsh-fig > span { font-size: 11.5px; color: var(--dsh-ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.dsh-fig > b { font: 600 22px/1.1 var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; white-space: nowrap; }
+.dsh-fig > b { font: 600 18px/1.1 var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; white-space: nowrap; }
 .dsh-fig > b small { font-size: 13px; font-weight: 500; color: var(--dsh-ink-3); margin-left: 1px; }
 .dsh-fig > em { font: 400 11px var(--font-mono); font-style: normal; color: var(--dsh-ink-3); }
 .dsh-fig.bad > b { color: var(--dsh-bad); }
@@ -47,8 +52,13 @@
     repeating-linear-gradient(to right, color-mix(in srgb, var(--dsh-ink) 30%, transparent) 0 1px, transparent 1px 25%) 0 100% / 100% 4px no-repeat; }
 .dsh-gauge > i { position: absolute; left: 0; bottom: 0; height: 2px; background: var(--dsh-ink); transition: width 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); }
 
+/* The reactor: the wheel and the charts, a fixed stage the page scrolls past. */
+.cr-hero.dsh-hero { flex: none; margin: 14px 20px 6px; height: clamp(680px, calc(100vh - 110px), 800px); min-height: 0; }
+.dsh-hero .cr-reactor { min-width: 0; }
+@media (max-width: 1100px) { .cr-hero.dsh-hero { height: auto; } }
+
 /* The four sections: hive, up next over running now, recent conversations. */
-.dsh-grid { flex: 1; min-height: 0; display: grid; margin: 0 20px 16px;
+.dsh-grid { flex: none; height: clamp(420px, 62vh, 680px); min-height: 0; display: grid; margin: 14px 20px 16px;
   grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr);
   grid-template-rows: minmax(0, auto) minmax(0, 1fr);
   grid-template-areas: "hive next recent" "hive now recent"; }
@@ -116,7 +126,7 @@ button.dsh-host { cursor: pointer; }
 
 /* Narrower: the hive and the lists side by side, conversations below. */
 @container (max-width: 1080px) {
-  .dsh-grid { flex: none; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); grid-template-rows: auto auto auto; grid-template-areas: "hive next" "hive now" "recent recent"; }
+  .dsh-grid { height: auto; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); grid-template-rows: auto auto auto; grid-template-areas: "hive next" "hive now" "recent recent"; }
   .dsh-recent { border-left: 0; border-top: 1px solid var(--dsh-line); padding-left: 2px; }
   .dsh-hive .dsh-body { max-height: 520px; }
 }

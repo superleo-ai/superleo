@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  LayoutDashboardIcon, ChartColumnIcon, PanelRightOpenIcon, PanelRightCloseIcon, BookOpenIcon, HexagonIcon, MessageSquareIcon, PaletteIcon,
+  LayoutDashboardIcon, PanelRightOpenIcon, PanelRightCloseIcon, BookOpenIcon, HexagonIcon, MessageSquareIcon, PaletteIcon,
   MessagesSquareIcon, PuzzleIcon, SlidersHorizontalIcon, TerminalIcon, XIcon,
   MoonIcon, SunIcon, CalendarDaysIcon, GlobeIcon,
   HeartPulseIcon, WorkflowIcon, GaugeIcon,
@@ -70,11 +70,11 @@ const RAIL: { key: ViewKey; label: string; Icon: typeof HexagonIcon; cls: string
 ];
 
 /** The pages the toolbar opens; the open one's button closes it again. */
-const SIDE: ViewKey[] = ["dashboards", "stats"];
+const SIDE: ViewKey[] = ["dashboards"];
 
 export const TITLES: Record<ViewKey, string> = {
   home: "", chat: "Chat", conversations: "Conversations", tasks: "Needs your attention", schedule: "Schedule", dashboards: "Dashboards", wellbeing: "Wellbeing", hive: "Dashboard", agents: "Bees", routines: "Automation", coding: "Coding", knowledge: "Knowledge",
-  skills: "Skills", mcp: "MCP", stats: "Stats", settings: "Settings",
+  skills: "Skills", mcp: "MCP", settings: "Settings",
 };
 
 /**
@@ -182,7 +182,7 @@ export default function DeskShell({ view, badges, children, overlay, onOpenConve
     pane.fold(false);
     if (!withPane) navigate(PATHS.home);
   };
-  // Dashboards and Stats: a page in Menu mode, a window over the world in 3D;
+  // Dashboards: a page in Menu mode, a window over the world in 3D;
   // pressed again, back to where you were.
   const sideOn = (k: ViewKey) => view === k && mode !== "world";
   const openSide = (k: ViewKey) => {
@@ -222,7 +222,7 @@ export default function DeskShell({ view, badges, children, overlay, onOpenConve
         <div className="dk-bar" style={drag} />
         {/* One toolbar, top right, the same in every mode and on every page:
             the pane's toggle at the inner end (absent in 3D, where there is no
-            pane), then Dashboards, Stats, light or dark, and the bell at the edge. */}
+            pane), then Dashboards, light or dark, and the bell at the edge. */}
         {/* In 3D the world has the right edge to itself. */}
         {mode === "menu" && <div className="dk-toolbar" style={noDrag} role="toolbar">
           {mode === "menu" && (
@@ -233,7 +233,7 @@ export default function DeskShell({ view, badges, children, overlay, onOpenConve
             </button>
           )}
           {SIDE.map((k) => {
-            const Icon = k === "dashboards" ? LayoutDashboardIcon : ChartColumnIcon;
+            const Icon = LayoutDashboardIcon;
             return (
               <button key={k} type="button" className={`dk-tool${sideOn(k) ? " on" : ""}`} aria-pressed={sideOn(k)}
                 title={t(TITLES[k])} aria-label={t(TITLES[k])} onClick={() => openSide(k)}>

@@ -14,7 +14,6 @@ export const PATHS: Record<ViewKey, string> = {
   home: "/",
   chat: "/chat",
   conversations: "/conversations",
-  stats: "/stats",
   hive: "/hive",
   agents: "/agents",
   routines: "/routines",
@@ -33,6 +32,8 @@ export const PATHS: Record<ViewKey, string> = {
 export function viewOf(pathname: string): ViewKey {
   if (pathname === "/" || pathname === "") return "home";
   const first = "/" + pathname.split("/")[1];
+  // The old Stats address: the Dashboard has taken its page (App redirects it).
+  if (first === "/stats") return "hive";
   const hit = (Object.keys(PATHS) as ViewKey[]).find((k) => PATHS[k] === first);
   return hit ?? "home";
 }

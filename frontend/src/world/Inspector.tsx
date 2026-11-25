@@ -300,7 +300,7 @@ export default function Inspector({ picked, data, onClose, open, openDash, full,
       const f = (n: number) => (n >= 1e6 ? (n / 1e6).toFixed(2) + "M" : n >= 1e3 ? (n / 1e3).toFixed(1) + "k" : String(Math.round(n)));
       if (m) rows.push(["Tokens", f(m.tokens)], ["Tool calls", String(m.calls)], ["Rounds", String(m.rounds)], ["tok/s", String(Math.round(m.tokPerSec))], ["Failures", String(m.fails)]);
       void fig;
-      body = <button className="wl-go ghost" onClick={() => open(PATHS.stats, true)}>{t("Open Stats")}<ArrowRightIcon size={14} /></button>;
+      body = <button className="wl-go ghost" onClick={() => open(PATHS.hive, true)}>{t("Open Dashboard")}<ArrowRightIcon size={14} /></button>;
       break;
     }
     case "settings": {
@@ -415,7 +415,7 @@ export default function Inspector({ picked, data, onClose, open, openDash, full,
     bee: PATHS.agents + "?agent=" + encodeURIComponent(picked.id), machine: PATHS.coding, cli: PATHS.coding, agent: PATHS.coding,
     brain: PATHS.knowledge, skills: PATHS.skills, skill: PATHS.skills, mcphub: PATHS.mcp, mcp: PATHS.mcp,
     dashboard: PATHS.dashboards, records: PATHS.schedule, event: PATHS.schedule, reminder: PATHS.schedule,
-    figure: PATHS.stats, settings: PATHS.settings, host: PATHS.hive, service: PATHS.hive,
+    figure: PATHS.hive, settings: PATHS.settings, host: PATHS.hive, service: PATHS.hive,
   };
   const screen = fullPaths[picked.kind] ?? PATHS.tasks;
   return (
