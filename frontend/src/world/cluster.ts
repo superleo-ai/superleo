@@ -1129,7 +1129,9 @@ export const cluster: District<WorldData> = {
       const st: RobotState = asks ? "wait"
         : live.length || delegated.length || own.work || (!term[n] && said === "working") ? "work"
         : own.wait || (!term[n] && said === "waiting") ? "wait"
-        : runs[0]?.state === "failed" ? "fail" : said === "lost" ? "lost" : "idle";
+        // A failure is news for an hour, not until the next run: a week-old
+        // usage-limit error is not what the agent is like now.
+        : runs[0]?.state === "failed" && Date.now() - Date.parse(runs[0].started) < 3600e3 ? "fail" : said === "lost" ? "lost" : "idle";
       const status = asks ? translate("needs your OK") : live.length ? clip(live[0].prompt, 24) : delegated.length ? clip(delegated[0].prompt, 24)
         : own.status || (st === "work" ? translate("working") : st === "wait" ? translate("waiting for you") : st === "fail" ? translate("failed")
           : st === "lost" ? translate("not answering") : said === "configured" ? translate("configured") : translate("idle"));
