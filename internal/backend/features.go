@@ -9,17 +9,19 @@ import (
 // is gone everywhere — no page, no rail entry, no tile, no phone entry, and
 // none of its tools reach the model. The browser and desktop control keep
 // their own settings (BrowserMode, DesktopControl) and are off unless
-// chosen; wellbeing and finance are on unless named in FeaturesOff, so an
+// chosen; coding is ExternalAgents.Enabled, the coding agents it may hand
+// work to; wellbeing and finance are on unless named in FeaturesOff, so an
 // install that never heard of the switch keeps them.
 const (
 	FeatureBrowser   = "browser"
 	FeatureDesktop   = "desktop"
+	FeatureCoding    = "coding"
 	FeatureWellbeing = "wellbeing"
 	FeatureFinance   = "finance"
 )
 
 // FeatureNames are every switch, in the order the settings show them.
-var FeatureNames = []string{FeatureBrowser, FeatureDesktop, FeatureWellbeing, FeatureFinance}
+var FeatureNames = []string{FeatureBrowser, FeatureDesktop, FeatureCoding, FeatureWellbeing, FeatureFinance}
 
 // featureServers are the MCP servers a feature brings; off, they are not
 // mounted (resolveMCPConfig) and the app's own calls to them are refused.
@@ -33,6 +35,8 @@ func (s *Settings) FeatureOn(name string) bool {
 		return s.browserMode() != BrowserModeOff
 	case FeatureDesktop:
 		return s.desktopControl()
+	case FeatureCoding:
+		return s.ExternalAgents.Enabled
 	case FeatureWellbeing, FeatureFinance:
 		return !slices.Contains(s.FeaturesOff, name)
 	}
@@ -66,6 +70,8 @@ func (s *Settings) SetFeature(name string, on bool) bool {
 		}
 	case FeatureDesktop:
 		s.DesktopControl = on
+	case FeatureCoding:
+		s.ExternalAgents.Enabled = on
 	case FeatureWellbeing, FeatureFinance:
 		off := slices.DeleteFunc(slices.Clone(s.FeaturesOff), func(v string) bool { return v == name })
 		if !on {

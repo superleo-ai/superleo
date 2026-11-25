@@ -1,9 +1,9 @@
 import { Fragment, useCallback, useEffect, useState } from "react";
 import { ChevronDownIcon, PlusIcon, SlidersHorizontalIcon, TerminalIcon, Trash2Icon } from "lucide-react";
-import { DeleteCodingTool, ListCodingTools, SaveCodingTool, SetCodingToolsEnabled, TryCodingTool } from "../../../wailsjs/go/app/App";
+import { DeleteCodingTool, ListCodingTools, SaveCodingTool, TryCodingTool } from "../../../wailsjs/go/app/App";
 import { app } from "../../../wailsjs/go/models";
 import { translate } from "../../lib/i18n";
-import { Avatar, Block, Btn, ConfirmBtn, Group, IconBtn, Menu, Note, Row, Seg, State, Text, Toggle } from "./kit";
+import { Avatar, Block, Btn, ConfirmBtn, Group, IconBtn, Menu, Note, Row, Seg, State, Text } from "./kit";
 
 /**
  * The coding tools SuperLeo may hand work to: the ones it knows, the ones
@@ -238,9 +238,6 @@ export default function CodingToolsCard() {
   return (
     <Group icon={TerminalIcon} title="Coding tools" testId="coding-tools" action={
       <>
-        <span className="st-lab">{translate("Hand work to them")}</span>
-        <Toggle on={data.enabled} label="Hand work to coding tools" disabled={busy} testId="coding-tools-on"
-          onChange={(on) => void act(() => SetCodingToolsEnabled(on))} />
         <Menu disabled={busy} items={menu} trigger={
           <Btn icon={PlusIcon} trail={ChevronDownIcon} data-testid="coding-tools-add">Add tool</Btn>
         } />

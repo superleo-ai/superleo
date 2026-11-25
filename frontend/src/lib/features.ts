@@ -8,11 +8,11 @@ import { ViewKey } from "./types";
  * part has no rail entry, no page and no tile. Read from the core and read
  * again whenever its settings change.
  */
-export type Feature = "browser" | "desktop" | "wellbeing" | "finance";
+export type Feature = "browser" | "desktop" | "coding" | "wellbeing" | "finance";
 export type FeatureMap = Record<Feature, boolean>;
 
 /** A core that does not say shows everything, as before the switches. */
-const ALL_ON: FeatureMap = { browser: true, desktop: true, wellbeing: true, finance: true };
+const ALL_ON: FeatureMap = { browser: true, desktop: true, coding: true, wellbeing: true, finance: true };
 
 let state: FeatureMap | null = null;
 const subs = new Set<() => void>();
@@ -57,7 +57,7 @@ export async function setFeature(name: Feature, on: boolean) {
 }
 
 /** The page a feature owns, hidden with it. */
-export const FEATURE_VIEW: Partial<Record<ViewKey, Feature>> = { wellbeing: "wellbeing" };
+export const FEATURE_VIEW: Partial<Record<ViewKey, Feature>> = { wellbeing: "wellbeing", coding: "coding" };
 
 /** Whether a page is shown: unknown until heard, so nothing flashes in and out. */
 export function viewShown(view: ViewKey | "browser", f: FeatureMap | null): boolean {

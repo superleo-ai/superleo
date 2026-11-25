@@ -36,6 +36,18 @@ func TestFeaturesDefaultsAndSwitching(t *testing.T) {
 	if s.BrowserMode != BrowserModeChrome {
 		t.Fatalf("browser on again: %q", s.BrowserMode)
 	}
+	// Coding is the coding agents' own switch, so the two never disagree.
+	if s.FeatureOn(FeatureCoding) {
+		t.Fatal("coding on with no coding agents enabled")
+	}
+	s.SetFeature(FeatureCoding, true)
+	if !s.ExternalAgents.Enabled || !s.Features()[FeatureCoding] {
+		t.Fatalf("coding on: %v", s.ExternalAgents)
+	}
+	s.SetFeature(FeatureCoding, false)
+	if s.ExternalAgents.Enabled {
+		t.Fatal("coding off left the coding agents on")
+	}
 	if s.SetFeature("nope", true) {
 		t.Fatal("an unknown feature was taken")
 	}

@@ -46,7 +46,7 @@ type PhoneSettingsView struct {
 	PhoneRelay        string            `json:"phone_relay"`
 	PhoneURLs         []string          `json:"phone_urls"`
 
-	// Features is each switchable part by name (browser, desktop, wellbeing,
+	// Features is each switchable part by name (browser, desktop, coding, wellbeing,
 	// finance); the phone hides what is off.
 	Features map[string]bool `json:"features"`
 

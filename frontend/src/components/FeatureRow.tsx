@@ -2,12 +2,12 @@ import { useState } from "react";
 import { Feature, FeatureMap, setFeature, useFeatures } from "../lib/features";
 import { Row, Toggle } from "./settings/kit";
 
-/** One switch for a feature that is on unless turned off (wellbeing, finance). */
+/** One switch for a feature with a plain on and off (coding, wellbeing, finance). */
 export default function FeatureRow({ feature, label, onChanged }: {
   feature: Exclude<Feature, "browser" | "desktop">;
   label: string;
-  /** The features now off, for the page's own copy of the settings. */
-  onChanged?: (off: string[]) => void;
+  /** The features now off and this one's state, for the page's own copy of the settings. */
+  onChanged?: (off: string[], on: boolean) => void;
 }) {
   const f = useFeatures();
   const [busy, setBusy] = useState(false);
@@ -18,7 +18,7 @@ export default function FeatureRow({ feature, label, onChanged }: {
     try {
       await setFeature(feature, on);
       const now = { ...(f ?? {}), [feature]: on } as FeatureMap;
-      onChanged?.((["wellbeing", "finance"] as const).filter((k) => now[k] === false));
+      onChanged?.((["wellbeing", "finance"] as const).filter((k) => now[k] === false), on);
     } catch (e) {
       setErr(String(e instanceof Error ? e.message : e));
     } finally {

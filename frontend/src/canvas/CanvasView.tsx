@@ -25,6 +25,7 @@ import { ChatTurnBrowser, newestBrowserTurn } from "../components/BrowserCard";
 import TraceChip from "../components/TraceChip";
 import { queenRef, queenTitle, useQueenName } from "../lib/queenName";
 import { translate, useI18n } from "../lib/i18n";
+import { useFeatures } from "../lib/features";
 
 type Kind = "inFlight" | "machines" | "today" | "stats" | "bees" | "later" | "coding" | "queen" | "generated";
 interface Tile { id: string; kind: Kind; span: 2 | 3 | 4 | 6 }
@@ -90,6 +91,8 @@ export default function CanvasView({ approvals }: { approvals: { pending: ToolAp
   const pulse = usePulse();
   const upcoming = useUpcoming();
   const codingRuns = useCodingRuns();
+  const features = useFeatures();
+  const coding = features?.coding !== false;
   const linked = useLinkedAgents();
   const attentionItems = useAttention();
   const [sheet, setSheet] = useState<AttentionItem | null>(null);
@@ -234,7 +237,7 @@ export default function CanvasView({ approvals }: { approvals: { pending: ToolAp
             <button className="cv-pill glassy round" onClick={() => setMenu((m) => !m)} aria-label="Menu" data-testid="canvas-menu"><MenuIcon size={17} /></button>
             {menu && (
               <div className="cv-menu cv-glass" onMouseLeave={() => setMenu(false)}>
-                {([["Conversations", PATHS.chat], ["Bees", PATHS.agents], ["Hive", PATHS.hive], ["Coding", PATHS.coding], ["Stats", PATHS.stats], ["Knowledge", PATHS.knowledge], ["Skills", PATHS.skills], ["MCP", PATHS.mcp], ["Settings", PATHS.settings]] as const).map(([label, path]) => (
+                {([["Conversations", PATHS.chat], ["Bees", PATHS.agents], ["Hive", PATHS.hive], ...(coding ? [["Coding", PATHS.coding]] as const : []), ["Stats", PATHS.stats], ["Knowledge", PATHS.knowledge], ["Skills", PATHS.skills], ["MCP", PATHS.mcp], ["Settings", PATHS.settings]] as const).map(([label, path]) => (
                   <button key={label} onClick={() => navigate(path)}>{label}</button>
                 ))}
                 <button onClick={() => { setMenu(false); setAttention(true); }}>{t("Attention")}</button>
@@ -264,7 +267,7 @@ export default function CanvasView({ approvals }: { approvals: { pending: ToolAp
             </section>
             <aside className="cv-side">
               {forYou}
-              {tiles.filter((t) => t.kind !== "queen").map((t) => (
+              {tiles.filter((t) => t.kind !== "queen" && (coding || t.kind !== "coding")).map((t) => (
                 <section
                   key={t.id}
                   className={`cv-glass cv-tile${editing ? " editing" : ""}`}
@@ -293,7 +296,7 @@ export default function CanvasView({ approvals }: { approvals: { pending: ToolAp
         {forYou}
 
         <div className="cv-grid">
-          {tiles.map((t) => (
+          {tiles.filter((t) => coding || t.kind !== "coding").map((t) => (
             <section
               key={t.id}
               className={`cv-glass cv-tile span-${t.span}${editing ? " editing" : ""}`}

@@ -208,7 +208,7 @@ export default function App() {
       <Route path="/hive/*" element={<HiveView />} />
       <Route path="/agents" element={<StandingView />} />
       <Route path="/routines" element={<SchedulesView status={status} log={runs} onOpenConversation={openConversation} />} />
-      <Route path="/coding" element={<AgentsView />} />
+      <Route path="/coding" element={<FeatureGate feature="coding"><AgentsView /></FeatureGate>} />
       <Route path="/settings" element={<SettingsView onSaved={refreshStatus} theme={theme} onTheme={setTheme} accent={accent} onAccent={setAccent} />} />
       <Route path="/knowledge" element={<KnowledgeView />} />
       <Route path="/skills" element={clientKind() === "desktop" ? <ExtensionsView /> : <SkillsView />} />

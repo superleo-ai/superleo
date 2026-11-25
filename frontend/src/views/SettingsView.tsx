@@ -15,6 +15,7 @@ import ProxyCard from "../components/ProxyCard";
 import BrowserModeCard from "../components/BrowserModeCard";
 import DesktopControlCard from "../components/DesktopControlCard";
 import FeatureRow from "../components/FeatureRow";
+import { useFeatures } from "../lib/features";
 import AddAgentCard from "../components/AddAgentCard";
 import AddWorkerCard from "../components/AddWorkerCard";
 import CodingToolsCard from "../components/settings/CodingToolsCard";
@@ -275,6 +276,7 @@ export default function SettingsView({ onSaved, theme, onTheme, accent, onAccent
   onAccent?: (a: Accent) => void;
 }) {
   const { t } = useI18n();
+  const features = useFeatures();
   // As last loaded or saved, and as being edited. Save sends the difference.
   const [orig, setOrig] = useState<Json | null>(null);
   const [s, setS] = useState<backend.Settings | null>(null);
@@ -666,13 +668,15 @@ export default function SettingsView({ onSaved, theme, onTheme, accent, onAccent
                   onChanged={(on) => absorbFields({ desktop_control: on })}
                   onBlockedChanged={(list) => absorbFields({ desktop_blocked_apps: list })}
                 />
+                <FeatureRow feature="coding" label="Coding"
+                  onChanged={(_, on) => absorbFields({ external_agents: { enabled: on } })} />
                 {(["wellbeing", "finance"] as const).map((f) => (
                   <FeatureRow key={f} feature={f} label={f === "wellbeing" ? "Wellbeing" : "Finance"}
                     onChanged={(off) => absorbFields({ features_off: off.length ? off : null })} />
                 ))}
               </Group>
 
-              <CodingToolsCard />
+              {features?.coding && <CodingToolsCard />}
 
               <Group icon={NetworkIcon} title="Hive" testId="hive-group"
                 action={

@@ -2,7 +2,7 @@ package app
 
 import "fmt"
 
-// Features is whether each switchable part is on: browser, desktop,
+// Features is whether each switchable part is on: browser, desktop, coding,
 // wellbeing, finance (backend/features.go). The window, the web page and the
 // phones hide what is off.
 func (a *App) Features() map[string]bool {

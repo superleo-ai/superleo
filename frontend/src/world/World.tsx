@@ -12,6 +12,7 @@ import { useDaylight } from "../lib/useDaylight";
 import type { ViewKey } from "../lib/types";
 import { WorldEngine, type Picked } from "./engine";
 import { cluster, lensOf, type WorldData } from "./cluster";
+import { useFeatures } from "../lib/features";
 import { worldBus } from "./bus";
 import Inspector from "./Inspector";
 import Command from "./Command";
@@ -163,12 +164,18 @@ export default function World({ view, onFlipTheme }: { view: ViewKey; onFlipThem
     return () => { worldBus.setFocus(null); e.dispose(); engine.current = null; };
   }, []);
 
+  // Coding switched off, the coding agents are not in the world: no robot,
+  // no run, no terminal session on a machine's screen.
+  const coding = useFeatures()?.coding !== false;
   const data: WorldData = useMemo(() => ({
-    hive, runs, bees, linked, attention, agenda: slow.agenda,
+    hive, bees, attention, agenda: slow.agenda,
     dashboards: slow.dashboards, skills: slow.skills, mcp: slow.mcp, desktop: slow.desktop,
     knowledge: 0, meter: { total: meter.total, members: meter.members }, busy,
-    hosts: topo.hosts, services: topo.services,
-  }), [hive, runs, bees, linked, topo, attention, slow, meter, busy]);
+    services: topo.services,
+    runs: coding ? runs : [],
+    linked: coding ? linked : linked.map((a) => ({ ...a, clis: [], activity: null, cliActivity: undefined })),
+    hosts: coding || !topo.hosts ? topo.hosts : topo.hosts.map((h) => ({ ...h, agents: h.agents.filter((a) => a.kind !== "cli") })),
+  }), [hive, runs, bees, linked, topo, attention, slow, meter, busy, coding]);
   useEffect(() => { engine.current?.update(data); }, [data]);
   const day = useDaylight();
   useEffect(() => { engine.current?.setNight(!day); }, [day]);
