@@ -285,7 +285,6 @@ export default function Inspector({ picked, data, onClose, open, openDash, full,
       if (it?.detail) rows.push(["Detail", it.detail]);
       body = (
         <div className="wi-acts">
-          <button onClick={() => open(PATHS.records, true)}>{t("Open Records")}</button>
           {picked.kind === "event" && (
             <button className="danger" onClick={twice("del", () => act("del", () => ForgetLife("schedule", picked.id), "Deleted").then(onClose))}><Trash2Icon size={14} />{t(confirm === "del" ? "Delete it?" : "Delete")}</button>
           )}
@@ -370,9 +369,6 @@ export default function Inspector({ picked, data, onClose, open, openDash, full,
             ))}
             {data.agenda.length === 0 && <li className="wi-none">{t("Nothing else planned today.")}</li>}
           </ul>
-          <div className="wi-acts">
-            <button onClick={() => open(PATHS.records, true)}>{t("Open Records")}</button>
-          </div>
           <Talk who={{ kind: "queen" }} placeholder="Tell noted something…" />
         </>
       );
