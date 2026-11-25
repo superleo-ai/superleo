@@ -119,12 +119,11 @@
 .dk-chat { grid-column: 2; grid-row: 1; margin: 0 10px 12px 0; display: grid; grid-template-rows: 58px minmax(0, 1fr) auto; min-height: 0; overflow: hidden; }
 .dk-chead { display: flex; align-items: center; gap: 12px; padding: 0 18px; border-bottom: 1px solid var(--line); }
 .dk-chead b { font-size: 15px; font-weight: 600; }
-.dk-msgs { overflow-y: auto; padding: 18px 22px 8px; display: flex; flex-direction: column; gap: 8px;
-  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 22px); mask-image: linear-gradient(180deg, transparent 0, #000 22px); }
+.dk-msgs { overflow-y: auto; padding: 18px 22px 8px; display: flex; flex-direction: column; gap: 8px; }
 .dk-msgs > * { flex-shrink: 0; }
 .dk-empty { margin: auto; max-width: 340px; text-align: center; color: var(--ink-3); line-height: 1.5; }
 .dk-q { align-self: flex-start; max-width: 94%; background: rgba(var(--glass-rgb), calc(var(--ga) + .38)); border-radius: calc(18px * var(--rs)) calc(18px * var(--rs)) calc(18px * var(--rs)) 6px;
-  padding: 10px 14px; line-height: 1.55; font-size: 14.5px; box-shadow: inset 0 1px 0 rgba(255,255,255,var(--hl)), 0 1px 3px rgba(0,0,0,.05); overflow-x: auto; }
+  padding: 10px 14px; line-height: 1.55; font-size: 14.5px; overflow-x: auto; }
 .dk-q.bad { box-shadow: inset 0 0 0 1px rgba(214,69,50,.4); }
 .dk-q p { margin: 0 0 .5em; } .dk-q p:last-child { margin-bottom: 0; }
 .dk-q table { border-collapse: collapse; font-size: 13px; margin: 6px 0; }
