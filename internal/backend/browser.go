@@ -748,3 +748,20 @@ func browserSection(mode string) string {
 	}
 	return ""
 }
+
+// BrowserEngineServer is this SuperLeo's own browser as an agent CLI on the
+// same machine is handed it, in the shape Claude's --mcp-config reads: the
+// same binary and session, so the CLI works in the browser the person chose
+// (their own Chrome, through the extension) instead of a bare `agent-browser
+// mcp` that launches a blank Chrome of its own, which sites like x.com refuse.
+// ok is false until the browser is mounted.
+func (s *Service) BrowserEngineServer() (entry map[string]any, ok bool) {
+	if s == nil || s.browser == nil || !s.browser.ready.Load() || s.browser.bin == "" {
+		return nil, false
+	}
+	env := make(map[string]any, len(s.browser.env))
+	for k, v := range s.browser.env {
+		env[k] = v
+	}
+	return map[string]any{"type": "stdio", "command": s.browser.bin, "args": []any{"mcp"}, "env": env}, true
+}

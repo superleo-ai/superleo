@@ -35,6 +35,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"path/filepath"
 	"slices"
 	"strings"
 	"sync"
@@ -612,6 +613,24 @@ func (a *App) queenKitFor(engine string, s *backend.Settings) (*QueenKit, error)
 		}
 		if running[name] {
 			kit.Required = append(kit.Required, name)
+		}
+	}
+	// On this machine the engine gets SuperLeo's own browser, attached the
+	// way the person chose, in place of any agent-browser of their config.
+	if !remote {
+		a.mu.Lock()
+		svc := a.svc
+		a.mu.Unlock()
+		if own, ok := svc.BrowserEngineServer(); ok {
+			name := backend.BrowserMCPName
+			for n, e := range kit.Servers {
+				if m, _ := e.(map[string]any); m != nil {
+					if cmd, _ := m["command"].(string); strings.HasPrefix(filepath.Base(cmd), "agent-browser") {
+						name = n
+					}
+				}
+			}
+			kit.Servers[name] = own
 		}
 	}
 	return kit, nil
