@@ -445,8 +445,8 @@ html[data-desk] body { background: transparent; }
 .dk-side { min-width: 0; }
 .dk.side-folded > .dk-side { display: none; }
 .dk.side-folded > .dk-chat { margin-left: 0; }
-.dk-side-resizer { position: absolute; z-index: 5; left: calc(var(--dk-side-width, 252px) - 8px); top: 10px; bottom: 22px; width: 8px; cursor: col-resize; touch-action: none; --wails-draggable: no-drag; }
-.dk-side-resizer::after { content: ""; position: absolute; inset: 0 2px; border-radius: 4px; background: transparent; transition: background .15s; }
+.dk-side-resizer { position: absolute; z-index: 5; left: calc(var(--dk-side-width, 252px) - 6px); top: 10px; bottom: 22px; width: 12px; cursor: col-resize; touch-action: none; --wails-draggable: no-drag; }
+.dk-side-resizer::after { content: ""; position: absolute; inset: 0 4px; border-radius: 4px; background: transparent; transition: background .15s; }
 .dk-side-resizer:hover::after, .dk-side-resizer:focus-visible::after, .dk-resizing .dk-side-resizer::after { background: var(--honey); }
 .dk-side-resizer:focus-visible { outline: 2px solid var(--honey); outline-offset: 2px; }
 .dk-resizing, .dk-resizing * { cursor: col-resize !important; user-select: none; }
