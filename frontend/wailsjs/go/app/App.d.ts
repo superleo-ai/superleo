@@ -317,6 +317,8 @@ export function PhoneLinks():Promise<app.PhoneLinkInfo>;
 
 export function PhoneSettings():Promise<app.PhoneSettingsView>;
 
+export function PickDirectory(arg1:string):Promise<string>;
+
 export function PickFiles():Promise<Array<string>>;
 
 export function PostNotification(arg1:app.PostNotificationRequest):Promise<app.PostedNotification>;

@@ -137,6 +137,7 @@ const zh: Record<string,string> = { "Dismiss":"忽略", "Dismiss all":"全部忽
   "Reload": "重新加载",
   "Everything SuperLeo knows, as one graph it reads on every turn.": "以知识图谱查看 SuperLeo 每次对话使用的知识。",
   "New run": "新建编程任务",
+  "Choose a folder": "选择文件夹",
   "Ask before tools run": "执行工具前询问",
   "workspace": "工作目录",
   "The directory it works in, on that machine": "所选机器上的工作目录",

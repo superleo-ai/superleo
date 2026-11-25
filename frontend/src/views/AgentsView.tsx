@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { PATHS } from "../lib/routes";
 import { focusInWorld } from "../world/bus";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { SquareIcon, ChevronRightIcon, PlusIcon, ArrowUpIcon, TerminalIcon, FolderIcon } from "lucide-react";
+import { SquareIcon, ChevronRightIcon, PlusIcon, ArrowUpIcon, TerminalIcon, FolderIcon, FolderOpenIcon } from "lucide-react";
 import "./coding.css";
 import {
   CLIRunDetail,
@@ -16,6 +16,7 @@ import {
   CodingSessions,
   CodingSessionLog,
   ReplyToCodingSession,
+  PickDirectory,
 } from "../../wailsjs/go/app/App";
 import { app } from "../../wailsjs/go/models";
 import { EventsOn } from "../../wailsjs/runtime";
@@ -256,6 +257,15 @@ function Start({ choices, onStarted }: { choices: string[] | null; onStarted: (r
   const names = choices ?? [];
   const [addressed, task] = addressOf(text, names);
   const agent = addressed || (names.includes(fallback) ? fallback : names[0] ?? "");
+  // A run on this computer can take its folder from the native dialog; one on
+  // another machine is typed, as a path on that machine.
+  const canPick = !!agent && whereOf(agent) === "core" && typeof window !== "undefined" && !!(window as any).runtime;
+  const pickFolder = async () => {
+    try {
+      const dir = await PickDirectory(cwd);
+      if (dir) setCwd(dir);
+    } catch { /* dismissed or no dialog: the path stays typed */ }
+  };
 
   // Grouped by machine: this is the answer to "what can run where".
   const machines = useMemo(() => {
@@ -325,10 +335,14 @@ function Start({ choices, onStarted }: { choices: string[] | null; onStarted: (r
                   </select>
                 </label>
               )}
-              <label className="cd-cwd" title="The directory it works in, on that machine">
-                <FolderIcon size={13} />
-                <input value={cwd} placeholder={translate("workspace")} onChange={(e) => setCwd(e.target.value)} spellCheck={false} />
-              </label>
+              <span className="cd-cwd" title={t("The directory it works in, on that machine")}>
+                {canPick ? (
+                  <button type="button" className="cd-pick" aria-label={t("Choose a folder")} title={t("Choose a folder")} onClick={() => void pickFolder()}>
+                    <FolderOpenIcon size={13} />
+                  </button>
+                ) : <FolderIcon size={13} />}
+                <input value={cwd} placeholder={translate("workspace")} aria-label={translate("workspace")} onChange={(e) => setCwd(e.target.value)} spellCheck={false} />
+              </span>
               <label className="cd-ask" title={t("Off: the CLI runs its tools without asking")}>
                 <input type="checkbox" checked={ask} onChange={(e) => setAsk(e.target.checked)} /> {translate("Ask before tools run")}
               </label>

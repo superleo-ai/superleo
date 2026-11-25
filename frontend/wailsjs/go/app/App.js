@@ -622,6 +622,10 @@ export function PhoneSettings() {
   return window['go']['app']['App']['PhoneSettings']();
 }
 
+export function PickDirectory(arg1) {
+  return window['go']['app']['App']['PickDirectory'](arg1);
+}
+
 export function PickFiles() {
   return window['go']['app']['App']['PickFiles']();
 }

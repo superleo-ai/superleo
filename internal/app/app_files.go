@@ -310,3 +310,27 @@ func (a *App) ExportWorkspaceFile(path string) string {
 	}
 	return "ok"
 }
+
+// PickDirectory asks for a folder on this computer through the native
+// dialog, starting at start when it is one ("~" is the home folder). Returns
+// the folder chosen, or "" when the dialog was dismissed. Only the desktop
+// window has the dialog.
+func (a *App) PickDirectory(start string) (string, error) {
+	if a.ctx == nil {
+		return "", &callError{400, "no folder dialog outside the desktop window"}
+	}
+	dir := strings.TrimSpace(start)
+	if dir == "~" || strings.HasPrefix(dir, "~/") {
+		if home, err := os.UserHomeDir(); err == nil {
+			dir = filepath.Join(home, strings.TrimPrefix(dir, "~"))
+		}
+	}
+	if st, err := os.Stat(dir); dir == "" || err != nil || !st.IsDir() {
+		dir, _ = os.UserHomeDir()
+	}
+	return runtime.OpenDirectoryDialog(a.ctx, runtime.OpenDialogOptions{
+		Title:                "Working folder",
+		DefaultDirectory:     dir,
+		CanCreateDirectories: true,
+	})
+}
