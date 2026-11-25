@@ -678,7 +678,9 @@ html[data-desk] body { background: transparent; }
 /* They keep a lane of their own down the right, with the bell at its top:
    the home in Menu mode stops short of it, pane open or folded, as every
    other page does. */
-.dk-shell.dk-flat.on-home > .dk { margin-right: 58px; }
+/* The same frame as every other page (6px 72px 14px 4px): its cards
+   carry 10px of right and 12px of bottom margin themselves. */
+.dk-shell.dk-flat.on-home > .dk { margin: 6px 62px 0 4px; }
 .dk-shell > .fab-stack { position: fixed; z-index: 9; }
 /* Menu mode in a narrow window: the live pane floats over the conversation,
    so it is solid, controls included. */
