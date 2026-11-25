@@ -99,3 +99,12 @@
 /* Editing controls always receive input, even inside native drag surfaces. */
 .cd-comp, .cd-comp textarea, .cd-comp input, .cd-comp select { --wails-draggable: no-drag; }
 .cd-comp textarea { pointer-events:auto; user-select:text; -webkit-user-select:text; cursor:text; }
+
+/* Pictures pasted into a terminal session: small in the log, full size on a click. */
+.cd-pics { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.cd-pic { display: block; padding: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--bg-1, #fff); cursor: zoom-in; }
+.cd-pic img { display: block; max-width: 220px; max-height: 140px; object-fit: cover; }
+.cd-pic.loading { width: 120px; height: 80px; background: var(--bg-2, rgba(0,0,0,.05)); }
+.cd-lightbox { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 32px;
+  background: rgba(246, 247, 249, .94); cursor: zoom-out; }
+.cd-lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; box-shadow: 0 12px 40px rgba(0,0,0,.18); }

@@ -152,6 +152,24 @@ func (a *App) CodingSessionLog(machine, cli, session string) (SessionLog, error)
 	return out, err
 }
 
+// CodingSessionImage is one picture pasted into a terminal session, by the
+// reference its log event carries, as a data URL: read where the session runs.
+func (a *App) CodingSessionImage(machine, cli, session, ref string) (string, error) {
+	machine, cli, session, ref = strings.TrimSpace(machine), strings.TrimSpace(cli), strings.TrimSpace(session), strings.TrimSpace(ref)
+	if machine == "" || isCoreMachine(machine) {
+		return readSessionImage(cli, session, ref)
+	}
+	c := a.agents().get(machine)
+	if c == nil {
+		return "", fmt.Errorf("%s is not connected", machine)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), sessionCallTimeout)
+	defer cancel()
+	var out string
+	err := c.call(ctx, "CodingSessionImage", []any{"", cli, session, ref}, &out)
+	return out, err
+}
+
 // ReplyToCodingSession types an answer into a terminal session on the
 // machine it runs on. Claude Code's go by its own route (ReplyToCCSession:
 // tmux, Otty, iTerm2, or held for its turn's end); the others by tmux or

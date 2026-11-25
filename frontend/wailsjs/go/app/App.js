@@ -162,6 +162,10 @@ export function ClearNotifications() {
   return window['go']['app']['App']['ClearNotifications']();
 }
 
+export function CodingSessionImage(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['CodingSessionImage'](arg1, arg2, arg3, arg4);
+}
+
 export function CodingSessionLog(arg1, arg2, arg3) {
   return window['go']['app']['App']['CodingSessionLog'](arg1, arg2, arg3);
 }

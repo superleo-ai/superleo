@@ -87,6 +87,8 @@ export function CheckRemoteAgents():Promise<Array<app.RemoteAgentStatus>>;
 
 export function ClearNotifications():Promise<Record<string, any>>;
 
+export function CodingSessionImage(arg1:string,arg2:string,arg3:string,arg4:string):Promise<string>;
+
 export function CodingSessionLog(arg1:string,arg2:string,arg3:string):Promise<app.SessionLog>;
 
 export function CodingSessions():Promise<Array<app.CodingSession>>;

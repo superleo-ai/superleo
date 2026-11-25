@@ -47,6 +47,9 @@ type CLIRunEvent struct {
 	Detail string `json:"detail,omitempty"`
 	CallID string `json:"callId,omitempty"`
 	Failed bool   `json:"failed,omitempty"`
+	// Images are the pictures pasted with what the person said in a terminal
+	// session, each a reference CodingSessionImage reads ("<message id>/<n>").
+	Images []string `json:"images,omitempty"`
 }
 
 // CLIRun is one invocation of an agent CLI. Follow-ups are runs of their own

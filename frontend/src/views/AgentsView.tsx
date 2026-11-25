@@ -5,6 +5,7 @@ import { focusInWorld } from "../world/bus";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { SquareIcon, ChevronRightIcon, PlusIcon, ArrowUpIcon, TerminalIcon, FolderIcon, FolderOpenIcon } from "lucide-react";
 import "./coding.css";
+import { createPortal } from "react-dom";
 import {
   CLIRunDetail,
   CLIRuns,
@@ -16,6 +17,7 @@ import {
   CodingSessions,
   CodingSessionLog,
   ReplyToCodingSession,
+  CodingSessionImage,
   PickDirectory,
 } from "../../wailsjs/go/app/App";
 import { app } from "../../wailsjs/go/models";
@@ -542,6 +544,58 @@ function ThreadView({ thread, events }: { thread: Thread; events: Record<string,
   );
 }
 
+/** Pictures already read, by session and reference: the log is pulled again
+ *  every few seconds, and a picture is megabytes. */
+const pictureCache = new Map<string, Promise<string>>();
+
+function sessionPicture(term: Term, ref: string): Promise<string> {
+  const key = `${termKey(term)}|${ref}`;
+  let p = pictureCache.get(key);
+  if (!p) {
+    p = CodingSessionImage(term.machine ?? "", term.cli, term.session ?? "", ref);
+    p.catch(() => pictureCache.delete(key));
+    pictureCache.set(key, p);
+  }
+  return p;
+}
+
+/** The pictures pasted with what the person said, small; one opens full size. */
+function SessionPictures({ term, refs }: { term: Term; refs: string[] }) {
+  const { t } = useI18n();
+  const [srcs, setSrcs] = useState<Record<string, string>>({});
+  const [open, setOpen] = useState("");
+  useEffect(() => {
+    let alive = true;
+    for (const ref of refs) {
+      sessionPicture(term, ref)
+        .then((src) => { if (alive) setSrcs((s) => (s[ref] ? s : { ...s, [ref]: src })); })
+        .catch(() => { /* gone from the log: the text still says it was there */ });
+    }
+    return () => { alive = false; };
+  }, [term, refs.join(" ")]);
+  useEffect(() => {
+    if (!open) return;
+    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(""); };
+    window.addEventListener("keydown", esc);
+    return () => window.removeEventListener("keydown", esc);
+  }, [open]);
+  return (
+    <div className="cd-pics">
+      {refs.map((ref, i) => srcs[ref] ? (
+        <button key={ref} type="button" className="cd-pic" onClick={() => setOpen(srcs[ref])} aria-label={t("Open picture {n}", { n: i + 1 })}>
+          <img src={srcs[ref]} alt="" />
+        </button>
+      ) : <span key={ref} className="cd-pic loading" />)}
+      {open && createPortal(
+        <div className="cd-lightbox" role="dialog" aria-modal="true" onClick={() => setOpen("")}>
+          <img src={open} alt="" />
+        </div>,
+        document.body,
+      )}
+    </div>
+  );
+}
+
 /** A session somebody started in a terminal: its log, read from the machine
  *  it runs on every couple of seconds while open, and a box that types an
  *  answer into its terminal. */
@@ -604,7 +658,10 @@ function TermView({ term }: { term: Term }) {
               isCard(e) ? (
                 <BrowserCard key={`bw-${e.seq}`} turnKey={e.key} calls={e.calls} running={e.running} live={e.running} />
               ) : e.kind === "you" ? (
-                <div key={e.seq} className="agents-you">{e.text}</div>
+                <div key={e.seq} className="agents-you">
+                  {e.text}
+                  {(e.images?.length ?? 0) > 0 && <SessionPictures term={term} refs={e.images!} />}
+                </div>
               ) : e.kind === "tool" ? (
                 <ToolStep key={e.seq} call={e} result={e.callId ? results.get(e.callId) : undefined} />
               ) : e.kind === "result" ? (

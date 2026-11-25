@@ -745,6 +745,7 @@ export namespace app {
 	    detail?: string;
 	    callId?: string;
 	    failed?: boolean;
+	    images?: string[];
 	
 	    static createFrom(source: any = {}) {
 	        return new CLIRunEvent(source);
@@ -760,6 +761,7 @@ export namespace app {
 	        this.detail = source["detail"];
 	        this.callId = source["callId"];
 	        this.failed = source["failed"];
+	        this.images = source["images"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

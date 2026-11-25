@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -144,6 +145,9 @@ func sessionLine(cli string, m map[string]any) ([]CLIRunEvent, string) {
 
 func claudeLine(m map[string]any, at time.Time) []CLIRunEvent {
 	t := str(m["type"])
+	if t == "attachment" && m["isSidechain"] != true {
+		return claudeQueued(m, at)
+	}
 	if (t != "user" && t != "assistant") || m["isMeta"] == true || m["isSidechain"] == true {
 		return nil
 	}
@@ -158,10 +162,15 @@ func claudeLine(m map[string]any, at time.Time) []CLIRunEvent {
 		return said(s, at)
 	}
 	var out []CLIRunEvent
+	var images []string
 	blocks, _ := msg["content"].([]any)
-	for _, b := range blocks {
+	for i, b := range blocks {
 		bm, _ := b.(map[string]any)
 		switch str(bm["type"]) {
+		case "image":
+			if id := str(m["uuid"]); t == "user" && id != "" {
+				images = append(images, fmt.Sprintf("%s/%d", id, i))
+			}
 		case "text":
 			if t == "user" {
 				out = append(out, youSaid(str(bm["text"]), at)...)
@@ -175,7 +184,132 @@ func claudeLine(m map[string]any, at time.Time) []CLIRunEvent {
 				CallID: str(bm["tool_use_id"]), Failed: bm["is_error"] == true})
 		}
 	}
+	// The pictures go with what was said alongside them; pasted alone, they
+	// are what was said.
+	if len(images) > 0 {
+		k := -1
+		for j := range out {
+			if out[j].Kind == "you" {
+				k = j
+			}
+		}
+		if k < 0 {
+			out = append(out, CLIRunEvent{At: at, Kind: "you"})
+			k = len(out) - 1
+		}
+		out[k].Images = images
+	}
 	return out
+}
+
+// claudeQueued is what the person typed while Claude Code was still working:
+// it is not a user line of its own but an attachment the turn took in.
+func claudeQueued(m map[string]any, at time.Time) []CLIRunEvent {
+	a, _ := m["attachment"].(map[string]any)
+	if a == nil || str(a["type"]) != "queued_command" {
+		return nil
+	}
+	if o, _ := a["origin"].(map[string]any); o != nil && str(o["kind"]) != "human" {
+		return nil
+	}
+	if s, ok := a["prompt"].(string); ok {
+		return youSaid(s, at)
+	}
+	var text []string
+	var images []string
+	blocks, _ := a["prompt"].([]any)
+	for i, b := range blocks {
+		bm, _ := b.(map[string]any)
+		switch str(bm["type"]) {
+		case "text":
+			text = append(text, str(bm["text"]))
+		case "image":
+			if id := str(m["uuid"]); id != "" {
+				images = append(images, fmt.Sprintf("%s/%d", id, i))
+			}
+		}
+	}
+	out := youSaid(strings.Join(text, "\n"), at)
+	if len(images) > 0 {
+		if len(out) == 0 {
+			out = []CLIRunEvent{{At: at, Kind: "you"}}
+		}
+		out[0].Images = images
+	}
+	return out
+}
+
+// sessionImageMax is the largest picture handed out of a session's log.
+const sessionImageMax = 20 << 20
+
+// sessionBlock is one block of a Claude Code message, as far as a picture needs.
+type sessionBlock struct {
+	Type   string `json:"type"`
+	Source struct {
+		Type      string `json:"type"`
+		MediaType string `json:"media_type"`
+		Data      string `json:"data"`
+	} `json:"source"`
+}
+
+// readSessionImage finds one pasted picture in a Claude Code session's log by
+// its reference ("<message id>/<n>") and returns it as a data URL.
+func readSessionImage(cli, session, ref string) (string, error) {
+	if cli != "claude" {
+		return "", errors.New("only Claude Code sessions keep pictures")
+	}
+	id, n, ok := strings.Cut(ref, "/")
+	idx, err := strconv.Atoi(n)
+	if !ok || id == "" || err != nil || idx < 0 {
+		return "", fmt.Errorf("not a picture reference: %q", ref)
+	}
+	path, err := sessionLogFile(cli, session)
+	if err != nil {
+		return "", err
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+	needle := []byte(`"uuid":"` + id + `"`)
+	sc := bufio.NewScanner(f)
+	sc.Buffer(make([]byte, 0, 1<<20), 64<<20)
+	for sc.Scan() {
+		line := sc.Bytes()
+		if !bytes.Contains(line, needle) {
+			continue
+		}
+		var m struct {
+			UUID    string `json:"uuid"`
+			Message struct {
+				Content json.RawMessage `json:"content"`
+			} `json:"message"`
+			// A message typed while a turn was running.
+			Attachment struct {
+				Prompt json.RawMessage `json:"prompt"`
+			} `json:"attachment"`
+		}
+		if json.Unmarshal(line, &m) != nil || m.UUID != id {
+			continue
+		}
+		var blocks []sessionBlock
+		if json.Unmarshal(m.Message.Content, &blocks) != nil || len(blocks) == 0 {
+			_ = json.Unmarshal(m.Attachment.Prompt, &blocks)
+		}
+		if idx >= len(blocks) || blocks[idx].Type != "image" {
+			break
+		}
+		src := blocks[idx].Source
+		if src.Type != "base64" || !strings.HasPrefix(src.MediaType, "image/") || len(src.Data) > sessionImageMax {
+			return "", errors.New("that picture cannot be shown")
+		}
+		return "data:" + src.MediaType + ";base64," + src.Data, nil
+	}
+	if err := sc.Err(); err != nil {
+		return "", err
+	}
+	return "", errors.New("that picture is no longer in the session's log")
 }
 
 func codexLine(m map[string]any, at time.Time) ([]CLIRunEvent, string) {

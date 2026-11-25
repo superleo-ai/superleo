@@ -58,7 +58,7 @@ var agentCallable = map[string]bool{
 	"ReplyToSession": true,
 	// A coding agent conversation on this machine, read and answered from
 	// core's screens (agent_sessions.go).
-	"CodingSessionLog": true, "ReplyToCodingSession": true,
+	"CodingSessionLog": true, "CodingSessionImage": true, "ReplyToCodingSession": true,
 	// Core's word on a terminal permission prompt this machine is holding
 	// (cchook_perm.go): pass, asking, allow or deny.
 	"AnswerCCPermission": true,
