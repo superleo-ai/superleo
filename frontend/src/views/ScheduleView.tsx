@@ -1,30 +1,42 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { CalendarDaysIcon, CheckIcon, ChevronDownIcon, MapPinIcon, PlusIcon, RepeatIcon, XIcon } from "lucide-react";
+import { CheckIcon, ChevronDownIcon, FolderIcon, MapPinIcon, PlusIcon, RepeatIcon, XIcon } from "lucide-react";
 import { CallTool, NotedSchedule } from "../../wailsjs/go/app/App";
 import { app } from "../../wailsjs/go/models";
 import { EventsOn } from "../../wailsjs/runtime";
 import { useI18n } from "../lib/i18n";
 import { toast } from "../lib/toasts";
 import {
-  addDays, clock, completeCall, createCall, dayHeading, deleteCall, Draft, draftOf, editCalls, Freq, groupByDay, HOLIDAY_POLICIES,
-  holidayLabel, isAlarm, isPaused, isTask, leadLabel, localDay, NEW_KINDS, newDraft, NewKind, newKindLabel, notifyOf, readSchedule,
-  repeatLabel, repeatShort, repeats, ringSummary, ScheduleItem, sourceOf, taskEditCalls, timeEditable, timeLabel, ToolCall, UnscheduledTask,
-  weekdayLabel, WEEKDAYS,
+  addDays, clock, completeCall, createCall, dayHeading, dayOf, deleteCall, Draft, draftOf, editCalls, Freq, groupByDay, HOLIDAY_POLICIES,
+  holidayLabel, isAlarm, isPaused, isTask, leadLabel, localDay, mondayOf, monthCells, monthOf, NEW_KINDS, newDraft, NewKind, newKindLabel,
+  notifyOf, projectColor, ProjectInfo, readProjects, readSchedule, readTasks, repeatLabel, repeatShort, repeats, ringSummary, ScheduleItem,
+  sourceOf, TaskInfo, taskEditCalls, timeEditable, timeLabel, ToolCall, UnscheduledTask, weekdayLabel, WEEKDAYS,
 } from "../lib/schedule";
 import { ModeChip, ModePicker } from "../components/ModeChip";
+import { InProgress, MonthCal, ProjectList, WeekGrid } from "./ScheduleParts";
 import "./schedule.css";
-import { Skeleton, SkeletonLines, SkeletonRows, SkeletonCards } from "../components/Skeleton";
+import { SkeletonRows } from "../components/Skeleton";
 
 const STEP = 7;
 const MAX_DAYS = 62;
 const LEADS = [0, 5, 10, 15, 30, 60, 120, 1440];
+const VIEW_KEY = "superleo-schedule-view";
 
 /** One noted write through CallTool; its error, if any, thrown. */
 export async function runCall(c: ToolCall) {
   const res = await CallTool("noted", c.tool, c.args, app.ActionOptions.createFrom({ label: c.label, confirmed: !!c.confirmed, sessionId: "" }));
   if (!res?.ok) throw new Error(res?.error || res?.code || "failed");
   return res;
+}
+
+/** One noted read through CallTool: its structured answer, or null. */
+async function readTool(tool: string, args: Record<string, unknown>): Promise<unknown> {
+  try {
+    const res = await CallTool("noted", tool, args, app.ActionOptions.createFrom({ label: tool, confirmed: false, sessionId: "" }));
+    return res?.ok ? res.structured ?? null : null;
+  } catch {
+    return null;
+  }
 }
 
 function useToday() {
@@ -39,31 +51,64 @@ function useToday() {
 type Picked =
   | { type: "item"; item: ScheduleItem }
   | { type: "task"; task: UnscheduledTask }
-  | { type: "new"; kind: NewKind; day: string };
+  | { type: "new"; kind: NewKind; day: string; time?: string };
+
+type View = "week" | "day";
+
+const savedView = (): View => {
+  try { return localStorage.getItem(VIEW_KEY) === "day" ? "day" : "week"; } catch { return "week"; }
+};
+
+/** What the page shows of a project: the project and its colour. */
+export interface ProjectTag { project: ProjectInfo; color: string }
 
 /**
- * 日程安排: the one page for events, alarms, reminders and to-dos. Day by
- * day from today; each row says how it reaches you (闹钟 / 提醒 / 通知 /
- * 不提醒), and opens to be changed.
+ * 日程安排: the one page for events, alarms, reminders and to-dos. A month
+ * and the work under way on the left; the chosen week as an hour grid, or
+ * day by day, on the right. Each item says how it reaches you (闹钟 / 提醒 /
+ * 通知 / 不提醒), and opens to be changed.
  */
 export default function ScheduleView() {
   const { t } = useI18n();
   const now = useToday();
   const today = localDay(now);
   const [params, setParams] = useSearchParams();
-  const [from, setFrom] = useState(() => (/^\d{4}-\d\d-\d\d$/.test(params.get("date") ?? "") ? params.get("date")! : today));
+  const [sel, setSel] = useState(() => (/^\d{4}-\d\d-\d\d$/.test(params.get("date") ?? "") ? params.get("date")! : today));
+  const [month, setMonth] = useState(() => monthOf(sel));
+  const [view, setViewState] = useState<View>(savedView);
   const [days, setDays] = useState(STEP);
   const [data, setData] = useState<{ items: ScheduleItem[]; unscheduled: UnscheduledTask[] } | null>(null);
+  const [cal, setCal] = useState<ScheduleItem[]>([]);
+  const [tasks, setTasks] = useState<TaskInfo[]>([]);
+  const [projects, setProjects] = useState<ProjectInfo[]>([]);
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(true);
   const [picked, setPicked] = useState<Picked | null>(null);
   const [adding, setAdding] = useState(false);
   const want = useRef(params.get("id") ?? "");
 
+  const setView = (v: View) => {
+    setViewState(v);
+    try { localStorage.setItem(VIEW_KEY, v); } catch { /* private browser */ }
+  };
+
+  const mainFrom = view === "week" ? mondayOf(sel) : sel;
+  const mainDays = view === "week" ? 7 : days;
+  const gridFrom = monthCells(month)[0];
+
   const load = useCallback(async () => {
     setLoading(true);
+    const side = Promise.all([
+      NotedSchedule(gridFrom, 42).then((r) => readSchedule(r).items).catch(() => null),
+      readTool("list_tasks", { state: "open", limit: 200 }),
+      readTool("list_projects", {}),
+    ]).then(([c, tk, pj]) => {
+      if (c) setCal(c);
+      if (tk) setTasks(readTasks(tk));
+      if (pj) setProjects(readProjects(pj));
+    });
     try {
-      const raw = await NotedSchedule(from, days);
+      const raw = await NotedSchedule(mainFrom, mainDays);
       setData(readSchedule(raw));
       setErr("");
     } catch (e: any) {
@@ -72,7 +117,8 @@ export default function ScheduleView() {
     } finally {
       setLoading(false);
     }
-  }, [from, days, t]);
+    await side;
+  }, [mainFrom, mainDays, gridFrom, t]);
 
   useEffect(() => { void load(); }, [load]);
   // noted's version moves on any schedule change, the queen's included.
@@ -93,33 +139,62 @@ export default function ScheduleView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
-  const grouped = useMemo(() => groupByDay(data?.items ?? [], from, days), [data, from, days]);
+  const grouped = useMemo(() => groupByDay(data?.items ?? [], mainFrom, mainDays), [data, mainFrom, mainDays]);
   const total = data?.items.length ?? 0;
+
+  const counts = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const it of cal) { const d = dayOf(it); if (d && !it.completed) m.set(d, (m.get(d) ?? 0) + 1); }
+    return m;
+  }, [cal]);
+  const taskById = useMemo(() => new Map(tasks.map((k) => [k.id, k])), [tasks]);
+  const tagById = useMemo(() => new Map<string, ProjectTag>(projects.map((p, i) => [p.id, { project: p, color: projectColor(p, i) }])), [projects]);
+  const colorOf = useCallback((id?: string) => (id && tagById.get(id)?.color) || "var(--s-acc)", [tagById]);
+  const working = useMemo(() => tasks
+    .filter((k) => !k.completed && (k.progress > 0 || k.workSessions > 0 || k.workedMinutes > 0))
+    .sort((a, b) => (b.lastWorkedTime ?? "").localeCompare(a.lastWorkedTime ?? "") || b.progress - a.progress), [tasks]);
 
   const done = (msg?: string) => {
     if (msg) toast.success(msg);
     setPicked(null);
     void load();
   };
+  const complete = (id: string, title: string) =>
+    runCall(completeCall(id, title)).then(() => done(t("Done: {title}", { title }))).catch((x) => toast.error(String(x?.message ?? x)));
 
-  const jump = (day: string) => {
+  const pick = (day: string) => {
     if (!/^\d{4}-\d\d-\d\d$/.test(day)) return;
-    setFrom(day);
+    setSel(day);
+    setMonth(monthOf(day));
     setDays(STEP);
   };
 
+  // A to-do from 进行中: its place on the schedule when it has one, else the to-do.
+  const pickTask = (k: TaskInfo) => {
+    const it = data?.items.find((x) => isTask(x) && (x.taskId || x.id) === k.id) ?? cal.find((x) => isTask(x) && (x.taskId || x.id) === k.id);
+    if (it) setPicked({ type: "item", item: it });
+    else setPicked({ type: "task", task: { id: k.id, title: k.title, notes: k.notes, tags: k.tags, notify: k.notify, remindBeforeMinutes: k.remindBeforeMinutes } });
+  };
+
+  const tagOf = (it: ScheduleItem): { tag?: ProjectTag; task?: TaskInfo } => {
+    const task = isTask(it) ? taskById.get(it.taskId || it.id) : undefined;
+    const pid = it.projectId || task?.projectId;
+    return { tag: pid ? tagById.get(pid) : undefined, task };
+  };
+
   const pickedKey = picked?.type === "item" ? `${picked.item.id}@${picked.item.startTime}` : picked?.type === "task" ? "task:" + picked.task.id : "";
+  const newDay = sel < today ? today : sel;
 
   return (
     <div className="view sch-view">
       <div className="view-header with-action sch-head">
         <div className="view-title">{t("Schedule")}</div>
         <div className="vh-actions sch-actions">
-          {from !== today && <button className="sch-btn" onClick={() => jump(today)}>{t("Today")}</button>}
-          <label className="sch-datepick" title={t("Go to a date")}>
-            <CalendarDaysIcon size={15} />
-            <input type="date" value={from} onChange={(e) => jump(e.target.value)} aria-label={t("Go to a date")} />
-          </label>
+          <div className="sch-seg sch-views" role="tablist" aria-label={t("Calendar")}>
+            {(["day", "week"] as View[]).map((v) => (
+              <button key={v} role="tab" aria-selected={view === v} className={view === v ? "on" : ""} onClick={() => setView(v)}>{t(v === "day" ? "Day" : "Week")}</button>
+            ))}
+          </div>
           <div className="sch-new">
             <button className="sch-btn pri" aria-expanded={adding} onClick={() => setAdding((v) => !v)}>
               <PlusIcon size={16} />{t("New")}<ChevronDownIcon size={14} />
@@ -127,7 +202,7 @@ export default function ScheduleView() {
             {adding && (
               <div className="sch-menu" role="menu" onMouseLeave={() => setAdding(false)}>
                 {NEW_KINDS.map((k) => (
-                  <button key={k} role="menuitem" onClick={() => { setAdding(false); setPicked({ type: "new", kind: k, day: from < today ? today : from }); }}>
+                  <button key={k} role="menuitem" onClick={() => { setAdding(false); setPicked({ type: "new", kind: k, day: newDay }); }}>
                     {newKindLabel(k)}
                   </button>
                 ))}
@@ -138,52 +213,79 @@ export default function ScheduleView() {
       </div>
 
       <div className={`sch-body${picked ? " with-panel" : ""}`}>
-        <div className="sch-scroll">
-          <div className="sch-col">
+        <aside className="sch-side">
+          <MonthCal month={month} sel={sel} today={today} counts={counts} week={view === "week"} onMonth={setMonth} onPick={pick} />
+          <InProgress tasks={working} today={today} colorOf={colorOf} onPick={pickTask} />
+          <ProjectList projects={projects} colorOf={colorOf} today={today} />
+        </aside>
+
+        <div className={`sch-pane ${view}`}>
           {err && <div className="sch-error" role="alert">{err} <button className="sch-link" onClick={() => void load()}>{t("Retry")}</button></div>}
           {!err && !data && loading && <div className="sch-loading"><SkeletonRows n={6} /></div>}
-          {data && (
-            <>
-              {grouped.map((day) => (
-                <DaySection key={day.date} date={day.date} items={day.items} today={today} now={now} pickedKey={pickedKey}
-                  onPick={(it) => setPicked({ type: "item", item: it })}
-                  onAdd={() => setPicked({ type: "new", kind: "event", day: day.date })} />
-              ))}
-              <div className="sch-more">
-                {days < MAX_DAYS
-                  ? <button className="sch-btn" onClick={() => setDays((d) => Math.min(MAX_DAYS, d + STEP))}>{t("{n} more days", { n: STEP })}</button>
-                  : <button className="sch-btn" onClick={() => jump(addDays(from, days))}>{t("Further on")}</button>}
-                <span>{t("{count} items through {date}", { count: total, date: dayHeading(addDays(from, days - 1), today).date })}</span>
-              </div>
-              {data.unscheduled.length > 0 && (
-                <section className="sch-day sch-unsched">
-                  <header className="sch-dayhead"><b>{t("To-dos with no time")}</b><em>{data.unscheduled.length}</em></header>
-                  <ol className="sch-rows">
-                    {data.unscheduled.map((task) => (
-                      <li key={task.id} className={`sch-row task${pickedKey === "task:" + task.id ? " on" : ""}`} tabIndex={0}
-                        onClick={() => setPicked({ type: "task", task })}
-                        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); setPicked({ type: "task", task }); } }}>
-                        <span className="sch-time" />
-                        <button className="sch-check" title={t("Mark done")} aria-label={t("Mark done")}
-                          onClick={(e) => { e.stopPropagation(); runCall(completeCall(task.id, task.title)).then(() => done(t("Done: {title}", { title: task.title }))).catch((x) => toast.error(String(x?.message ?? x))); }}>
-                          <CheckIcon size={11} strokeWidth={3} />
-                        </button>
-                        <span className="sch-main"><b>{task.title}</b>{task.notes && <small>{task.notes}</small>}</span>
-                        {notifyOf(task) !== "none" && <ModeChip mode={notifyOf(task)} compact />}
-                      </li>
-                    ))}
-                  </ol>
-                </section>
-              )}
-            </>
+          {data && view === "week" && (
+            <WeekGrid start={mainFrom} items={data.items} unscheduled={data.unscheduled} today={today} sel={sel} now={now} pickedKey={pickedKey}
+              tasks={taskById} onSelect={pick}
+              onPick={(it) => setPicked({ type: "item", item: it })}
+              onPickTask={(task) => setPicked({ type: "task", task })}
+              onNew={(day, time) => setPicked({ type: "new", kind: "event", day, time })}
+              onDone={complete} />
           )}
-          </div>
+          {data && view === "day" && (
+            <div className="sch-scroll">
+              <div className="sch-col">
+                {grouped.map((day) => (
+                  <DaySection key={day.date} date={day.date} items={day.items} today={today} now={now} pickedKey={pickedKey} tagOf={tagOf}
+                    onPick={(it) => setPicked({ type: "item", item: it })}
+                    onAdd={() => setPicked({ type: "new", kind: "event", day: day.date })} />
+                ))}
+                <div className="sch-more">
+                  {days < MAX_DAYS
+                    ? <button className="sch-btn" onClick={() => setDays((d) => Math.min(MAX_DAYS, d + STEP))}>{t("{n} more days", { n: STEP })}</button>
+                    : <button className="sch-btn" onClick={() => pick(addDays(sel, days))}>{t("Further on")}</button>}
+                  <span>{t("{count} items through {date}", { count: total, date: dayHeading(addDays(sel, days - 1), today).date })}</span>
+                </div>
+                {data.unscheduled.length > 0 && (
+                  <section className="sch-day sch-unsched">
+                    <header className="sch-dayhead"><b>{t("To-dos with no time")}</b><em>{data.unscheduled.length}</em></header>
+                    <ol className="sch-rows">
+                      {data.unscheduled.map((task) => {
+                        const info = taskById.get(task.id);
+                        const tag = info?.projectId ? tagById.get(info.projectId) : undefined;
+                        return (
+                          <li key={task.id} className={`sch-row task${pickedKey === "task:" + task.id ? " on" : ""}`} tabIndex={0}
+                            onClick={() => setPicked({ type: "task", task })}
+                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); setPicked({ type: "task", task }); } }}>
+                            <span className="sch-time" />
+                            <button className="sch-check" title={t("Mark done")} aria-label={t("Mark done")}
+                              onClick={(e) => { e.stopPropagation(); void complete(task.id, task.title); }}>
+                              <CheckIcon size={11} strokeWidth={3} />
+                            </button>
+                            <span className="sch-main">
+                              <b>{task.title}</b>
+                              {(task.notes || tag || (info?.progress ?? 0) > 0) && (
+                                <small>
+                                  {(info?.progress ?? 0) > 0 && <span className="sch-pct">{info!.progress}%</span>}
+                                  {tag && <ProjTag tag={tag} />}
+                                  {task.notes && <span className="sch-loc">{task.notes}</span>}
+                                </small>
+                              )}
+                            </span>
+                            {notifyOf(task) !== "none" && <ModeChip mode={notifyOf(task)} compact />}
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  </section>
+                )}
+              </div>
+            </div>
+          )}
         </div>
         {picked && (
-          <aside className="sch-panel" key={pickedKey || (picked.type === "new" ? "new:" + picked.kind + picked.day : "")}>
+          <aside className="sch-panel" key={pickedKey || (picked.type === "new" ? "new:" + picked.kind + picked.day + (picked.time ?? "") : "")}>
             {picked.type === "item" && <ItemEditor item={picked.item} onClose={() => setPicked(null)} onDone={done} />}
             {picked.type === "task" && <TaskEditor task={picked.task} today={today} onClose={() => setPicked(null)} onDone={done} />}
-            {picked.type === "new" && <NewEditor kind={picked.kind} day={picked.day} onKind={(k) => setPicked({ ...picked, kind: k })} onClose={() => setPicked(null)} onDone={done} />}
+            {picked.type === "new" && <NewEditor kind={picked.kind} day={picked.day} time={picked.time} onKind={(k) => setPicked({ ...picked, kind: k })} onClose={() => setPicked(null)} onDone={done} />}
           </aside>
         )}
       </div>
@@ -191,8 +293,13 @@ export default function ScheduleView() {
   );
 }
 
-function DaySection({ date, items, today, now, pickedKey, onPick, onAdd }: {
+function ProjTag({ tag }: { tag: ProjectTag }) {
+  return <span className="sch-proj"><FolderIcon size={11} style={{ color: tag.color }} />{tag.project.title}</span>;
+}
+
+function DaySection({ date, items, today, now, pickedKey, tagOf, onPick, onAdd }: {
   date: string; items: ScheduleItem[]; today: string; now: Date; pickedKey: string;
+  tagOf: (it: ScheduleItem) => { tag?: ProjectTag; task?: TaskInfo };
   onPick: (it: ScheduleItem) => void; onAdd: () => void;
 }) {
   const { t } = useI18n();
@@ -204,7 +311,7 @@ function DaySection({ date, items, today, now, pickedKey, onPick, onAdd }: {
   items.forEach((it, i) => {
     if (i === nowAt) rows.push(<NowLine key="now" now={now} />);
     const past = isToday && !it.allDay && +new Date(it.endTime || it.startTime) < +now;
-    rows.push(<Row key={`${it.id}@${it.startTime}`} it={it} past={past || date < today} on={pickedKey === `${it.id}@${it.startTime}`} onPick={() => onPick(it)} />);
+    rows.push(<Row key={`${it.id}@${it.startTime}`} it={it} {...tagOf(it)} past={past || date < today} on={pickedKey === `${it.id}@${it.startTime}`} onPick={() => onPick(it)} />);
   });
   if (isToday && items.length > 0 && nowAt === -1) rows.push(<NowLine key="now" now={now} />);
   return (
@@ -224,16 +331,17 @@ function NowLine({ now }: { now: Date }) {
   return <li className="sch-now" aria-hidden><span>{clock(now.toISOString())}</span><i /></li>;
 }
 
-function Row({ it, past, on, onPick }: { it: ScheduleItem; past: boolean; on: boolean; onPick: () => void }) {
+function Row({ it, tag, task: info, past, on, onPick }: { it: ScheduleItem; tag?: ProjectTag; task?: TaskInfo; past: boolean; on: boolean; onPick: () => void }) {
   const { t } = useI18n();
   const mode = notifyOf(it);
   const rings = ringSummary(it.ringTimes);
   const rep = repeatShort(it);
   const lead = leadLabel(it);
   const task = isTask(it);
+  const pct = info && info.progress > 0 ? info.progress : 0;
   const end = !it.allDay && !isAlarm(it) && !task && it.endTime && clock(it.endTime) !== clock(it.startTime) ? clock(it.endTime) : "";
   const cls = ["sch-row", past && "past", isPaused(it) && "paused", it.completed && "done", on && "on", it.allDay && "allday", task && "task"].filter(Boolean).join(" ");
-  const hasMeta = rings || rep || lead || it.location || isPaused(it);
+  const hasMeta = rings || rep || lead || it.location || isPaused(it) || pct || tag;
   return (
     <li className={cls} onClick={onPick} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPick(); } }}
       title={it.ringTimes && it.ringTimes.length > 1 ? it.ringTimes.join(" ") : undefined}>
@@ -249,10 +357,12 @@ function Row({ it, past, on, onPick }: { it: ScheduleItem; past: boolean; on: bo
         {hasMeta && (
           <small>
             {isPaused(it) && <span className="sch-off">{t("Off")}</span>}
+            {pct > 0 && <span className="sch-pct">{pct}%</span>}
             {rings && <span>{rings}</span>}
             {rep && <span className="sch-rep"><RepeatIcon size={11} />{rep}</span>}
             {lead && <span>{lead}</span>}
             {it.location && <span className="sch-loc"><MapPinIcon size={11} />{it.location}</span>}
+            {tag && <ProjTag tag={tag} />}
           </small>
         )}
       </span>
@@ -473,11 +583,13 @@ function TaskEditor({ task, today, onClose, onDone }: { task: UnscheduledTask; t
   );
 }
 
-function NewEditor({ kind, day, onKind, onClose, onDone }: { kind: NewKind; day: string; onKind: (k: NewKind) => void; onClose: () => void; onDone: (msg?: string) => void }) {
+function NewEditor({ kind, day, time, onKind, onClose, onDone }: { kind: NewKind; day: string; time?: string; onKind: (k: NewKind) => void; onClose: () => void; onDone: (msg?: string) => void }) {
   const { t } = useI18n();
-  const [d, setD] = useState<Draft>(() => newDraft(kind, day));
+  const fresh = (k: NewKind) => { const n = newDraft(k, day); return time ? { ...n, time } : n; };
+  const [d, setD] = useState<Draft>(() => fresh(kind));
   const [timed, setTimed] = useState(kind !== "todo");
-  useEffect(() => { setD((x) => ({ ...newDraft(kind, day), title: x.title, date: x.date })); setTimed(kind !== "todo"); }, [kind, day]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { setD((x) => ({ ...fresh(kind), title: x.title, date: x.date })); setTimed(kind !== "todo"); }, [kind, day, time]);
   const set = (p: Partial<Draft>) => setD((x) => ({ ...x, ...p }));
   const { busy, err, run } = useRunner(onDone);
   const alarmLike = kind === "alarm" || kind === "reminder";

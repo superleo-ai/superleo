@@ -48,6 +48,7 @@ export interface ScheduleItem {
   enabled?: boolean;
   completed?: boolean;
   taskId?: string;
+  projectId?: string;
   ringTimes?: string[];
 }
 
@@ -502,4 +503,184 @@ export function readSchedule(raw: unknown): { items: ScheduleItem[]; unscheduled
     items: items.filter((x) => x && typeof x === "object" && typeof x.id === "string" && typeof x.startTime === "string").map((x) => ({ ...x, title: x.title || "" })),
     unscheduled: unscheduled.filter((x) => x && typeof x === "object" && typeof x.id === "string"),
   };
+}
+
+// ── To-dos, projects and the calendar ───────────────────────────────────
+
+/** A to-do as noted's list_tasks gives it: what the page shows of its work. */
+export interface TaskInfo {
+  id: string;
+  title: string;
+  notes?: string;
+  dueTime?: string;
+  notify?: string;
+  remindBeforeMinutes?: number;
+  completed?: boolean;
+  projectId?: string;
+  tags?: string[];
+  progress: number;
+  workedMinutes: number;
+  workSessions: number;
+  lastWorkedTime?: string;
+}
+
+/** A project as list_projects gives it. percent is 0-1. */
+export interface ProjectInfo {
+  id: string;
+  title: string;
+  pinned?: boolean;
+  archived?: boolean;
+  space?: string;
+  progress?: {
+    tasksTotal?: number;
+    tasksDone?: number;
+    percent?: number;
+    nextTime?: string;
+    nextTitle?: string;
+    daysLeft?: number;
+    tasksOverdue?: number;
+  };
+}
+
+const listOf = (raw: unknown): Record<string, unknown>[] => {
+  const r = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+  const items = Array.isArray(raw) ? raw : Array.isArray(r.items) ? r.items : [];
+  return items.filter((x): x is Record<string, unknown> => !!x && typeof x === "object" && typeof (x as { id?: unknown }).id === "string");
+};
+const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+
+/** list_tasks' structured answer. */
+export function readTasks(raw: unknown): TaskInfo[] {
+  return listOf(raw).map((x) => ({
+    ...(x as unknown as TaskInfo),
+    title: String(x.title ?? ""),
+    progress: Math.max(0, Math.min(100, num(x.progress))),
+    workedMinutes: num(x.workedMinutes),
+    workSessions: num(x.workSessions),
+  }));
+}
+
+/** list_projects' structured answer, archived ones left out. */
+export function readProjects(raw: unknown): ProjectInfo[] {
+  return listOf(raw).map((x) => ({ ...(x as unknown as ProjectInfo), title: String(x.title ?? "") })).filter((p) => !p.archived);
+}
+
+/** A project's share done, 0-100. */
+export function projectPercent(p: ProjectInfo): number {
+  const v = num(p.progress?.percent);
+  const pc = v <= 1 ? v * 100 : v;
+  if (pc > 0) return Math.round(Math.min(100, pc));
+  const total = num(p.progress?.tasksTotal);
+  return total ? Math.round((num(p.progress?.tasksDone) / total) * 100) : 0;
+}
+
+const PROJECT_COLORS = ["#1F5BFF", "#C2410C", "#0F8B8D", "#E8890C", "#1B8A55", "#7C5CD6"];
+/** A project's colour, noted's: life rust, work blue, else by its place. */
+export function projectColor(p: ProjectInfo | undefined, index: number): string {
+  if (p?.space === "life") return "#C2410C";
+  if (p?.space === "work") return "#1F5BFF";
+  return PROJECT_COLORS[((index % PROJECT_COLORS.length) + PROJECT_COLORS.length) % PROJECT_COLORS.length];
+}
+
+/** "2 小时 10 分" / "2 h 10 min". */
+export function spanLabel(minutes: number): string {
+  const m = Math.max(0, Math.round(minutes));
+  const h = Math.floor(m / 60);
+  const r = m % 60;
+  if (h && r) return translate("{h} h {m} min", { h, m: r });
+  if (h) return translate("{h} h", { h });
+  return translate("{m} min", { m: r });
+}
+
+/** When something last happened, short: 今天, 昨天, 3 天前, 10月3日. */
+export function sinceLabel(iso: string, today: string): string {
+  const day = dayOf({ startTime: iso, allDay: false });
+  if (!day) return "";
+  const diff = Math.round((+dateOf(today) - +dateOf(day)) / 86400000);
+  if (diff <= 0) return translate("Today");
+  if (diff === 1) return translate("Yesterday");
+  if (diff < 7) return translate("{n} days ago", { n: diff });
+  return dateOf(day).toLocaleDateString(getLanguage(), { month: "short", day: "numeric" });
+}
+
+/** "已做 3 次 · 共 2 小时 10 分 · 上次 今天". */
+export function workedLine(t: TaskInfo, today: string): string {
+  const parts: string[] = [];
+  if (t.workSessions > 0) parts.push(t.workSessions === 1 ? translate("Worked once") : translate("Worked {n} times", { n: t.workSessions }));
+  if (t.workedMinutes > 0) parts.push(translate("{span} in all", { span: spanLabel(t.workedMinutes) }));
+  if (t.lastWorkedTime) {
+    const when = sinceLabel(t.lastWorkedTime, today);
+    // "last today", not "last Today".
+    const lower = getLanguage() === "en" && (when === "Today" || when === "Yesterday");
+    if (when) parts.push(translate("last {when}", { when: lower ? when.toLowerCase() : when }));
+  }
+  return parts.join(" · ");
+}
+
+/** "还剩 41 天", "今天", "超期 3 天", or nothing. */
+export function daysLeftLabel(n?: number | null): string {
+  if (n == null || !Number.isFinite(n)) return "";
+  if (n === 0) return translate("Due today");
+  return n > 0 ? translate("{n} days left", { n }) : translate("{n} days over", { n: -n });
+}
+
+/** The Monday of a day's week. */
+export const mondayOf = (day: string) => addDays(day, -((dateOf(day).getDay() + 6) % 7));
+
+/** YYYY-MM of a day, and a month moved by n. */
+export const monthOf = (day: string) => day.slice(0, 7);
+export function addMonths(month: string, n: number): string {
+  const [y, m] = month.split("-").map(Number);
+  const d = new Date(y, m - 1 + n, 1);
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
+}
+
+/** The 42 days a month's page shows, Monday first. */
+export function monthCells(month: string): string[] {
+  const first = mondayOf(month + "-01");
+  return Array.from({ length: 42 }, (_, i) => addDays(first, i));
+}
+
+/** "2026年11月" / "November 2026". */
+export const monthTitle = (month: string) => dateOf(month + "-01").toLocaleDateString(getLanguage(), { year: "numeric", month: "long" });
+
+/** One letter per weekday for a month's head: 一…日 / M…S. */
+export const weekdayLetters = () => (zh() ? ["一", "二", "三", "四", "五", "六", "日"] : ["M", "T", "W", "T", "F", "S", "S"]);
+
+/** Minutes since a day's midnight of a time, clamped to the day. */
+export function minuteOfDay(iso: string, day: string): number {
+  const d = new Date(iso);
+  if (!Number.isFinite(d.getTime())) return 0;
+  const m = (+d - +dateOf(day)) / 60000;
+  return Math.max(0, Math.min(1440, m));
+}
+
+export interface Placed { it: ScheduleItem; top: number; end: number; lane: number; lanes: number }
+
+/** Timed items of one day placed on an hour grid: start and end in minutes,
+ *  and side-by-side lanes where they overlap. A point in time (an alarm, a
+ *  to-do's due) gets minLen minutes so it can be seen and clicked. */
+export function placeDay(items: ScheduleItem[], day: string, minLen = 30): Placed[] {
+  const out: Placed[] = items
+    .filter((it) => !it.allDay)
+    .map((it) => {
+      const top = minuteOfDay(it.startTime, day);
+      const raw = it.endTime && !isAlarm(it) && !isTask(it) ? minuteOfDay(it.endTime, day) : top;
+      return { it, top, end: Math.min(1440, Math.max(raw, top + minLen)), lane: 0, lanes: 1 };
+    })
+    .sort((a, b) => a.top - b.top || b.end - a.end);
+  let group: Placed[] = [];
+  let groupEnd = -1;
+  const ends: number[] = [];
+  const close = () => { const n = Math.max(1, ...group.map((g) => g.lane + 1)); group.forEach((g) => (g.lanes = n)); group = []; ends.length = 0; };
+  for (const p of out) {
+    if (p.top >= groupEnd && group.length) close();
+    let lane = ends.findIndex((e) => e <= p.top);
+    if (lane < 0) { lane = ends.length; ends.push(p.end); } else ends[lane] = p.end;
+    p.lane = lane;
+    group.push(p);
+    groupEnd = Math.max(groupEnd, p.end);
+  }
+  if (group.length) close();
+  return out;
 }
