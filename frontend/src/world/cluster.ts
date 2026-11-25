@@ -286,6 +286,44 @@ function setLight(station: THREE.Object3D, s: DeskLight) {
 /** A computer at a desk, monitor (or laptop) facing the room. Its screens and
  *  the light along its front edge are in userData; `spots` are where its
  *  robots stand, beside the desk, turned to the screen. */
+/** A robot's own computer: a small desk at its hands with a laptop on it, and
+ *  over the laptop a hologram screen saying what it is doing. Part of the
+ *  robot, so it goes where the robot goes. */
+function ownDesk(r: THREE.Group) {
+  const d = new THREE.Group();
+  const top = 0.6;
+  const desk = rbox(1.25, 0.06, 0.62, FIN.satin(), 0.03);
+  desk.position.y = top - 0.03;
+  d.add(desk);
+  for (const x of [-0.54, 0.54]) {
+    const leg = cyl(0.025, 0.025, top - 0.06, 10, FIN.alu(), true);
+    leg.position.set(x, 0, 0);
+    d.add(leg);
+  }
+  const base = rbox(0.7, 0.03, 0.44, FIN.alu(), 0.02);
+  base.position.set(0, top + 0.015, 0.02);
+  const lid = rbox(0.7, 0.44, 0.025, FIN.alu(), 0.02);
+  lid.position.set(0, top + 0.24, 0.24);
+  lid.rotation.x = 0.22;
+  d.add(base, lid);
+  // The hologram over the laptop, lit from a slit on the desk's far edge.
+  const sw = 1.3, sh = 0.76, mid = 1.95;
+  const sc = screen(sw, sh, 320, true);
+  sc.mesh.position.set(0, mid, 0.3);
+  sc.mesh.rotation.y = Math.PI;
+  const proj = projector(0.62, 0.12);
+  proj.position.set(0, top, 0.3);
+  const ray = beam(top + 0.06, mid - sh / 2, 0.5, sw);
+  ray.position.z = 0.3;
+  ray.rotation.y = Math.PI;
+  d.add(proj, ray, sc.mesh);
+  d.add(contact(1.6, 1.0, 0.08));
+  d.position.z = 0.78;
+  r.add(d);
+  r.userData.desk = true;
+  r.userData.ownScreen = sc;
+}
+
 function workstation(kind: "desktop" | "laptop" | "console") {
   const g = new THREE.Group();
   const wide = kind === "console" ? 10 : 6.2;
@@ -739,6 +777,9 @@ export const cluster: District<WorldData> = {
       displays.set(sc, { title, status, lines, busy, sig });
       paint(sc, title, status, lines, busy, true);
     };
+    /** A robot's own screen: its name and what it is doing. */
+    const deskSay = (r: THREE.Object3D, n: string, status: string, st: RobotState) =>
+      show(r.userData.ownScreen as Screen | undefined, n, status, [], st === "work");
     let blinkAt = 0;
 
     let calls = -1;
@@ -951,6 +992,7 @@ export const cluster: District<WorldData> = {
           p.crew.forEach((a, k) => {
             const n = a.kind === "cli" ? cliName(a) : a.name;
             const r = robot("cli", trim(n));
+            ownDesk(r);
             grp.add(r);
             const via = a.via || p.via;
             ctx.pickable(r, { kind: a.kind === "cli" ? "cli" : "agent", id: `${n}.${via}`, title: `${n} · ${p.host.name}` });
@@ -964,7 +1006,8 @@ export const cluster: District<WorldData> = {
               // In a row before the desk, turned to its screen.
               const spread = Math.min(2.4, 4.8 / Math.max(1, p.crew.length - 1));
               const ang = (k - (p.crew.length - 1) / 2) * spread * 0.32;
-              pos = new THREE.Vector3(Math.sin(ang) * 4.2, 0, 2.6 + Math.cos(ang) * 1.4).add(at);
+              // Far enough back that their own desks clear the machine's.
+              pos = new THREE.Vector3(Math.sin(ang) * 4.2, 0, 3.9 + Math.cos(ang) * 1.4).add(at);
               face = at.clone().add(new THREE.Vector3(0, 0, -0.6));
               r.userData.desk = true;
             }
@@ -1023,6 +1066,7 @@ export const cluster: District<WorldData> = {
             extras.set(`${a.name}@${p.host.id}`, { r, label: ctx.label(r, n, "", k % 2 ? 2.9 : 2.1), a, host: p.host });
             return;
           }
+          ownDesk(r);
           const via = a.via || p.via;
           // On a cluster, the agent by its own name: whichever node runs it.
           const id = ha ? n : `${n}.${via}`;
@@ -1056,6 +1100,7 @@ export const cluster: District<WorldData> = {
         crew.forEach((a, k) => {
           const n = a.kind === "cli" ? cliName(a) : a.name;
           const r = robot("cli", trim(n));
+          ownDesk(r);
           const ang = THREE.MathUtils.degToRad(4 + k * step);
           r.position.set(Math.cos(ang) * 5.7, 0.35, Math.sin(ang) * 5.7);
           r.userData.base = 0.35;
@@ -1141,6 +1186,7 @@ export const cluster: District<WorldData> = {
           busy ||= s.st === "work";
           setState(c.r, s.st);
           c.label.set(n, s.status, tone(s.st));
+          deskSay(c.r, n, s.status, s.st);
         }
         const runsHere = d.runs.filter((r) => (r.remote || "core") === p.via);
         const liveHere = runsHere.filter((r) => r.state === "running");
@@ -1178,6 +1224,7 @@ export const cluster: District<WorldData> = {
         const s = crewState(d, n, "core", {}, x.a, run, asking);
         setState(x.r, s.st);
         x.label.set(n, s.status, tone(s.st));
+        deskSay(x.r, n, s.status, s.st);
       }
 
       // Services: what they run, at which address, and how they stand.
@@ -1327,6 +1374,7 @@ export const cluster: District<WorldData> = {
               let c = x!.clis.get(n);
               if (!c) {
                 const r = robot("cli", TRIMS[Math.floor(hash01(n) * TRIMS.length)]);
+                ownDesk(r);
                 g.add(r);
                 const isCli = (a.clis ?? []).includes(n);
                 ctx.pickable(r, { kind: isCli ? "cli" : "agent", id: isCli ? `${n}.${a.name}` : `${n}.${a.name}`, title: `${n} · ${a.name}` });
@@ -1338,7 +1386,7 @@ export const cluster: District<WorldData> = {
               // In a row in front of the machine.
               const spread = Math.min(2.4, Math.max(4.8, (who.length - 1) * 1.2) / Math.max(1, who.length - 1));
               const ang = (k - (who.length - 1) / 2) * spread * 0.32;
-              const local = new THREE.Vector3(Math.sin(ang) * 4.2, 0, 2.6 + Math.cos(ang) * 1.4);
+              const local = new THREE.Vector3(Math.sin(ang) * 4.2, 0, 3.9 + Math.cos(ang) * 1.4);
               const world = x!.dev.localToWorld(local.clone()).setY(0);
               c.r.position.copy(world);
               c.r.userData.base = 0;
@@ -1355,6 +1403,7 @@ export const cluster: District<WorldData> = {
               const status = asks ? "needs your OK" : live.length ? clip(live[0].prompt, 24) : delegated.length ? clip(delegated[0].prompt, 24)
                 : own.status || (st === "fail" ? "failed" : "idle");
               c.label.set(n, status, st === "wait" ? "wait" : st === "work" ? "work" : st === "fail" ? "bad" : "idle");
+              deskSay(c.r, n, status, st);
             });
             const runsHere = d.runs.filter((r) => (r.remote || "core") === a.name);
             const liveHere = runsHere.filter((r) => r.state === "running");
@@ -1407,6 +1456,7 @@ export const cluster: District<WorldData> = {
               let b = x!.bots.get(n);
               if (!b) {
                 const r = robot("cli", TRIMS[Math.floor(hash01(n) * TRIMS.length)]);
+                ownDesk(r);
                 g.add(r);
                 ctx.pickable(r, { kind: "agent", id: `${n}.${rel.name}`, title: `${n} · ${rel.name}` });
                 b = { r, label: ctx.label(r, n, "", k % 2 ? 2.9 : 2.1) };
@@ -1427,8 +1477,9 @@ export const cluster: District<WorldData> = {
               const st: RobotState = asks ? "wait" : delegated.length || own.work ? "work" : own.wait ? "wait" : "idle";
               busyHere = busyHere || st === "work";
               setState(b.r, st);
-              b.label.set(n, asks ? translate("needs your OK") : delegated.length ? clip(delegated[0].prompt, 24) : own.status || translate("idle"),
-                st === "wait" ? "wait" : st === "work" ? "work" : "idle");
+              const said = asks ? translate("needs your OK") : delegated.length ? clip(delegated[0].prompt, 24) : own.status || translate("idle");
+              b.label.set(n, said, st === "wait" ? "wait" : st === "work" ? "work" : "idle");
+              deskSay(b.r, n, said, st);
             });
             setLight(x.pad, busyHere ? "busy" : "idle");
             x.cable.setActive(run.some((t) => route(t.worker)?.curve === x!.cable.curve));
