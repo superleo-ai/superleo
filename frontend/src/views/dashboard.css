@@ -135,3 +135,7 @@ button.dsh-host { cursor: pointer; }
   .dsh-sec { border-left: 0; padding-left: 2px; border-top: 1px solid var(--dsh-line); }
   .dsh-hive { border-top: 0; }
 }
+
+/* The icon that swaps to the agents board. */
+.dsh-switch { flex: none; width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid var(--dsh-line); border-radius: 10px; background: transparent; color: var(--dsh-ink-2) !important; cursor: pointer; }
+.dsh-switch:hover { color: var(--dsh-ink) !important; border-color: color-mix(in srgb, var(--dsh-ink) 25%, transparent); }

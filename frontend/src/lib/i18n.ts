@@ -370,6 +370,7 @@ const zh: Record<string,string> = { "Dismiss":"忽略", "Dismiss all":"全部忽
   "Turn right": "向右转",
   "Back to this view": "回到这个视角",
   "Reset to the default view": "恢复默认视角",
+  "Reactor view":"反应堆视图", "Agents view":"智能体视图", "{n} working":"{n} 个工作中", "Ask {name}":"问{name}", "Ask the queen":"问蜂后", "1 machine":"1 台机器", "{n} machines":"{n} 台机器", "queen {name} · {w} workers · {r} remote":"蜂后 {name} · {w} 个工作者 · {r} 个远程", "Runs · 30d":"运行 · 30天", "wk":"周", "{w} this week · {pw} the week before":"本周 {w} · 上周 {pw}", "Success":"成功率", "{n} done":"{n} 完成", "{f} failed · {c} cancelled":"{f} 失败 · {c} 取消", "{cli} plan {n}%":"{cli} 套餐 {n}%", "all time · {n} turns today":"累计 · 今日 {n} 轮", "Working":"工作中", "Remote":"远程", "Tokens today":"今日 Token", "Graph":"图谱", "CPU · heap":"CPU · 堆", "Reactor":"反应堆", "Low success":"成功率低", "now":"现在", "last":"最近", "remote":"远程", "Machine":"机器", "Via":"经由", "Avg run":"平均用时", "Runs":"运行记录", "Talk":"对话", "Run":"运行", "this Mac":"这台 Mac", "CLI":"CLI", "1 terminal":"1 个终端", "{n} terminals":"{n} 个终端", "Recent":"最近", "board·Up next":"接下来", "board·Reply":"回复", "board·New run":"新建运行",
 };
 // English is the keys; the other languages are looked up, and a string a
 // language has no translation for yet stays English.

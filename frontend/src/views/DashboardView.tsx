@@ -25,6 +25,7 @@ import { useFeatures } from "../lib/features";
 import { queenTitle, useQueenName } from "../lib/queenName";
 import { isLegacyConsole, legacyConsoleTitle, pairedDeviceNames, useQueenSession } from "../lib/queenConsole";
 import { withoutCallNotes } from "../lib/format";
+import AgentsBoard, { ViewSwitch, useDashView } from "./AgentsBoard";
 import "./dashboard.css";
 
 type Task = HiveTask & FullTask;
@@ -81,6 +82,15 @@ function Overview({ hive, now, attention, onOpenConversation }: {
   const codingRunning = runs.filter((r) => r.state === "running");
 
   const stats = useStatsData();
+  // Two views of the same page: the agents board (the default) and the
+  // reactor with its charts; the header's icon swaps them.
+  const [view, setView] = useDashView();
+  if (view === "board") {
+    return (
+      <AgentsBoard hive={hive} now={now} attention={attention} onOpenConversation={onOpenConversation} pulse={pulse} hosts={topo.hosts} runs={runs}
+        stats={{ usage: stats.dash?.usage, graph: stats.graph, inv: stats.inv }} onSwitch={setView} />
+    );
+  }
   const live = pulse.live || (stats.dash?.activeRuns?.length ?? 0) > 0;
   const brain = stats.dash?.memoryMode?.startsWith("shared") ? t("shared brain") : stats.dash?.memoryMode || t("local brain");
   const clock = new Date(now).toTimeString().slice(0, 8);
@@ -97,6 +107,7 @@ function Overview({ hive, now, attention, onOpenConversation }: {
           <span className="dsh-chip" title={t("in flight")}><Radio size={12} />{stats.dash?.activeRuns?.length ?? 0}</span>
         </div>
         <span className="dsh-clock"><Clock size={13} />{clock}</span>
+        <ViewSwitch view="reactor" onSwitch={setView} className="dsh-switch" />
       </header>
 
       <Figures hostsLive={hostsLive} hostsAll={hosts.length} running={hiveRunning.length + codingRunning.length} needs={needs.length} />
