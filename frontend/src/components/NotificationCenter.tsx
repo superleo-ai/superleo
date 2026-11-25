@@ -98,7 +98,7 @@ export default function NotificationCenter({
   // wraps to a second row when the pills do not fit, and the bell is not the
   // rightmost thing in it — a panel anchored to the bell's right edge runs off
   // the left of a phone screen.
-  const [pos, setPos] = useState({ top: 0, left: 0, width: 340 });
+  const [pos, setPos] = useState<{ top?: number; bottom?: number; left: number; width: number }>({ top: 0, left: 0, width: 340 });
   useEffect(() => {
     if (!open) return;
     const place = () => {
@@ -107,7 +107,10 @@ export default function NotificationCenter({
       const r = bell.getBoundingClientRect();
       const width = Math.min(340, window.innerWidth - 16);
       const left = Math.min(Math.max(8, r.right - width), window.innerWidth - width - 8);
-      setPos({ top: r.bottom + 8, left, width });
+      // A bell in the lower half (the desk keeps it above the bottom buttons)
+      // opens its panel upward.
+      if (r.top > window.innerHeight / 2) setPos({ bottom: window.innerHeight - r.top + 8, left, width });
+      else setPos({ top: r.bottom + 8, left, width });
     };
     place();
     window.addEventListener("resize", place);
@@ -166,7 +169,7 @@ export default function NotificationCenter({
           className="notif-panel"
           role="dialog"
           aria-label={t("Notifications")}
-          style={{ top: pos.top, left: pos.left, width: pos.width }}
+          style={{ top: pos.top, bottom: pos.bottom, left: pos.left, width: pos.width }}
         >
           <div className="notif-head">
             <span className="notif-title">{t("Notifications")}</span>

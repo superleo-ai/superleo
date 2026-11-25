@@ -36,7 +36,7 @@
 /* The toolbar: a column down the right edge, in the lane the round buttons
    keep at the bottom, in the same place in both modes and on every page. */
 .dk-shell { --dk-tb-right: 25px; --dk-tb-w: 0px; }
-.dk-shell > .dk-toolbar { position: fixed; z-index: 9; top: 48px; right: var(--dk-tb-right); width: 34px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.dk-shell > .dk-toolbar { position: fixed; z-index: 9; bottom: calc(148px + env(safe-area-inset-bottom, 0px)); right: calc(27px + env(safe-area-inset-right, 0px)); width: 34px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .dk-shell .dk-tool, .dk-shell .dk-bell { position: relative; flex: none; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; color: var(--ink-2); }
 .dk-shell .dk-tool:hover, .dk-shell .dk-bell:hover { background: rgba(var(--glass-rgb), .75); color: var(--ink); }
 .dk-shell .dk-tool.on, .dk-shell .dk-bell.on { background: rgba(var(--glass-rgb), .92); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line), 0 1px 3px rgba(0, 0, 0, .06); }
@@ -640,7 +640,7 @@ html[data-desk] body { background: transparent; }
 .dk-world:not(.panel-on) .wl-cam { right: 20px; }
 /* Menu mode: no world behind, so a page takes the width it used to leave
    for it, short of the round buttons' lane down the right. */
-.dk-shell.dk-world.dk-flat > .dk-page { width: auto; justify-self: stretch; margin: 6px 72px 14px 4px; }
+.dk-shell.dk-world.dk-flat > .dk-page { width: auto; justify-self: stretch; margin: 6px 14px 14px 4px; }
 
 /* A page opened full size over the world: the screen of the thing it
    belongs to, in a window with a way back. */
@@ -680,7 +680,7 @@ html[data-desk] body { background: transparent; }
    other page does. */
 /* The same frame as every other page (6px 72px 14px 4px): its cards
    carry 10px of right and 12px of bottom margin themselves. */
-.dk-shell.dk-flat.on-home > .dk { margin: 6px 62px 0 4px; }
+.dk-shell.dk-flat.on-home > .dk { margin: 6px 4px 0 4px; }
 /* In Menu mode the list and the conversation are one card, the way the
    Conversations page is: a hairline between them, round corners only on
    the outside, and neither casts its shadow across the seam. */
@@ -718,3 +718,14 @@ html[data-desk] body { background: transparent; }
 .dk-chat.dk-conv .cv2-phead { min-height: 58px; padding: 0 18px; box-sizing: border-box; }
 .dk-chat.dk-conv .cv2-phead .dk-icon { flex: none; }
 .dk-world.window-on > .dk .cv2-phead { padding-right: 52px; }
+
+/* The right-edge controls float over the page instead of keeping a gutter:
+   one glass pill (dashboards, bell) above the round buttons. On the chat
+   page they rise above the composer. */
+.dk-shell.dk-flat > .dk-toolbar { right: calc(26px + env(safe-area-inset-right, 0px)); width: 40px; padding: 4px 0; gap: 2px; border-radius: 20px;
+  background: rgba(var(--glass-rgb), .86); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 6px 18px rgba(22, 32, 43, .12), 0 0 0 1px rgba(22, 32, 43, .06); }
+.dk-shell.dk-flat .fab-stack { right: calc(26px + env(safe-area-inset-right, 0px)); bottom: calc(62px + env(safe-area-inset-bottom, 0px)); }
+.dk-shell.dk-flat > .dk-toolbar { bottom: calc(166px + env(safe-area-inset-bottom, 0px)); }
+.dk-shell.dk-flat.on-home .fab-stack { bottom: calc(104px + env(safe-area-inset-bottom, 0px)); }
+.dk-shell.dk-flat.on-home > .dk-toolbar { bottom: calc(154px + env(safe-area-inset-bottom, 0px)); }

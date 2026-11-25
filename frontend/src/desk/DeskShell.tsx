@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  LayoutDashboardIcon, PanelRightOpenIcon, PanelRightCloseIcon, BookOpenIcon, HexagonIcon, MessageSquareIcon, PaletteIcon,
+  LayoutDashboardIcon, BookOpenIcon, HexagonIcon, MessageSquareIcon, PaletteIcon,
   PuzzleIcon, SlidersHorizontalIcon, TerminalIcon, XIcon,
-  MoonIcon, SunIcon, CalendarDaysIcon, GlobeIcon,
+  CalendarDaysIcon, GlobeIcon,
   HeartPulseIcon, WorkflowIcon, GaugeIcon,
 } from "lucide-react";
 import DeskStatusBar from "./DeskStatusBar";
@@ -169,8 +169,9 @@ export default function DeskShell({ view, badges, children, overlay, onOpenConve
   const liveRuns = runs.filter((r) => r.state === "running").length;
   const [folded, setFolded] = useState(loadFolded);
   const [paneBusy, setPaneBusy] = useState(false);
+  // The right pane is gone (2026-11-25); the home is the conversation alone.
   const pane: Pane = {
-    folded,
+    folded: true,
     fold: (on) => { setFolded(on); try { localStorage.setItem(FOLD_KEY, on ? "1" : "0"); } catch { /* fine */ } },
     setBusy: setPaneBusy,
   };
@@ -226,13 +227,6 @@ export default function DeskShell({ view, badges, children, overlay, onOpenConve
             pane), then Dashboards, light or dark, and the bell at the edge. */}
         {/* In 3D the world has the right edge to itself. */}
         {mode === "menu" && <div className="dk-toolbar" style={noDrag} role="toolbar">
-          {mode === "menu" && (
-            <button type="button" className={`dk-tool dk-tool-pane${paneShown ? " on" : ""}`} aria-pressed={paneShown}
-              title={paneShown ? t("Hide this pane") : t("Show the hive")} aria-label={paneShown ? t("Hide this pane") : t("Show the hive")} onClick={togglePane}>
-              {paneShown ? <PanelRightCloseIcon size={18} /> : <PanelRightOpenIcon size={18} />}
-              {!paneShown && (paneBusy || liveRuns > 0) && <i className="dk-livedot" />}
-            </button>
-          )}
           {SIDE.map((k) => {
             const Icon = LayoutDashboardIcon;
             return (
@@ -242,11 +236,6 @@ export default function DeskShell({ view, badges, children, overlay, onOpenConve
               </button>
             );
           })}
-          <button type="button" className="dk-tool dk-tool-mode" aria-pressed={theme.mode === "dark"}
-            title={theme.mode === "dark" ? t("Light") : t("Dark")} aria-label={theme.mode === "dark" ? t("Light") : t("Dark")}
-            onClick={() => setTheme({ ...theme, mode: theme.mode === "dark" ? "light" : "dark" })}>
-            {theme.mode === "dark" ? <SunIcon size={18} /> : <MoonIcon size={18} />}
-          </button>
           <NotificationCenter variant="desk" onOpenConversation={onOpenConversation} needs={needs} />
         </div>}
         <nav className="dk-rail" style={drag}>
@@ -284,7 +273,8 @@ export default function DeskShell({ view, badges, children, overlay, onOpenConve
         <FabStack style={noDrag}>
           {world && <SettingsFab onClick={() => window.dispatchEvent(new CustomEvent("superleo:window", { detail: PATHS.settings }))} />}
           <ModeFab world={world} onClick={toggleMode} />
-          <ChatFab onClick={openChat} />
+          {/* On the chat page the chat is the page: no button for it. */}
+          {!(mode === "menu" && withPane) && <ChatFab onClick={openChat} />}
         </FabStack>
         {world && overlay}
         <DeskStatusBar status={status} loading={loading} codingRuns={liveRuns}/>

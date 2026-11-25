@@ -1,0 +1,98 @@
+/* Automation: scheduled prompts as calm cards, one action row each. */
+
+.au-head-actions { display: flex; gap: 8px; align-items: center; }
+
+.au-icon {
+  display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 12px;
+  border: 1px solid var(--border); background: var(--bg-1); color: var(--text-1);
+  cursor: pointer; transition: background .15s, color .15s, border-color .15s, box-shadow .15s;
+}
+.au-icon:hover { background: var(--bg-2); color: var(--text-0); box-shadow: 0 2px 8px rgba(22, 32, 43, .06); }
+.au-icon:disabled { opacity: .5; cursor: default; }
+.au-icon.sm { width: 32px; height: 32px; border-radius: 10px; border-color: transparent; background: transparent; }
+.au-icon.sm:hover, .au-icon.sm[aria-expanded="true"] { background: var(--bg-2); box-shadow: none; }
+.au-spin { animation: au-rot 0.9s linear infinite; }
+@keyframes au-rot { to { transform: rotate(360deg); } }
+
+.au-list { display: flex; flex-direction: column; gap: 12px; max-width: 920px; }
+
+.au-card {
+  border: 1px solid var(--border); border-radius: 18px; background: var(--bg-1);
+  box-shadow: 0 1px 2px rgba(22, 32, 43, .04), 0 8px 24px rgba(22, 32, 43, .05);
+  transition: box-shadow .2s, border-color .2s;
+}
+.au-card:hover { box-shadow: 0 1px 2px rgba(22, 32, 43, .05), 0 12px 32px rgba(22, 32, 43, .08); }
+.au-card.off .au-title, .au-card.off .au-badge { opacity: .55; }
+
+.au-row { display: flex; align-items: center; gap: 14px; padding: 16px 16px 16px 18px; cursor: pointer; outline: none; }
+.au-row:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); border-radius: 18px; }
+
+.au-badge {
+  flex: none; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 13px;
+  background: var(--accent-soft); color: var(--accent);
+}
+.au-badge.run { background: color-mix(in srgb, var(--green, #1f9d55) 14%, transparent); }
+.au-pulse { width: 10px; height: 10px; border-radius: 50%; background: var(--green, #1f9d55); animation: au-pulse 1.2s ease-in-out infinite; }
+@keyframes au-pulse { 50% { transform: scale(1.5); opacity: .5; } }
+
+.au-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.au-title { font-size: 15px; font-weight: 600; color: var(--text-0); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.au-sub { font-size: 13px; color: var(--text-2); }
+.au-dot { margin: 0 6px; color: var(--text-3); }
+
+.au-actions { flex: none; display: flex; align-items: center; gap: 10px; cursor: default; }
+
+.au-run {
+  display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 14px; border-radius: 999px;
+  border: 0; background: var(--text-0); color: var(--bg-1); font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: transform .1s, opacity .15s;
+}
+.au-run:hover { opacity: .88; }
+.au-run:active { transform: scale(.97); }
+.au-run:disabled { opacity: .5; cursor: default; }
+.au-run.stop { background: var(--red); color: #fff; }
+.au-mini-spin { width: 12px; height: 12px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: au-rot .8s linear infinite; }
+
+.au-switch {
+  position: relative; width: 40px; height: 24px; border-radius: 999px; border: 0; padding: 0;
+  background: var(--bg-3, #d5d9df); cursor: pointer; transition: background .2s;
+}
+.au-switch > span {
+  position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .2); transition: transform .2s;
+}
+.au-switch.on { background: var(--green, #1f9d55); }
+.au-switch.on > span { transform: translateX(16px); }
+.au-switch:disabled { opacity: .5; cursor: default; }
+
+.au-more-wrap { position: relative; }
+.au-menu {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; min-width: 200px; padding: 6px;
+  border: 1px solid var(--border); border-radius: 14px; background: var(--bg-1);
+  box-shadow: 0 16px 40px rgba(22, 32, 43, .16);
+}
+.au-menu > button {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border: 0; border-radius: 9px;
+  background: transparent; color: var(--text-0); font-size: 13px; text-align: left; cursor: pointer;
+}
+.au-menu > button:hover { background: var(--bg-2); }
+.au-menu button.danger { color: var(--red); }
+.au-confirm { padding: 8px 6px 4px; }
+.au-confirm-q { font-size: 13px; font-weight: 600; color: var(--text-0); margin: 0 4px 10px; }
+.au-confirm-btns { display: flex; gap: 8px; justify-content: flex-end; }
+.au-confirm-btns button {
+  height: 30px; padding: 0 12px; border-radius: 9px; border: 1px solid var(--border);
+  background: var(--bg-1); color: var(--text-0); font-size: 13px; cursor: pointer;
+}
+.au-confirm-btns button:hover { background: var(--bg-2); }
+.au-confirm-btns button.danger { background: var(--red); border-color: var(--red); color: #fff; }
+
+.au-detail { padding: 0 18px 18px 74px; }
+.au-detail dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 18px; margin: 0 0 12px; font-size: 13px; }
+.au-detail dt { color: var(--text-3); }
+.au-detail dd { margin: 0; color: var(--text-1); }
+.au-detail code { font-family: var(--mono, ui-monospace, monospace); font-size: 12px; padding: 1px 6px; border-radius: 6px; background: var(--bg-2); color: var(--text-2); }
+.au-prompt {
+  white-space: pre-wrap; font-size: 13px; line-height: 1.6; color: var(--text-1);
+  padding: 12px 14px; border-radius: 12px; background: var(--bg-2); max-height: 240px; overflow: auto;
+}

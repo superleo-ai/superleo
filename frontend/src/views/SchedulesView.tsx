@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronRightIcon, SquareIcon, WorkflowIcon } from "lucide-react";
+import { BellIcon, BellRingIcon, ClockIcon, EllipsisIcon, MessageSquareIcon, PlayIcon, RotateCwIcon, SquareIcon, Trash2Icon, WorkflowIcon } from "lucide-react";
+import "./automation.css";
 import {
   CancelScheduledRun,
   DeleteScheduledPrompt,
@@ -52,6 +53,15 @@ export default function SchedulesView({
   const [note, setNote] = useState<Note>(null);
   const [busy, setBusy] = useState("");
   const [confirmDelete, setConfirmDelete] = useState("");
+  const [menuFor, setMenuFor] = useState("");
+  useEffect(() => {
+    if (!menuFor) return;
+    const away = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest(".au-more-wrap")) { setMenuFor(""); setConfirmDelete(""); }
+    };
+    window.addEventListener("mousedown", away);
+    return () => window.removeEventListener("mousedown", away);
+  }, [menuFor]);
   // Folded to one line each; the prompt can run to a page.
   const [open, setOpen] = useState<Set<string>>(() => new Set());
   const toggle = (id: string) =>
@@ -144,57 +154,38 @@ export default function SchedulesView({
   const schedulerDown = status !== null && status.ready && !status.scheduler;
 
   const actions = (
-    <div className="vh-actions">
+    <div className="au-head-actions">
       {/* Asked for from a click, never on load: an unprompted permission
-          dialog is what teaches people to press "block", and a blocked
-          notification cannot be asked for again from script. */}
+          dialog is what teaches people to press "block". */}
       {banners === "default" && (
         <button
-          className="btn ghost sm"
-          title={t("Show a system notification when a scheduled run finishes while this tab is in the background")}
+          className="au-icon"
+          title={t("Enable notifications")}
+          aria-label={t("Enable notifications")}
           onClick={async () => {
             const granted = await requestNotifyPermission();
             setBanners(granted);
-            // One banner the moment it is allowed. Being told "notifications
-            // are on" is not the same as having seen one arrive, and the
-            // difference is where Focus modes and full-screen apps hide.
-            if (granted === "granted") {
-              notifyNow("SuperLeo", "通知已开启 —— 定时任务跑完时会这样提醒你。");
-            }
+            if (granted === "granted") notifyNow("SuperLeo", "通知已开启 —— 定时任务跑完时会这样提醒你。");
           }}
         >
-          🔔 Enable notifications
+          <BellIcon size={16} />
         </button>
       )}
       {banners === "granted" && (
         <button
-          className="btn ghost sm"
+          className="au-icon"
           title={t("Post a test notification now")}
+          aria-label={t("Post a test notification now")}
           onClick={() => {
             const result = notifyNow("SuperLeo", "这是一条测试通知。定时任务跑完时就是这个样子。");
-            setNote(
-              result === "posted"
-                ? {
-                    kind: "ok",
-                    text: "已发出一条测试通知。没看见的话，多半是系统的「专注模式」把它收进了通知中心。",
-                  }
-                : { kind: "err", text: `通知没能发出（${result}）。` },
-            );
+            if (result !== "posted") toast.error(`通知没能发出（${result}）。`);
           }}
         >
-          🔔 试一下
+          <BellRingIcon size={16} />
         </button>
       )}
-      {/* Wrapped rather than passed directly: onClick would hand load()
-          the click event as its `quiet` argument. */}
-      <button className="btn ghost sm" onClick={() => load()} disabled={loading}>
-        {loading ? (
-          <>
-            <span className="spinner" style={{ borderTopColor: "var(--text-1)" }} /> {t("Loading…")}
-          </>
-        ) : (
-          `↻ ${t("Refresh")}`
-        )}
+      <button className="au-icon" title={t("Refresh")} aria-label={t("Refresh")} onClick={() => load()} disabled={loading}>
+        <RotateCwIcon size={16} className={loading ? "au-spin" : ""} />
       </button>
     </div>
   );
@@ -234,166 +225,129 @@ export default function SchedulesView({
         )}
 
         {list.length > 0 && (
-          <div className="record-list">
+          <div className="au-list">
             {list.map((s) => {
               const next = parseTime(s.next_run);
               const last = parseTime(s.last_run);
               const words = describeCron(s.schedule);
               const title = (s.note || "").trim() || firstLine(s.prompt, 70);
-              // Two different things, kept apart on purpose: `acting` is a
-              // binding call in flight (milliseconds), `running` is the agent
-              // turn itself (minutes). Conflating them is what made "Run now"
-              // look finished the moment the click returned.
+              // `acting` is a binding call in flight (milliseconds), `running`
+              // is the agent turn itself (minutes).
               const acting = busy === s.id;
               const running = !!s.running;
               const isOpen = open.has(s.id);
+              const menuOpen = menuFor === s.id;
               return (
-                <div
-                  className={`record-card${s.enabled ? "" : " paused"}`}
-                  key={s.id}
-                >
+                <div className={`au-card${s.enabled ? "" : " off"}${isOpen ? " open" : ""}`} key={s.id}>
                   <div
-                    className="rc-title sched-head"
-                    style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}
+                    className="au-row"
                     role="button"
                     tabIndex={0}
                     aria-expanded={isOpen}
                     onClick={() => toggle(s.id)}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        toggle(s.id);
-                      }
+                      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(s.id); }
                     }}
                   >
-                    <ChevronRightIcon
-                      size={15}
-                      style={{ flexShrink: 0, transition: "transform .15s", transform: isOpen ? "rotate(90deg)" : "none", color: "var(--text-3)" }}
-                    />
-                    <span className={`status-dot ${s.enabled ? "ok" : "unknown"}`} />
-                    <span className="sched-name">{title}</span>
-                    {!s.enabled && <span className="chip">{t("Paused")}</span>}
-                    {running && (
-                      <span className="chip">
-                        <span className="spinner" style={{ borderTopColor: "var(--text-1)" }} />{" "}
-                        {t("Running")}
+                    <span className={`au-badge${running ? " run" : ""}`}>
+                      {running ? <span className="au-pulse" /> : <ClockIcon size={18} strokeWidth={1.8} />}
+                    </span>
+                    <span className="au-main">
+                      <span className="au-title">{title}</span>
+                      <span className="au-sub">
+                        {running ? t("Running") : (
+                          <>
+                            {words || s.schedule}
+                            {s.enabled && next ? <><span className="au-dot">·</span>{fromNow(next)}</> : null}
+                            {!s.enabled && <><span className="au-dot">·</span>{t("Paused")}</>}
+                          </>
+                        )}
                       </span>
-                    )}
-                    {!isOpen && s.enabled && !running && (
-                      <span className="sched-when">
-                        {words || s.schedule}
-                        {next ? ` · ${fromNow(next)}` : ""}
-                      </span>
-                    )}
-                    <span className="sched-actions" onClick={(e) => e.stopPropagation()}>
-                      {/* Run now is the only way to find out whether a schedule
-                          does what was meant without waiting for the hour. It
-                          starts the run and returns; while the run is in flight
-                          the same button stops it, the way the composer's send
-                          button becomes stop mid-answer. */}
+                    </span>
+                    <span className="au-actions" onClick={(e) => e.stopPropagation()}>
                       {running ? (
                         <button
-                          className="btn ghost sm"
+                          className="au-run stop"
                           disabled={acting}
                           title={t("Stop this run")}
-                          onClick={() =>
-                            act(s.id, "Stop", () => CancelScheduledRun(s.id), {
-                              refusalIsFine: true,
-                            })
-                          }
+                          onClick={() => act(s.id, "Stop", () => CancelScheduledRun(s.id), { refusalIsFine: true })}
                         >
-                          <SquareIcon className="size-3 fill-current" /> {t("Stop")}
+                          <SquareIcon size={12} className="fill-current" /> {t("Stop")}
                         </button>
                       ) : (
                         <button
-                          className="btn ghost sm"
+                          className="au-run"
                           disabled={acting}
                           title={t("Run this prompt immediately")}
                           onClick={() => act(s.id, "Run", () => RunScheduledPromptNow(s.id))}
                         >
-                          {acting ? (
-                            <>
-                              <span
-                                className="spinner"
-                                style={{ borderTopColor: "var(--text-1)" }}
-                              />{" "}
-                              {t("Starting…")}
-                            </>
-                          ) : (
-                            t("Run now")
-                          )}
+                          {acting ? <span className="au-mini-spin" /> : <PlayIcon size={13} className="fill-current" />} {t("Run now")}
                         </button>
                       )}
                       <button
-                        className="btn ghost sm"
+                        className={`au-switch${s.enabled ? " on" : ""}`}
+                        role="switch"
+                        aria-checked={s.enabled}
                         disabled={acting}
-                        onClick={() =>
-                          act(s.id, s.enabled ? "Pause" : "Resume", () =>
-                            SetScheduledPromptEnabled(s.id, !s.enabled),
-                          )
-                        }
+                        title={s.enabled ? t("Pause") : t("Resume")}
+                        onClick={() => act(s.id, s.enabled ? "Pause" : "Resume", () => SetScheduledPromptEnabled(s.id, !s.enabled))}
                       >
-                        {s.enabled ? t("Pause") : t("Resume")}
+                        <span />
                       </button>
-                      <button
-                        className="btn ghost sm"
-                        disabled={acting}
-                        onClick={() => {
-                          if (confirmDelete !== s.id) {
-                            setConfirmDelete(s.id);
-                            return;
-                          }
-                          setConfirmDelete("");
-                          act(s.id, "Delete", () => DeleteScheduledPrompt(s.id));
-                        }}
-                      >
-                        {confirmDelete === s.id ? t("Click again to delete") : t("Delete")}
-                      </button>
-                    </span>
-                  </div>
-                  {isOpen && (<>
-                  <div className="rc-row">
-                    <span className="rc-key">{t("When")}</span>
-                    <span className="rc-val">
-                      {words !== "" && <>{words} </>}
-                      <span className="mono">{s.schedule}</span>
-                    </span>
-                  </div>
-                  <div className="rc-row">
-                    <span className="rc-key">{t("Next run")}</span>
-                    <span className="rc-val">
-                      {!s.enabled
-                        ? "—"
-                        : next
-                          ? `${formatStamp(next)} · ${fromNow(next)}`
-                          : "unknown — “Run now” tests it without waiting"}
-                    </span>
-                  </div>
-                  {last && (
-                    <div className="rc-row">
-                      <span className="rc-key">{t("Last run")}</span>
-                      <span className="rc-val">
-                        {formatStamp(last)} · {fromNow(last)}
-                      </span>
-                    </div>
-                  )}
-                  {title.trim() !== s.prompt.trim() && (
-                    <div className="rc-row">
-                      <span className="rc-key">{t("Prompt")}</span>
-                      <span className="rc-val">{s.prompt}</span>
-                    </div>
-                  )}
-                  {!!s.session && (
-                    <div className="rc-row">
-                      <span className="rc-key">{t("Conversation")}</span>
-                      <span className="rc-val">
-                        <button className="link-btn" onClick={() => onOpenConversation(s.session!)}>
-                          {s.session}
+                      <span className="au-more-wrap">
+                        <button
+                          className="au-icon sm"
+                          aria-label={t("More")}
+                          aria-haspopup="menu"
+                          aria-expanded={menuOpen}
+                          onClick={() => { setMenuFor(menuOpen ? "" : s.id); setConfirmDelete(""); }}
+                        >
+                          <EllipsisIcon size={16} />
                         </button>
+                        {menuOpen && (
+                          <div className="au-menu" role="menu">
+                            {confirmDelete === s.id ? (
+                              <div className="au-confirm">
+                                <div className="au-confirm-q">{t("Delete this automation?")}</div>
+                                <div className="au-confirm-btns">
+                                  <button onClick={() => { setConfirmDelete(""); setMenuFor(""); }}>{t("Cancel")}</button>
+                                  <button
+                                    className="danger"
+                                    onClick={() => { setMenuFor(""); act(s.id, "Delete", () => DeleteScheduledPrompt(s.id)); }}
+                                  >
+                                    {t("Delete")}
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                {!!s.session && (
+                                  <button role="menuitem" onClick={() => { setMenuFor(""); onOpenConversation(s.session!); }}>
+                                    <MessageSquareIcon size={14} /> {t("Conversation")}
+                                  </button>
+                                )}
+                                <button role="menuitem" className="danger" onClick={() => setConfirmDelete(s.id)}>
+                                  <Trash2Icon size={14} /> {t("Delete")}
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        )}
                       </span>
+                    </span>
+                  </div>
+                  {isOpen && (
+                    <div className="au-detail">
+                      <dl>
+                        <dt>{t("When")}</dt>
+                        <dd>{words !== "" && <>{words} </>}<code>{s.schedule}</code></dd>
+                        <dt>{t("Next run")}</dt>
+                        <dd>{!s.enabled ? "—" : next ? `${formatStamp(next)} · ${fromNow(next)}` : "—"}</dd>
+                        {last && (<><dt>{t("Last run")}</dt><dd>{formatStamp(last)} · {fromNow(last)}</dd></>)}
+                      </dl>
+                      <div className="au-prompt">{s.prompt}</div>
                     </div>
                   )}
-                  </>)}
                 </div>
               );
             })}
@@ -417,7 +371,7 @@ export default function SchedulesView({
     <div className="view">
       <div className="view-header with-action">
         <div>
-          <div className="view-title">{t("Automation")}{list.length > 0 ? ` (${list.length})` : ""}</div>
+          <div className="view-title">{t("Automation")}</div>
         </div>
         {actions}
       </div>
