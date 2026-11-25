@@ -723,7 +723,9 @@ html[data-desk] body { background: transparent; }
    one glass pill (dashboards, bell) above the round buttons. On the chat
    page they rise above the composer. */
 .dk-shell.dk-flat > .dk-toolbar { right: calc(26px + env(safe-area-inset-right, 0px)); width: 40px; padding: 4px 0; gap: 2px; border-radius: 20px;
-  background: rgba(var(--glass-rgb), .86); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  /* No backdrop-filter: it would make this pill the box the bell's fixed
+     panel is placed in, and throw the panel off screen. */
+  background: rgba(var(--glass-rgb), .97);
   box-shadow: 0 6px 18px rgba(22, 32, 43, .12), 0 0 0 1px rgba(22, 32, 43, .06); }
 .dk-shell.dk-flat .fab-stack { right: calc(26px + env(safe-area-inset-right, 0px)); bottom: calc(62px + env(safe-area-inset-bottom, 0px)); }
 .dk-shell.dk-flat > .dk-toolbar { bottom: calc(166px + env(safe-area-inset-bottom, 0px)); }
