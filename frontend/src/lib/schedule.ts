@@ -240,6 +240,18 @@ export function repeatLabel(it: ScheduleItem): string {
   return [rule, policy].filter(Boolean).join(" · ");
 }
 
+/** The rule alone, for a row: "每天", "每周一、三". Holiday policy stays in the editor. */
+export function repeatShort(it: ScheduleItem): string {
+  const r = it.schedule?.kind === "recurring" && it.schedule.recurrence ? it.schedule.recurrence : it.rrule ? parseRRule(it.rrule) : null;
+  if (!r) return "";
+  const days = new Set(r.byDay ?? []);
+  if (r.freq.toLowerCase() === "weekly" && (r.interval ?? 1) === 1) {
+    if (days.size === 5 && ["MON", "TUE", "WED", "THU", "FRI"].every((d) => days.has(d))) return translate("Weekdays");
+    if (days.size === 2 && days.has("SAT") && days.has("SUN")) return translate("Weekends");
+  }
+  return ruleLabel(r);
+}
+
 /** The lead, for a row: "提前10分钟", nothing when it is at the time. */
 export function leadLabel(it: { remindBeforeMinutes?: number; notify?: string }): string {
   const n = it.remindBeforeMinutes ?? 0;

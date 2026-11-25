@@ -1,17 +1,15 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ArrowUpIcon, CalendarDaysIcon, CheckIcon, ChevronDownIcon, MapPinIcon, PlusIcon, RepeatIcon, XIcon } from "lucide-react";
-import { CallTool, NotedSchedule, SendChat } from "../../wailsjs/go/app/App";
+import { CalendarDaysIcon, CheckIcon, ChevronDownIcon, MapPinIcon, PlusIcon, RepeatIcon, XIcon } from "lucide-react";
+import { CallTool, NotedSchedule } from "../../wailsjs/go/app/App";
 import { app } from "../../wailsjs/go/models";
 import { EventsOn } from "../../wailsjs/runtime";
 import { useI18n } from "../lib/i18n";
-import { useImeGuard } from "../lib/ime";
-import { loadQueenSession } from "../lib/queenConsole";
 import { toast } from "../lib/toasts";
 import {
   addDays, clock, completeCall, createCall, dayHeading, deleteCall, Draft, draftOf, editCalls, Freq, groupByDay, HOLIDAY_POLICIES,
   holidayLabel, isAlarm, isPaused, isTask, leadLabel, localDay, NEW_KINDS, newDraft, NewKind, newKindLabel, notifyOf, readSchedule,
-  repeatLabel, repeats, ringSummary, ScheduleItem, sourceOf, taskEditCalls, timeEditable, timeLabel, ToolCall, UnscheduledTask,
+  repeatLabel, repeatShort, repeats, ringSummary, ScheduleItem, sourceOf, taskEditCalls, timeEditable, timeLabel, ToolCall, UnscheduledTask,
   weekdayLabel, WEEKDAYS,
 } from "../lib/schedule";
 import { ModeChip, ModePicker } from "../components/ModeChip";
@@ -116,7 +114,6 @@ export default function ScheduleView() {
     <div className="view sch-view">
       <div className="view-header with-action sch-head">
         <div className="view-title">{t("Schedule")}</div>
-        <AskQueen onAnswered={() => void load()} />
         <div className="vh-actions sch-actions">
           {from !== today && <button className="sch-btn" onClick={() => jump(today)}>{t("Today")}</button>}
           <label className="sch-datepick" title={t("Go to a date")}>
@@ -142,6 +139,7 @@ export default function ScheduleView() {
 
       <div className={`sch-body${picked ? " with-panel" : ""}`}>
         <div className="sch-scroll">
+          <div className="sch-col">
           {err && <div className="sch-error" role="alert">{err} <button className="sch-link" onClick={() => void load()}>{t("Retry")}</button></div>}
           {!err && !data && loading && <div className="sch-loading"><SkeletonRows n={6} /></div>}
           {data && (
@@ -160,23 +158,26 @@ export default function ScheduleView() {
               {data.unscheduled.length > 0 && (
                 <section className="sch-day sch-unsched">
                   <header className="sch-dayhead"><b>{t("To-dos with no time")}</b><em>{data.unscheduled.length}</em></header>
-                  <ul className="sch-rows">
+                  <ol className="sch-rows">
                     {data.unscheduled.map((task) => (
-                      <li key={task.id} className={`sch-row task${pickedKey === "task:" + task.id ? " on" : ""}`} onClick={() => setPicked({ type: "task", task })}>
+                      <li key={task.id} className={`sch-row task${pickedKey === "task:" + task.id ? " on" : ""}`} tabIndex={0}
+                        onClick={() => setPicked({ type: "task", task })}
+                        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); setPicked({ type: "task", task }); } }}>
+                        <span className="sch-time" />
                         <button className="sch-check" title={t("Mark done")} aria-label={t("Mark done")}
                           onClick={(e) => { e.stopPropagation(); runCall(completeCall(task.id, task.title)).then(() => done(t("Done: {title}", { title: task.title }))).catch((x) => toast.error(String(x?.message ?? x))); }}>
-                          <CheckIcon size={12} />
+                          <CheckIcon size={11} strokeWidth={3} />
                         </button>
-                        <span className="sch-tick"><i className="m-none" /></span>
                         <span className="sch-main"><b>{task.title}</b>{task.notes && <small>{task.notes}</small>}</span>
-                        <ModeChip mode={notifyOf(task)} />
+                        {notifyOf(task) !== "none" && <ModeChip mode={notifyOf(task)} compact />}
                       </li>
                     ))}
-                  </ul>
+                  </ol>
                 </section>
               )}
             </>
           )}
+          </div>
         </div>
         {picked && (
           <aside className="sch-panel" key={pickedKey || (picked.type === "new" ? "new:" + picked.kind + picked.day : "")}>
@@ -207,45 +208,55 @@ function DaySection({ date, items, today, now, pickedKey, onPick, onAdd }: {
   });
   if (isToday && items.length > 0 && nowAt === -1) rows.push(<NowLine key="now" now={now} />);
   return (
-    <section className={`sch-day${isToday ? " today" : ""}`}>
+    <section className={`sch-day${isToday ? " today" : ""}${items.length === 0 ? " empty" : ""}`}>
       <header className="sch-dayhead">
         {head.rel && <b>{head.rel}</b>}
         <span className={head.rel ? "" : "plain"}>{head.date}</span>
-        <em>{items.length || ""}</em>
+        {items.length === 0 && <em>{t("Nothing planned")}</em>}
         <button className="sch-dayadd" title={t("New on this day")} aria-label={t("New on this day")} onClick={onAdd}><PlusIcon size={14} /></button>
       </header>
-      {items.length === 0
-        ? <div className="sch-empty">{t("Nothing planned")}</div>
-        : <ol className="sch-rows">{rows}</ol>}
+      {items.length > 0 && <ol className="sch-rows">{rows}</ol>}
     </section>
   );
 }
 
 function NowLine({ now }: { now: Date }) {
-  return <li className="sch-now" aria-hidden><span>{clock(now.toISOString())}</span><i /><b /></li>;
+  return <li className="sch-now" aria-hidden><span>{clock(now.toISOString())}</span><i /></li>;
 }
 
 function Row({ it, past, on, onPick }: { it: ScheduleItem; past: boolean; on: boolean; onPick: () => void }) {
   const { t } = useI18n();
   const mode = notifyOf(it);
   const rings = ringSummary(it.ringTimes);
-  const meta = [rings, repeatLabel(it), leadLabel(it), it.location].filter(Boolean);
-  const cls = ["sch-row", past && "past", isPaused(it) && "paused", it.completed && "done", on && "on", it.allDay && "allday"].filter(Boolean).join(" ");
+  const rep = repeatShort(it);
+  const lead = leadLabel(it);
+  const task = isTask(it);
+  const end = !it.allDay && !isAlarm(it) && !task && it.endTime && clock(it.endTime) !== clock(it.startTime) ? clock(it.endTime) : "";
+  const cls = ["sch-row", past && "past", isPaused(it) && "paused", it.completed && "done", on && "on", it.allDay && "allday", task && "task"].filter(Boolean).join(" ");
+  const hasMeta = rings || rep || lead || it.location || isPaused(it);
   return (
     <li className={cls} onClick={onPick} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPick(); } }}
       title={it.ringTimes && it.ringTimes.length > 1 ? it.ringTimes.join(" ") : undefined}>
-      <span className={`sch-time${it.allDay ? " allday" : ""}`}>{timeLabel(it)}</span>
-      <span className="sch-tick"><i className={`m-${mode}${isAlarm(it) ? " alarm" : isTask(it) ? " task" : ""}`} /></span>
+      <span className={`sch-time${it.allDay ? " allday" : ""}`}><b>{timeLabel(it)}</b>{end && <small>{end}</small>}</span>
+      {task ? (
+        <button className={`sch-check${it.completed ? " on" : ""}`} title={t("Mark done")} aria-label={t("Mark done")} disabled={it.completed}
+          onClick={(e) => { e.stopPropagation(); runCall(completeCall(it.id, it.title)).then(() => toast.success(t("Done: {title}", { title: it.title }))).catch((x) => toast.error(String(x?.message ?? x))); }}>
+          <CheckIcon size={11} strokeWidth={3} />
+        </button>
+      ) : <span className={`sch-bar m-${mode}`} aria-hidden />}
       <span className="sch-main">
         <b>{it.title || t("Untitled")}</b>
-        {(meta.length > 0 || isPaused(it)) && (
+        {hasMeta && (
           <small>
             {isPaused(it) && <span className="sch-off">{t("Off")}</span>}
-            {meta.join(" · ")}
+            {rings && <span>{rings}</span>}
+            {rep && <span className="sch-rep"><RepeatIcon size={11} />{rep}</span>}
+            {lead && <span>{lead}</span>}
+            {it.location && <span className="sch-loc"><MapPinIcon size={11} />{it.location}</span>}
           </small>
         )}
       </span>
-      <ModeChip mode={mode} />
+      {mode !== "none" && <ModeChip mode={mode} compact />}
     </li>
   );
 }
@@ -525,59 +536,5 @@ function NewEditor({ kind, day, onKind, onClose, onDone }: { kind: NewKind; day:
         <button type="submit" className="sch-btn pri" disabled={busy || !d.title.trim()}>{busy ? t("Saving…") : t("Add")}</button>
       </footer>
     </form>
-  );
-}
-
-/** 说一句来新建: tell the queen, in your own words; she writes it into noted. */
-function AskQueen({ onAnswered }: { onAnswered: () => void }) {
-  const { t } = useI18n();
-  const ime = useImeGuard();
-  const [text, setText] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [answer, setAnswer] = useState<{ text: string; bad?: boolean } | null>(null);
-  const req = useRef("");
-  const answered = useRef(onAnswered);
-  answered.current = onAnswered;
-  useEffect(() => {
-    const end = (p: any, bad: boolean) => {
-      if (!req.current || p?.requestId !== req.current) return;
-      req.current = "";
-      setBusy(false);
-      setAnswer({ text: String((bad ? p.error : p.final) ?? "").trim(), bad });
-      answered.current();
-    };
-    const offs = [EventsOn("chat:done", (p: any) => end(p, false)), EventsOn("chat:error", (p: any) => end(p, true))];
-    return () => offs.forEach((f) => typeof f === "function" && f());
-  }, []);
-  const send = async () => {
-    const s = text.trim();
-    if (!s || busy) return;
-    setBusy(true); setAnswer(null); setText("");
-    try {
-      const session = await loadQueenSession();
-      req.current = await SendChat(session, s, []);
-    } catch (e: any) {
-      setBusy(false);
-      setAnswer({ text: String(e?.message ?? e), bad: true });
-    }
-  };
-  return (
-    <div className="sch-ask">
-      <form onSubmit={(e) => { e.preventDefault(); void send(); }}>
-        <input value={text} onChange={(e) => setText(e.target.value)} {...ime.handlers}
-          onKeyDown={(e) => { if (e.key === "Enter" && ime.composing(e)) e.preventDefault(); }}
-          placeholder={t("Add by saying it…")} aria-label={t("Tell the queen")} />
-        <button type="submit" disabled={!text.trim() || busy} title={t("Send")} aria-label={t("Send")}>
-          {busy ? <span className="sch-spin" /> : <ArrowUpIcon size={16} />}
-        </button>
-      </form>
-      {busy && <div className="sch-said">{t("The queen is on it…")}</div>}
-      {answer && answer.text && (
-        <div className={`sch-said${answer.bad ? " bad" : ""}`}>
-          <span>{answer.text}</span>
-          <button onClick={() => setAnswer(null)} aria-label={t("Close")}><XIcon size={13} /></button>
-        </div>
-      )}
-    </div>
   );
 }
