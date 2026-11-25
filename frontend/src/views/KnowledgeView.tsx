@@ -3,11 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { graphSrc } from "../lib/hivelink";
 import { graphLook } from "../lib/graphframe";
 import { ClipboardSetText } from "../../wailsjs/runtime";
-import { GraphView as startGraphView, MemoryRecall } from "../../wailsjs/go/app/App";
-import { openExternal } from "../lib/openExternal";
-import ImportPanel from "../components/ImportPanel";
-import { SearchIcon, UploadIcon } from "lucide-react";
-import { useImeGuard } from "@/lib/ime";
+import { GraphView as startGraphView } from "../../wailsjs/go/app/App";
 import { useDaylight } from "../lib/useDaylight";
 import { Skeleton, SkeletonLines, SkeletonRows, SkeletonCards } from "../components/Skeleton";
 
@@ -74,30 +70,12 @@ const SERVED = Boolean((window as unknown as Record<string, unknown>).superleoSe
 
 export default function KnowledgeView() {
   const { t } = useI18n();
-  const ime = useImeGuard();
-  // Search and import are occasional; the graph is why the page exists. Both
-  // used to hold a full row apiece above it — a search bar with two buttons and
-  // an import link — so the thing people came to look at started below the
-  // fold. They are icons in the header now, and the search field appears when
-  // it is asked for.
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [importOpen, setImportOpen] = useState(false);
-  const searchRef = useRef<HTMLInputElement | null>(null);
   const [status, setStatus] = useState<GraphStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const frameRef = useRef<HTMLIFrameElement | null>(null);
   const day = useDaylight();
 
-  // Recall, which used to be the Memory page.
-  const [query, setQuery] = useState("");
-  const [recall, setRecall] = useState("");
-  const [searched, setSearched] = useState(false);
-  const [searching, setSearching] = useState(false);
-  const [recallErr, setRecallErr] = useState("");
-  // Bumped to force the iframe to remount, which is the only way to reload a
-  // cross-origin frame from outside it.
-  const [nonce, setNonce] = useState(0);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -124,65 +102,6 @@ export default function KnowledgeView() {
     return () => clearInterval(t);
   }, [status, load]);
 
-  /**
-   * Light the query up on the graph.
-   *
-   * Sent as a message rather than by reaching into the frame's DOM: the frame
-   * is a different origin over HTTP (SuperLeo proxies it), so touching its
-   * document would throw. The view ignores messages it does not understand, so
-   * an older CortexDB simply does not highlight — the recall still works.
-   */
-  // The graph's find is a substring match over node labels, and a recall query
-  // is a question — "AI Agent" is not the name of anything, so forwarding it
-  // verbatim lit up nothing while the graph sat full of agent-go, oss-agent and
-  // the rest. The panel promises "the same search lights up the nodes it is
-  // about"; sending the query's most distinctive word is what makes that true.
-  //
-  // Longest word, because that is the one carrying the meaning: "AI Agent" ->
-  // "Agent", "what do I know about superleo" -> "superleo". A query with no
-  // spaces (any CJK one, and most single terms) is already its own best term
-  // and goes through unchanged.
-  const highlightTerm = (q: string) => {
-    const words = q.split(/[\s,.;:!?()[\]{}"'`]+/).filter(Boolean);
-    if (words.length < 2) return q;
-    return words.reduce((best, w) => (w.length > best.length ? w : best), "");
-  };
-
-  const highlight = useCallback((q: string) => {
-    const w = frameRef.current?.contentWindow;
-    if (!w) return;
-    try {
-      w.postMessage({ type: "cortexdb:highlight", query: q ? highlightTerm(q) : "" }, "*");
-    } catch {
-      // A frame that will not take a message is not a reason to fail a search.
-    }
-  }, []);
-
-  const search = useCallback(async () => {
-    const q = query.trim();
-    if (!q || searching) return;
-    setSearching(true);
-    setRecallErr("");
-    highlight(q);
-    try {
-      setRecall((await MemoryRecall(q)) ?? "");
-      setSearched(true);
-    } catch (e: any) {
-      setRecallErr(String(e?.message || e));
-      setSearched(true);
-    } finally {
-      setSearching(false);
-    }
-  }, [query, searching, highlight]);
-
-  const clearSearch = useCallback(() => {
-    setQuery("");
-    setRecall("");
-    setSearched(false);
-    setRecallErr("");
-    highlight("");
-  }, [highlight]);
-
   const copy = (url: string) => {
     ClipboardSetText(url).then(() => {
       setCopied(true);
@@ -194,49 +113,8 @@ export default function KnowledgeView() {
     status?.backend === "shared" ? "Shared brain" : "Local brain";
 
   const header = (
-    <div className="view-header with-action">
-      <div>
-        <div className="view-title">{translate("Knowledge")}</div>
-        <div className="view-desc">
-          Everything SuperLeo knows, as one graph it reads on every turn.
-        </div>
-      </div>
-      {status?.url && (
-        <div className="vh-actions">
-          <span className="graph-meta">
-            {status.nodes} nodes · {status.edges} edges
-          </span>
-          <button
-            className={`btn ghost sm icon-only${searchOpen ? " on" : ""}`}
-            title="Recall from memory"
-            aria-label="Recall from memory"
-            aria-pressed={searchOpen}
-            onClick={() => {
-              const next = !searchOpen;
-              setSearchOpen(next);
-              if (next) setTimeout(() => searchRef.current?.focus(), 0);
-              else clearSearch();
-            }}
-          >
-            <SearchIcon size={15} />
-          </button>
-          <button
-            className={`btn ghost sm icon-only${importOpen ? " on" : ""}`}
-            title="Import a file into this graph"
-            aria-label="Import a file into this graph"
-            aria-pressed={importOpen}
-            onClick={() => setImportOpen((v) => !v)}
-          >
-            <UploadIcon size={15} />
-          </button>
-          <button className="btn ghost sm" onClick={() => setNonce((n) => n + 1)}>
-            Reload
-          </button>
-          <button className="btn sm" onClick={() => openExternal(status.url)}>
-            Open ↗
-          </button>
-        </div>
-      )}
+    <div className="view-header">
+      <div className="view-title">{translate("Knowledge")}</div>
     </div>
   );
 
@@ -275,66 +153,6 @@ export default function KnowledgeView() {
   } else {
     body = (
       <div className="graph-stage">
-        {searchOpen && (
-        <div className="knowledge-search">
-          <input
-            ref={searchRef}
-            className="input"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onCompositionStart={ime.handlers.onCompositionStart}
-            onCompositionEnd={ime.handlers.onCompositionEnd}
-            onKeyDown={(e) => {
-              // Enter mid-composition accepts a candidate. preventDefault here
-              // would swallow that keystroke and search for a half-typed query.
-              if (e.key === "Enter" && !ime.composing(e)) {
-                e.preventDefault();
-                search();
-              }
-              // Escape closes the field as well as clearing it: it was opened
-              // deliberately, and leaving an empty bar behind is clutter of the
-              // kind this replaced.
-              if (e.key === "Escape") {
-                clearSearch();
-                setSearchOpen(false);
-              }
-            }}
-            placeholder={t("Recall — e.g. what do I know about Alice?")}
-            autoComplete="off"
-          />
-          <button className="btn" onClick={search} disabled={searching || query.trim() === ""}>
-            {searching ? (
-              <>
-                <span className="spinner" /> Searching…
-              </>
-            ) : (
-              "Recall"
-            )}
-          </button>
-          {(searched || query !== "") && (
-            <button className="btn ghost" onClick={clearSearch}>
-              {translate("Clear")}
-            </button>
-          )}
-        </div>
-        )}
-
-        <ImportPanel open={importOpen} onOpenChange={setImportOpen} />
-
-        {recallErr && <div className="report-error">⚠ {recallErr}</div>}
-        {!recallErr && searched && (
-          <div className="knowledge-recall">
-            {recall.trim() === "" ? (
-              <div className="graph-note">
-                Nothing matched. Either the brain holds nothing about that, or recall is
-                unavailable because no embedding model is configured.
-              </div>
-            ) : (
-              <div className="prose-panel">{recall}</div>
-            )}
-          </div>
-        )}
-
         {status?.nodes === 0 && (
           <div className="graph-note">
             {brain} has no entities yet, so the scene is empty. It fills in on its own as SuperLeo
@@ -353,23 +171,12 @@ export default function KnowledgeView() {
           come back on a desktop.
         </div>
         <iframe
-          key={`${graphSrc() ?? status?.url}#${nonce}#${day}`}
+          key={`${graphSrc() ?? status?.url}#${day}`}
           ref={frameRef}
           className="graph-frame"
           src={(graphSrc() ?? status?.url) ? graphLook((graphSrc() ?? status?.url)!, day) : undefined}
           title={t("CortexDB knowledge graph")}
         />
-        <div className="graph-foot">
-          <span className="graph-source">{status?.source}</span>
-          <span>
-            {status?.activity
-              ? "Tool calls light up the nodes they name."
-              : "Structure only — SuperLeo's tool calls do not feed this view's ticker."}
-          </span>
-          <button className="link-btn" onClick={() => status?.url && openExternal(status.url)}>
-            Not drawing? Open it in a browser ↗
-          </button>
-        </div>
       </div>
     );
   }
