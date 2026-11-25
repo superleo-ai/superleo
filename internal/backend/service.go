@@ -65,6 +65,8 @@ type Service struct {
 	// noModel: built without an API model, for a CLI queen engine (nomodel.go).
 	// brain is then nil, and the agent runs on a generator that always refuses.
 	noModel bool
+	// engine is the CLI queen engine a no-model service thinks through (SetEngine).
+	engine *engineHook
 	// promptScheduler is injected by whoever owns the process lifetime (the app,
 	// or the background daemon), because a cron loop outlives a chat turn. Tools
 	// that create schedules — set_reminder — go through it. Guarded by schedMu
@@ -193,7 +195,8 @@ func NewService(s *Settings) (*Service, error) {
 	}
 
 	// --- Brain (LLM): OpenAI-compatible pool. ---
-	var brain domain.Generator = noModelLLM{}
+	hook := &engineHook{}
+	var brain domain.Generator = noModelLLM{engine: hook}
 	if noModel {
 		slog.Info("no API model: the service is built for the CLI queen engine; turns that need SuperLeo's own model are refused")
 	} else {
@@ -474,7 +477,7 @@ func NewService(s *Settings) (*Service, error) {
 		sharedMem: sharedMem,
 		svc:       svc, sb: sb, settings: s, MemoryMode: memMode, dataDir: cfg.DataDir(),
 		claims: newScheduleClaims(),
-		brain:  ownBrain, noModel: noModel, SharedMemoryMCP: sharedMCP,
+		brain:  ownBrain, noModel: noModel, engine: hook, SharedMemoryMCP: sharedMCP,
 		gate: gate, plans: planStore,
 	}
 	// Token accounting for the dashboard: one observer sees every model turn,
@@ -761,7 +764,7 @@ func (s *Service) Stream(ctx context.Context, sessionID, message string, imagePa
 // StreamTurn runs one turn and returns the answer with the tokens it used.
 func (s *Service) StreamTurn(ctx context.Context, sessionID, message string, imagePaths []string, emit func(ev *agent.Event)) (TurnResult, error) {
 	var turn TurnResult
-	if !s.HasModel() {
+	if !s.CanThink() {
 		return turn, ErrNoModel
 	}
 	// Whatever the turn started — a shell command, an MCP call — is bound to

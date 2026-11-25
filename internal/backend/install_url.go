@@ -493,7 +493,8 @@ func (s *Service) finishSkillInstall(ctx context.Context, name, path, how string
 // extractJSON asks the model for one structured decision and decodes it.
 func (s *Service) extractJSON(ctx context.Context, prompt string, schema map[string]interface{}, out interface{}) error {
 	if s.brain == nil {
-		return fmt.Errorf("no LLM configured")
+		// No model of its own: the CLI engine reads the page and decides.
+		return s.extractJSONOnEngine(ctx, prompt, schema, out)
 	}
 	res, err := s.brain.GenerateStructured(ctx, prompt, schema, &domain.GenerationOptions{Temperature: 0})
 	if err != nil {

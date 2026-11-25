@@ -116,7 +116,7 @@ func (s *Service) StreamLong(ctx context.Context, goal string, o LongRunOptions,
 		return nil, fmt.Errorf("superleo: agent service unavailable")
 	}
 	if !s.HasModel() {
-		return nil, ErrNoModel
+		return s.streamLongOnEngine(ctx, goal, o, emit)
 	}
 
 	cfg := agent.LongRunConfig{

@@ -45,7 +45,7 @@ func New(cfg Config) (*Watchdog, error) {
 		Host: MacHost{AppPath: cfg.AppPath},
 		Log:  log, Now: time.Now, Sleep: time.Sleep,
 	}
-	w.Judge = &ChatJudge{Cfg: cfg, Settings: w.settings}
+	w.Judge = &ChatJudge{Cfg: cfg, Settings: w.settings, Engine: w.askEngine}
 	w.init()
 	return w, nil
 }
@@ -71,6 +71,17 @@ func (w *Watchdog) settings(ctx context.Context) (settings, error) {
 		w.Log.Hide(s.LLMKey)
 	}
 	return s, err
+}
+
+// askEngine puts one question to the app's CLI queen engine (AskEngine). An
+// engine takes longer to answer than the app's other calls, so it gets its own
+// timeout.
+func (w *Watchdog) askEngine(ctx context.Context, prompt string) (string, error) {
+	c := *w.API
+	c.Timeout = 3 * time.Minute
+	var out string
+	err := c.Call(ctx, "AskEngine", &out, prompt)
+	return out, err
 }
 
 // Run ticks until ctx ends.

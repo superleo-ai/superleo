@@ -34,6 +34,9 @@ type ChatJudge struct {
 	Settings func(ctx context.Context) (settings, error)
 	Cfg      Config
 	HTTP     *http.Client
+	// Engine asks the app's CLI queen engine one question, for an install
+	// with no API model to judge with. Nil: the drift check is skipped then.
+	Engine func(ctx context.Context, prompt string) (string, error)
 }
 
 const judgePrompt = `你是任务监督员。下面是一个任务的目标和它最近的几步。判断这些步骤是否仍在朝目标推进。
@@ -49,10 +52,21 @@ func (j *ChatJudge) Verdict(ctx context.Context, goal string, steps []string) (s
 		}
 		base, model, key = firstNonEmpty(base, s.LLMBaseURL), firstNonEmpty(model, s.LLMModel), firstNonEmpty(key, s.LLMKey)
 	}
-	if base == "" || model == "" {
-		return "", "", ErrNoJudge
-	}
 	user := "目标：\n" + trunc(goal, 1500) + "\n\n最近的步骤：\n" + strings.Join(steps, "\n")
+	if base == "" || model == "" {
+		if j.Engine == nil {
+			return "", "", ErrNoJudge
+		}
+		out, err := j.Engine(ctx, judgePrompt+"\n\n"+user)
+		if err != nil {
+			if strings.Contains(err.Error(), "no model of its own") {
+				return "", "", ErrNoJudge
+			}
+			return "", "", errors.New("judge engine failed")
+		}
+		v, r := parseVerdict(out)
+		return v, r, nil
+	}
 	body, _ := json.Marshal(map[string]any{
 		"model": model, "temperature": 0, "max_tokens": 800,
 		"messages": []map[string]string{{"role": "system", "content": judgePrompt}, {"role": "user", "content": user}},

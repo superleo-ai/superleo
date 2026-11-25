@@ -110,6 +110,17 @@ func (a *App) SetQueenEngineList(engines []backend.QueenEngineEntry, publicURL s
 		next = *s
 	}
 	a.mu.Unlock()
+	// With no model of its own, SuperLeo's own agent is not an engine that
+	// can take a turn: it is kept in the list, switched off, so nothing falls
+	// back onto a model that is not there.
+	if !next.HasModel() {
+		engines = append([]backend.QueenEngineEntry(nil), engines...)
+		for i := range engines {
+			if engines[i].Engine == backend.QueenEngineSuperLeo {
+				engines[i].Enabled = false
+			}
+		}
+	}
 	next.Hive.SetQueenChain(engines)
 	next.Hive.PublicURL = strings.TrimSpace(publicURL)
 	if err := a.SaveSettings(next); err != nil {

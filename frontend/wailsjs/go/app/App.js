@@ -30,6 +30,10 @@ export function AnswerCCPermission(arg1, arg2, arg3) {
   return window['go']['app']['App']['AnswerCCPermission'](arg1, arg2, arg3);
 }
 
+export function AskEngine(arg1) {
+  return window['go']['app']['App']['AskEngine'](arg1);
+}
+
 export function AskIn(arg1, arg2, arg3, arg4) {
   return window['go']['app']['App']['AskIn'](arg1, arg2, arg3, arg4);
 }

@@ -348,7 +348,7 @@ func (a *App) answerCall(c *agentlinkpb.Call) *agentlinkpb.Reply {
 		r.Error = c.GetMethod() + " is not something core can ask an agent to do"
 		return r
 	}
-	if c.GetMethod() == "SendChat" && !a.hasModel() {
+	if c.GetMethod() == "SendChat" && !a.canThink() {
 		r.Error = "this agent has no model of its own to do work with"
 		return r
 	}

@@ -3,6 +3,7 @@ package watchdog
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -626,4 +627,28 @@ type judgeFn func(goal string)
 func (f judgeFn) Verdict(_ context.Context, goal string, _ []string) (string, string, error) {
 	f(goal)
 	return OnTrack, "", nil
+}
+
+// With no API model, the judge asks the app's engine instead of skipping.
+func TestJudgeAsksTheEngineWhenThereIsNoModel(t *testing.T) {
+	j := &ChatJudge{
+		Settings: func(context.Context) (settings, error) { return settings{}, nil },
+		Engine: func(_ context.Context, prompt string) (string, error) {
+			return `{"verdict":"off_track","reason":"idle"}`, nil
+		},
+	}
+	v, r, err := j.Verdict(context.Background(), "goal", []string{"step"})
+	if err != nil || v != OffTrack || r != "idle" {
+		t.Fatalf("%q %q %v", v, r, err)
+	}
+	j.Engine = func(context.Context, string) (string, error) {
+		return "", errors.New("HTTP 500 no model of its own: add")
+	}
+	if _, _, err := j.Verdict(context.Background(), "goal", []string{"step"}); !errors.Is(err, ErrNoJudge) {
+		t.Fatalf("%v", err)
+	}
+	j.Engine = nil
+	if _, _, err := j.Verdict(context.Background(), "goal", []string{"step"}); !errors.Is(err, ErrNoJudge) {
+		t.Fatalf("%v", err)
+	}
 }

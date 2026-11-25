@@ -238,7 +238,7 @@ var mailIDs = regexp.MustCompile(`— id ([0-9a-f-]{36}),`)
 func (a *App) wakeFor(m backend.HiveMessage) {
 	wake := a.wakeFn
 	if wake == nil {
-		if !a.hasModel() {
+		if !a.canThink() {
 			return // nothing here can run a turn; the inbox keeps it
 		}
 		wake = func(session, prompt string) { a.sendChat(session, prompt, nil, true) }

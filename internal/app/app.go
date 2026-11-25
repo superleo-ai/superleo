@@ -487,6 +487,11 @@ func (a *App) rebuild() {
 	}
 	a.buildErr = ""
 	a.svc = svc
+	// With no model of its own the service thinks through the queen's CLI
+	// engine for everything that is not a chat turn on screen.
+	if !svc.HasModel() {
+		svc.SetEngine(a.engineOneShot)
+	}
 	if yolo {
 		svc.ToolGate().StartYolo()
 	}
@@ -932,14 +937,16 @@ func (a *App) sendChat(sessionID, message string, imagePaths []string, own bool)
 // texts pasted in a row). SuperLeo's model still answers when the engine
 // cannot.
 func (a *App) startTurn(requestID, sessionID, message string, imagePaths []string, own bool) {
-	if !own {
+	// own keeps a turn from the engine only while there is a model of its own
+	// to take it: with none, the engine is the only one there is.
+	if !own || !a.hasModel() {
 		if engine := a.queenEngineFor(sessionID, imagePaths); engine != "" {
 			busy := a.sessionBusy(sessionID)
 			if busy {
 				slog.Info("queen engine: conversation still answering; this turn gets a session of its own",
 					"session", sessionID, "engine", engine, "turn", requestID)
 			}
-			a.routeToEngine(requestID, sessionID, engine, message, busy)
+			a.routeToEngine(requestID, sessionID, engine, message, busy, imagePaths...)
 			return
 		}
 	}

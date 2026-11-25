@@ -21,6 +21,8 @@ export function AlarmRings(arg1:number):Promise<any>;
 
 export function AnswerCCPermission(arg1:string,arg2:string,arg3:string):Promise<void>;
 
+export function AskEngine(arg1:string):Promise<string>;
+
 export function AskIn(arg1:string,arg2:string,arg3:string,arg4:string):Promise<app.DirectReply>;
 
 export function AskRemoteAgent(arg1:string,arg2:string):Promise<backend.RemoteResult>;

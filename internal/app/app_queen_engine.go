@@ -173,24 +173,21 @@ func (a *App) queenRunPlace(r QueenRunRequest) (cwd, session string) {
 }
 
 // queenEngineFor is the engine a turn goes to, or "" for this app's model.
-// SuperLeo first in the list with no model to answer with hands the turn to
-// the first engine after it.
+// With no model of its own, a turn of any origin goes to the first engine
+// switched on (SuperLeo's own agent is not one that can take it): a schedule,
+// the hive's mail, a channel, a picture. With one, SuperLeo first in the list
+// keeps the person's turn for its own model.
 func (a *App) queenEngineFor(sessionID string, imagePaths []string) string {
 	a.mu.Lock()
 	s := a.settings
 	a.mu.Unlock()
-	if engine := queenEngineRoute(s, sessionID, len(imagePaths) > 0); engine != "" {
-		return engine
-	}
-	if !queenTurn(s, sessionID, len(imagePaths) > 0) || a.hasModel() {
+	if !a.hasModel() {
+		if on := noModelEngines(s); len(on) > 0 {
+			return on[0]
+		}
 		return ""
 	}
-	for _, e := range s.Hive.QueenEnginesOn() {
-		if e != backend.QueenEngineSuperLeo {
-			return e
-		}
-	}
-	return ""
+	return queenEngineRoute(s, sessionID, len(imagePaths) > 0)
 }
 
 // queenEngineRoute decides who thinks for a turn: the first engine in the
@@ -236,7 +233,7 @@ func personalSession(id string) bool {
 // one at a time, each that cannot take the turn handing it to the next one
 // switched on (queenEnginesAfter). busy: the conversation's own session is
 // still answering, so an engine starts a session of its own for this turn.
-func (a *App) routeToEngine(requestID, sessionID, engine, message string, busy bool) {
+func (a *App) routeToEngine(requestID, sessionID, engine, message string, busy bool, pictures ...string) {
 	a.mu.Lock()
 	var s backend.Settings
 	if a.settings != nil {
@@ -354,6 +351,7 @@ func (a *App) routeToEngine(requestID, sessionID, engine, message string, busy b
 		if earlier := handoffText(unseen); earlier != "" {
 			o.Prompt = earlier + message
 		}
+		o.Prompt += pictureNote(pictures)
 
 		// The answer as it is written. Claude and pi send a message's text
 		// twice, as deltas while they write and whole once they have; a
