@@ -40,6 +40,8 @@ export interface Hive {
   /** The relay agents (agent_link.relay_only): not machines, but the named
    *  agents they serve are drawn as their own group. */
   relays?: RelayAgent[];
+  /** A queen on a cluster can start and retire worker pods. */
+  spawner?: { enabled: boolean; max: number };
 }
 
 /** A relay agent: what it serves (openclaw, hermes, pi …) and what is
@@ -95,6 +97,7 @@ export function useHive(): Hive {
           engine: s.queen_engine ?? "",
           engineNow: s.queen_engine_now ?? "",
           relays: Array.isArray(s.relays) ? s.relays : [],
+          spawner: s.spawner,
           members: [...(s.members ?? [])].sort((a: HiveMember, b: HiveMember) => a.name.localeCompare(b.name, undefined, { numeric: true })),
           // The first load seeds the orders; after that the stream is the source.
           tasks: cur.loaded ? cur.tasks : [...(s.tasks ?? [])].slice(-80).reverse(),

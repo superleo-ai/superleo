@@ -4,7 +4,7 @@ import {
   LayoutDashboardIcon, ChartColumnIcon, PanelRightOpenIcon, PanelRightCloseIcon, BookOpenIcon, HexagonIcon, MessageSquareIcon, PaletteIcon,
   MessagesSquareIcon, PuzzleIcon, SlidersHorizontalIcon, TerminalIcon, XIcon,
   MoonIcon, SunIcon, CalendarDaysIcon, GlobeIcon,
-  HeartPulseIcon, WorkflowIcon,
+  HeartPulseIcon, WorkflowIcon, GaugeIcon,
 } from "lucide-react";
 import DeskStatusBar from "./DeskStatusBar";
 import World from "../world/World";
@@ -25,6 +25,7 @@ import "../canvas/canvas.css";
 import "./desk.css";
 
 import { setDeskWorld } from "../lib/deskWorld";
+import { focusInWorld } from "../world/bus";
 const served = Boolean((window as unknown as Record<string, unknown>).superleoServed);
 export const drag = { "--wails-draggable": "drag" } as React.CSSProperties;
 export const noDrag = { "--wails-draggable": "no-drag" } as React.CSSProperties;
@@ -61,7 +62,7 @@ const RAIL: { key: ViewKey; label: string; Icon: typeof HexagonIcon; cls: string
   { key: "conversations", label: "Conversations", Icon: MessagesSquareIcon, cls: "dk-a-rec" },
   { key: "schedule", label: "Schedule", Icon: CalendarDaysIcon, cls: "dk-a-sched" },
   { key: "wellbeing", label: "Wellbeing", Icon: HeartPulseIcon, cls: "dk-a-sched" },
-  { key: "hive", label: "Hive", Icon: HexagonIcon, cls: "dk-a-hive" },
+  { key: "hive", label: "Dashboard", Icon: GaugeIcon, cls: "dk-a-hive" },
   { key: "routines", label: "Automation", Icon: WorkflowIcon, cls: "dk-a-sched" },
   { key: "coding", label: "Coding", Icon: TerminalIcon, cls: "dk-a-code" },
   { key: "knowledge", label: "Knowledge", Icon: BookOpenIcon, cls: "dk-a-know" },
@@ -72,7 +73,7 @@ const RAIL: { key: ViewKey; label: string; Icon: typeof HexagonIcon; cls: string
 const SIDE: ViewKey[] = ["dashboards", "stats"];
 
 export const TITLES: Record<ViewKey, string> = {
-  home: "", chat: "Chat", conversations: "Conversations", tasks: "Needs your attention", schedule: "Schedule", dashboards: "Dashboards", wellbeing: "Wellbeing", hive: "Hive", agents: "Bees", routines: "Automation", coding: "Coding", knowledge: "Knowledge",
+  home: "", chat: "Chat", conversations: "Conversations", tasks: "Needs your attention", schedule: "Schedule", dashboards: "Dashboards", wellbeing: "Wellbeing", hive: "Dashboard", agents: "Bees", routines: "Automation", coding: "Coding", knowledge: "Knowledge",
   skills: "Skills", mcp: "MCP", stats: "Stats", settings: "Settings",
 };
 
@@ -125,10 +126,25 @@ export default function DeskShell({ view, badges, children, overlay, onOpenConve
     const esc = (e: KeyboardEvent) => {
       if (e.key === "Escape" && !(e.target as HTMLElement)?.closest?.("input,textarea,[contenteditable=true]")) setMode((m) => (m === "window" ? "world" : m));
     };
+    // A page asks to show something in the world (the dashboard's machines
+    // and agents): the world comes up, without changing the kept mode, and
+    // the thing is selected once the world has it.
+    let tries = 0;
+    let retry = 0;
+    const focus = (e: Event) => {
+      const d = (e as CustomEvent<{ kind: string; id: string }>).detail;
+      if (!d?.kind) return;
+      setMode("world");
+      window.clearTimeout(retry);
+      tries = 0;
+      const again = () => { if (!focusInWorld(d.kind, d.id) && ++tries < 20) retry = window.setTimeout(again, 150); };
+      retry = window.setTimeout(again, 0);
+    };
+    window.addEventListener("superleo:world-focus", focus);
     window.addEventListener("keydown", esc);
     window.addEventListener("superleo:window", open);
     window.addEventListener("superleo:theme", theme);
-    return () => { window.removeEventListener("keydown", esc); window.removeEventListener("superleo:window", open); window.removeEventListener("superleo:theme", theme); };
+    return () => { window.clearTimeout(retry); window.removeEventListener("superleo:world-focus", focus); window.removeEventListener("keydown", esc); window.removeEventListener("superleo:window", open); window.removeEventListener("superleo:theme", theme); };
   }, [navigate]);
   const world = mode !== "menu";
   // The App decides which toasts to draw by this, and must not draw them twice.

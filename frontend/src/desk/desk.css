@@ -604,6 +604,7 @@ html[data-desk] body { background: transparent; }
 .dk-world .dk-page.page-settings, .dk-world .dk-page.page-knowledge, .dk-world .dk-page.page-stats,
 .dk-world .dk-page.page-records, .dk-world .dk-page.page-dashboards, .dk-world .dk-page.page-skills,
 .dk-world .dk-page.page-mcp, .dk-world .dk-page.page-coding { width: 600px; }
+.dk-world .dk-page.page-hive { width: min(1180px, calc(100% - 90px)); }
 
 /* Needs you, as a panel: compact rows; the selected one is the crate that is
    lit in the world. */
@@ -629,7 +630,6 @@ html[data-desk] body { background: transparent; }
 .dk-world .hive-roster-row { cursor: pointer; border-radius: 10px; }
 .dk-world .hive-roster-row:hover { background: #f4f7fb; }
 .dk-world .hive-roster-row.on { background: #eef3ff; box-shadow: inset 3px 0 0 #2f5bea; }
-.dk-world .dk-page.page-hive { width: 520px; }
 .dk-world .dk-page.page-agents { width: 620px; }
 /* In 3D mode the world is the whole screen: pages show only as a window
    over it, and the rail and lists are Menu mode's (panel-on). Home's

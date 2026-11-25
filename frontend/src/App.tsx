@@ -8,7 +8,7 @@ import StatusBar from "./components/StatusBar";
 import ChatView from "./views/ChatView";
 import StatsView from "./views/StatsView";
 import WellbeingView from "./views/WellbeingView";
-import HiveView from "./views/HiveView";
+import DashboardView from "./views/DashboardView";
 import AgentsView from "./views/AgentsView";
 import StandingView from "./views/StandingView";
 import SchedulesView from "./views/SchedulesView";
@@ -202,9 +202,9 @@ export default function App() {
       <Route path="/schedule" element={<ScheduleView />} />
       <Route path="/stats" element={<StatsView />} />
       <Route path="/wellbeing" element={<FeatureGate feature="wellbeing"><WellbeingView /></FeatureGate>} />
-      {/* Everything under /hive is the Hive screen's own to route:
-          the overview, and one page per task. */}
-      <Route path="/hive/*" element={<HiveView />} />
+      {/* Everything under /hive is the Dashboard's own to route: the
+          overview, and one page per hive task. */}
+      <Route path="/hive/*" element={<DashboardView attention={attention.items} onOpenConversation={openConversation} />} />
       <Route path="/agents" element={<StandingView />} />
       <Route path="/routines" element={<SchedulesView status={status} log={runs} onOpenConversation={openConversation} />} />
       <Route path="/coding" element={<FeatureGate feature="coding"><AgentsView /></FeatureGate>} />

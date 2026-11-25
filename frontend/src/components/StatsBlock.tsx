@@ -84,7 +84,7 @@ export function useStatChoice(): [string[], (next: string[]) => void] {
 
 /** The ledger's totals, when a figure needs them: once now, then after each
  *  turn the core finishes. */
-function useUsage(wanted: boolean) {
+export function useUsage(wanted = true) {
   const [usage, setUsage] = useState<Sources["usage"]>(null);
   useEffect(() => {
     if (!wanted) return;
