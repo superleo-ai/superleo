@@ -262,7 +262,7 @@ func (g *ToolGate) AuditPath() string {
 //
 // Deliberately not agent.DefaultPermissionPolicy. That one gates every tool
 // whose name contains create / update / ingest / write / edit, which in this
-// app is add_record, upsert_person, memory_update, ingest_document, fs_write
+// app is add_schedule, memory_update, ingest_document, fs_write
 // and a dozen more — a normal turn would raise five or six prompts. A person
 // asked to approve everything approves everything, and a gate that trains the
 // user to click yes is worse than no gate, because it also carries the claim

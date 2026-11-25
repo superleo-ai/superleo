@@ -2459,7 +2459,6 @@ export namespace app {
 	    long_task_max_tokens: number;
 	    pii_redaction: boolean;
 	    disable_ptc: boolean;
-	    cliproxy_enabled: boolean;
 	    llm_base_url: string;
 	    llm_model: string;
 	    memory_backend: string;
@@ -2490,7 +2489,6 @@ export namespace app {
 	        this.long_task_max_tokens = source["long_task_max_tokens"];
 	        this.pii_redaction = source["pii_redaction"];
 	        this.disable_ptc = source["disable_ptc"];
-	        this.cliproxy_enabled = source["cliproxy_enabled"];
 	        this.llm_base_url = source["llm_base_url"];
 	        this.llm_model = source["llm_model"];
 	        this.memory_backend = source["memory_backend"];
@@ -3196,46 +3194,6 @@ export namespace backend {
 		    }
 		    return a;
 		}
-	}
-	export class CLIProxyAccount {
-	    file: string;
-	    provider: string;
-	    account: string;
-	    project: string;
-	    expires: string;
-	    disabled: boolean;
-	
-	    static createFrom(source: any = {}) {
-	        return new CLIProxyAccount(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.file = source["file"];
-	        this.provider = source["provider"];
-	        this.account = source["account"];
-	        this.project = source["project"];
-	        this.expires = source["expires"];
-	        this.disabled = source["disabled"];
-	    }
-	}
-	export class CLIProxyProvider {
-	    id: string;
-	    label: string;
-	    needs_project: boolean;
-	    note: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new CLIProxyProvider(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
-	        this.label = source["label"];
-	        this.needs_project = source["needs_project"];
-	        this.note = source["note"];
-	    }
 	}
 	export class Channel {
 	    id: string;
@@ -3970,8 +3928,6 @@ export namespace backend {
 	}
 	export class LifeData {
 	    schedules: any[];
-	    records: any[];
-	    persons: Record<string, any>;
 	    reminders: any[];
 	
 	    static createFrom(source: any = {}) {
@@ -3981,8 +3937,6 @@ export namespace backend {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.schedules = source["schedules"];
-	        this.records = source["records"];
-	        this.persons = source["persons"];
 	        this.reminders = source["reminders"];
 	    }
 	}
@@ -4615,8 +4569,6 @@ export namespace backend {
 	    disable_ptc: boolean;
 	    pii_redaction: boolean;
 	    avatar_port: number;
-	    cliproxy_enabled: boolean;
-	    cliproxy_port: number;
 	    proxy?: ProxySettings;
 	    memory_backend: string;
 	    shared_memory_endpoint: string;
@@ -4690,8 +4642,6 @@ export namespace backend {
 	        this.disable_ptc = source["disable_ptc"];
 	        this.pii_redaction = source["pii_redaction"];
 	        this.avatar_port = source["avatar_port"];
-	        this.cliproxy_enabled = source["cliproxy_enabled"];
-	        this.cliproxy_port = source["cliproxy_port"];
 	        this.proxy = this.convertValues(source["proxy"], ProxySettings);
 	        this.memory_backend = source["memory_backend"];
 	        this.shared_memory_endpoint = source["shared_memory_endpoint"];

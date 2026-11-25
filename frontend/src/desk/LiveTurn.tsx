@@ -88,8 +88,12 @@ function savedLine(t: TraceItem): string {
   switch (t.tool) {
     case "add_schedule": return `Calendar: ${s("title")} · ${when(a.start_at)}${s("location") ? ` · ${s("location")}` : ""}`;
     case "set_reminder": return `Reminder: ${s("title")} · ${/^\d\d:\d\d$/.test(s("remind_at")) ? `every day ${s("remind_at")}` : when(a.remind_at)}`;
-    case "add_record": return `Noted: ${s("title") || s("body").slice(0, 80)}`;
-    case "upsert_person": return `Person: ${s("name")}${s("relation") ? ` · ${s("relation")}` : ""}`;
+    case "mcp_noted_create_note": return `Noted: ${s("title") || s("content").slice(0, 80)}`;
+    case "mcp_noted_upsert_person": {
+      const f = (a.fields ?? {}) as Record<string, unknown>;
+      const rel = typeof f.relation === "string" ? f.relation.trim() : "";
+      return `Person: ${s("name")}${rel ? ` · ${rel}` : ""}`;
+    }
     default: return "";
   }
 }

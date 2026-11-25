@@ -211,16 +211,6 @@ type Settings struct {
 	// Avatar driver server port (127.0.0.1:AvatarPort).
 	AvatarPort int `json:"avatar_port"`
 
-	// CLIProxyEnabled runs an embedded CLIProxyAPI (127.0.0.1:CLIProxyPort) and
-	// routes the brain through it, so the agent uses the Claude Code / Codex /
-	// Gemini CLI subscriptions whose credentials live in <data>/cliproxy/auths
-	// instead of LLMBaseURL + LLMKey. LLMModel still selects the model — it must
-	// be one the proxy serves (see the model list in Settings).
-	CLIProxyEnabled bool `json:"cliproxy_enabled"`
-
-	// CLIProxyPort is the local port the embedded proxy binds (loopback only).
-	CLIProxyPort int `json:"cliproxy_port"`
-
 	// Proxy is the network proxy SuperLeo's own outside requests and the
 	// agent CLIs it starts go through (proxy.go): the environment by
 	// default, off, the system's, or a URL.
@@ -579,9 +569,6 @@ func (s *Settings) SharedMemoryTokenResolved() string {
 const (
 	defaultMaxRds  = 40
 	defaultAvatarP = 47615
-	// DefaultCLIProxyPort is deliberately off the well-known range to avoid
-	// colliding with dev servers.
-	DefaultCLIProxyPort = 43517
 )
 
 // DataDir returns the SuperLeo data directory (~/.superleo),
@@ -614,22 +601,20 @@ func settingsPath() string { return filepath.Join(DataDir(), "settings.json") }
 // cloud endpoint or API key is assumed.
 func defaults() *Settings {
 	s := &Settings{
-		LLMBaseURL:      envOr("LLM_BASE", ""),
-		LLMKey:          envOr("LLM_KEY", ""),
-		LLMModel:        envOr("LLM_MODEL", ""),
-		EmbedBaseURL:    envOr("EMBED_BASE", ""),
-		EmbedKey:        envOr("EMBED_KEY", ""),
-		EmbedModel:      envOr("EMBED_MODEL", ""),
-		SearchBaseURL:   envOr("SEARCH_BASE", ""),
-		SearchKey:       envOr("SEARCH_KEY", ""),
-		SearchModel:     envOr("SEARCH_MODEL", ""),
-		SearchNative:    envOr("SEARCH_NATIVE", ""),
-		WorkspaceDir:    filepath.Join(DataDir(), "workspace"),
-		MaxRounds:       defaultMaxRds,
-		Headless:        true,
-		AvatarPort:      defaultAvatarP,
-		CLIProxyEnabled: true,
-		CLIProxyPort:    DefaultCLIProxyPort,
+		LLMBaseURL:    envOr("LLM_BASE", ""),
+		LLMKey:        envOr("LLM_KEY", ""),
+		LLMModel:      envOr("LLM_MODEL", ""),
+		EmbedBaseURL:  envOr("EMBED_BASE", ""),
+		EmbedKey:      envOr("EMBED_KEY", ""),
+		EmbedModel:    envOr("EMBED_MODEL", ""),
+		SearchBaseURL: envOr("SEARCH_BASE", ""),
+		SearchKey:     envOr("SEARCH_KEY", ""),
+		SearchModel:   envOr("SEARCH_MODEL", ""),
+		SearchNative:  envOr("SEARCH_NATIVE", ""),
+		WorkspaceDir:  filepath.Join(DataDir(), "workspace"),
+		MaxRounds:     defaultMaxRds,
+		Headless:      true,
+		AvatarPort:    defaultAvatarP,
 		// Local memory is the default: a fresh install must not depend on a
 		// server somewhere else on the network.
 		MemoryBackend:         MemoryBackendLocal,
@@ -739,9 +724,6 @@ func (s *Settings) backfill(def *Settings) {
 	}
 	if s.AvatarPort <= 0 {
 		s.AvatarPort = def.AvatarPort
-	}
-	if s.CLIProxyPort <= 0 {
-		s.CLIProxyPort = def.CLIProxyPort
 	}
 	s.registerWindow()
 	// An older settings file has no memory_backend; it was on local memory, so

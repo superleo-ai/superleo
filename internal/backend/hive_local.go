@@ -401,7 +401,6 @@ func LocalWorkerSettings(queen Settings, name, joinURL, joinToken, advertise str
 	w.WebhookURL, w.WebhookSecret = "", ""
 	w.Channels = []Channel{}
 	w.APNs = APNsSettings{}
-	w.CLIProxyEnabled = false
 	w.AvatarPort = 0
 	w.RemoteAgents = RemoteAgents{}
 	w.Headless = true

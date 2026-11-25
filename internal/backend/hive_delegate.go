@@ -85,9 +85,8 @@ var queenKeeps = map[string]bool{
 	"task_complete": true, "task_blocked": true, "search_available_tools": true,
 	// talking to the person, and the shape of the answer
 	"notify_user": true, "ui_block_rules": true, "resolve_datetime": true,
-	// her own records, reminders and schedules: they live, and ring, on her
-	"add_record": true, "add_schedule": true, "upsert_person": true, "search_records": true,
-	"list_schedules": true, "list_reminders": true, "set_reminder": true,
+	// her own reminders and schedules: they live, and ring, on her
+	"add_schedule": true, "list_schedules": true, "list_reminders": true, "set_reminder": true,
 	"memory_save": true, "memory_update": true, "memory_delete": true,
 	"list_deliverables": true, "status": true, "doctor": true, "attention": true,
 	"devices": true, "linked_agents": true, "coding_runs": true, "standing_agents": true,

@@ -73,16 +73,8 @@ jobs:
       - name: go test
         run: go test ./... -count=3 -timeout 15m
 
-      # A gate for everything but the tests that start the embedded proxy:
-      # CLIProxyAPI's Server.Start reads what its watcher's UpdateClients
-      # writes, a race inside the dependency and not ours to fix. While the
-      # whole run was advisory, two races of our own sat in it unread.
       - name: go test -race
-        run: go test ./... -race -count=1 -timeout 20m -skip 'TestEffectiveRoutesThroughProxy|TestCLIProxyAccounts|TestCLIProxyLifecycle|TestAccountChangesAreNotRevertedByTheProxy'
-
-      - name: go test -race (dependency races, advisory)
-        continue-on-error: true
-        run: go test ./... -race -count=1 -timeout 20m -run 'TestEffectiveRoutesThroughProxy|TestCLIProxyAccounts|TestCLIProxyLifecycle|TestAccountChangesAreNotRevertedByTheProxy'
+        run: go test ./... -race -count=1 -timeout 20m
 
   frontend:
     name: Frontend

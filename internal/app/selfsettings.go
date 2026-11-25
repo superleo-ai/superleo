@@ -183,25 +183,7 @@ func (a *App) selfSectionState(sec string, cfg *backend.Settings) map[string]any
 	a.mu.Unlock()
 	switch sec {
 	case "model":
-		source := "custom_api"
-		if cfg.CLIProxyEnabled {
-			source = "accounts"
-		}
-		accounts := []map[string]any{}
-		for _, ac := range a.CLIProxyAccounts() {
-			accounts = append(accounts, map[string]any{
-				"provider": ac.Provider, "account": ac.Account, "project": ac.Project,
-				"expires": ac.Expires, "enabled": !ac.Disabled, "file": ac.File,
-			})
-		}
-		out := map[string]any{"source": source, "accounts": accounts, "ready": svc != nil}
-		a.mu.Lock()
-		p, perr := a.proxy, a.proxyErr
-		a.mu.Unlock()
-		if p != nil || perr != "" {
-			out["accounts_proxy"] = map[string]any{"running": p != nil, "error": perr}
-		}
-		return out
+		return map[string]any{"ready": svc != nil, "has_model": cfg.HasModel()}
 	case "queen":
 		return map[string]any{"engines": a.QueenEngineList()}
 	case "proxy":

@@ -7,8 +7,6 @@ import {agent} from '../models';
 import {mcp} from '../models';
 import {context} from '../models';
 
-export function AddRecord(arg1:string,arg2:string,arg3:string,arg4:Array<string>,arg5:string):Promise<Record<string, any>>;
-
 export function AddSchedule(arg1:string,arg2:string,arg3:string,arg4:Array<string>):Promise<Record<string, any>>;
 
 export function AddWorkerMCP(arg1:string,arg2:string,arg3:string,arg4:Array<string>,arg5:Record<string, string>):Promise<backend.WorkerKit>;
@@ -42,20 +40,6 @@ export function CCAwayHint(arg1:boolean):Promise<Record<string, any>>;
 export function CCSessions():Promise<Array<app.CCSession>>;
 
 export function CLIActivityAll():Promise<Record<string, Record<string, app.CLIActivity>>>;
-
-export function CLIProxyAccounts():Promise<Array<backend.CLIProxyAccount>>;
-
-export function CLIProxyLogin(arg1:string,arg2:string):Promise<string>;
-
-export function CLIProxyProviders():Promise<Array<backend.CLIProxyProvider>>;
-
-export function CLIProxySetAccountEnabled(arg1:string,arg2:boolean):Promise<string>;
-
-export function CLIProxySignOut(arg1:string):Promise<string>;
-
-export function CLIProxyStatus():Promise<Record<string, any>>;
-
-export function CLIProxySubmitPrompt(arg1:string):Promise<string>;
 
 export function CLIRunDetail(arg1:string):Promise<app.CLIRun>;
 

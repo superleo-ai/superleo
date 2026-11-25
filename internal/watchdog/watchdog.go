@@ -2,6 +2,7 @@ package watchdog
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -427,6 +428,12 @@ func (w *Watchdog) drift(ctx context.Context, it item, now time.Time) {
 	}
 	w.State.Judged[it.Key] = now
 	v, reason, err := w.Judge.Verdict(ctx, it.Goal, it.Steps)
+	if errors.Is(err, ErrNoJudge) {
+		// No API model to judge with (a CLI engine thinks here): drift
+		// is not checked, and the run is left alone. Rate-limited by Judged.
+		w.Log.Line("drift", "skipped", "run", it.Key, "reason", "no judge model")
+		return
+	}
 	if err != nil {
 		w.Log.Line("drift", "judge_error", "run", it.Key, "error", w.Log.Scrub(err.Error()))
 		return

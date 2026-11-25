@@ -26,7 +26,7 @@ func TestTheQueenHandsOverHerWorkToolsAndKeepsTheRest(t *testing.T) {
 		"hive_delegate", "hive_members", "hive_command", "hive_task", "resolve_datetime", "notify_user",
 		"ui_block_rules", "set_reminder", "schedule_prompt", "settings_get", "task_complete",
 		"search_available_tools", "scratchpad_add", "remote_agent_run", "coding_agent_run", "mcp_servers",
-		"memory_save", "add_record", "dashboard_save", "skill_cortexdb",
+		"memory_save", "add_schedule", "dashboard_save", "skill_cortexdb",
 	}
 	deny := WorkToolDenylist(registry)
 	for _, want := range []string{"mcp_noted_list_events", "mcp_noted_create_event", "mcp_websearch_basic", "web_search",
@@ -39,7 +39,7 @@ func TestTheQueenHandsOverHerWorkToolsAndKeepsTheRest(t *testing.T) {
 	for _, keep := range []string{"hive_delegate", "hive_members", "hive_command", "hive_task", "resolve_datetime",
 		"notify_user", "ui_block_rules", "set_reminder", "schedule_prompt", "settings_get", "task_complete",
 		"search_available_tools", "scratchpad_add", "remote_agent_run", "coding_agent_run", "mcp_servers",
-		"memory_save", "add_record", "dashboard_save", "skill_cortexdb"} {
+		"memory_save", "add_schedule", "dashboard_save", "skill_cortexdb"} {
 		if slices.Contains(deny, keep) {
 			t.Errorf("%s is the queen's own, but it was taken from her", keep)
 		}

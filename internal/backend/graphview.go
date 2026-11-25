@@ -216,7 +216,7 @@ type GraphViewStatus struct {
 }
 
 // Map renders the status the way the frontend reads it. The bound methods on
-// App hand plain maps to the generated bindings (see GetStatus, CLIProxyStatus)
+// App hand plain maps to the generated bindings (see GetStatus)
 // rather than growing the generated models file for one panel.
 func (st GraphViewStatus) Map() map[string]any {
 	return map[string]any{

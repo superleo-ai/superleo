@@ -150,11 +150,6 @@ type App struct {
 	remoteOnce sync.Once
 	remote     *backend.RemoteRunner
 	sse        *backend.SSEServer
-	proxy      *backend.CLIProxy
-
-	// loginCh is non-nil while a provider login is waiting for the user; it
-	// carries the manually pasted callback URL.
-	loginCh chan string
 
 	// runs holds the chat turns currently in flight, keyed by the request id
 	// every one of their events is tagged with. It has its own lock rather than
@@ -323,7 +318,6 @@ type App struct {
 	phones *phoneLink
 
 	buildErr string
-	proxyErr string
 }
 
 // NewApp creates a new App.
@@ -394,7 +388,6 @@ func (a *App) boot() {
 		a.avatar = sse
 	}
 
-	a.syncProxy()
 	a.rebuild()
 	// The coding runs that were going when SuperLeo last stopped.
 	a.recoverCLIRuns()
@@ -420,40 +413,6 @@ func (a *App) boot() {
 		a.startAlarmWatch()
 		a.lookForRemoteAgents()
 	}
-}
-
-// syncProxy brings the embedded CLIProxyAPI in line with the current settings:
-// started when enabled (and restarted when the port changes), stopped otherwise.
-// A failure here is non-fatal — it is reported through GetStatus and the agent
-// falls back to the configured LLM endpoint.
-func (a *App) syncProxy() {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-
-	want := a.settings != nil && a.settings.CLIProxyEnabled
-	if !want {
-		if a.proxy != nil {
-			_ = a.proxy.Close()
-			a.proxy = nil
-		}
-		a.proxyErr = ""
-		return
-	}
-	if a.proxy != nil && a.proxy.Port() == a.settings.CLIProxyPort {
-		return
-	}
-	if a.proxy != nil {
-		_ = a.proxy.Close()
-		a.proxy = nil
-	}
-
-	p, err := backend.StartCLIProxy(a.settings.CLIProxyPort)
-	if err != nil {
-		a.proxyErr = err.Error()
-		return
-	}
-	a.proxyErr = ""
-	a.proxy = p
 }
 
 // shutdown releases backend resources.
@@ -504,10 +463,6 @@ func (a *App) Shutdown(ctx context.Context) {
 	if a.sse != nil {
 		_ = a.sse.Close()
 		a.sse = nil
-	}
-	if a.proxy != nil {
-		_ = a.proxy.Close()
-		a.proxy = nil
 	}
 }
 
@@ -608,17 +563,12 @@ func (a *App) restartScheduler() {
 }
 
 // effective returns the settings the backend Service is actually built from:
-// the user's settings, with the brain redirected at the embedded CLIProxyAPI
-// when it is running. Callers must hold a.mu.
+// a copy of the user's settings. Callers must hold a.mu.
 func (a *App) effective() *backend.Settings {
 	if a.settings == nil {
 		return nil
 	}
 	s := *a.settings
-	if a.proxy != nil {
-		s.LLMBaseURL = a.proxy.BaseURL()
-		s.LLMKey = a.proxy.Key()
-	}
 	return &s
 }
 
@@ -671,12 +621,18 @@ func (a *App) SaveSettings(s backend.Settings) error {
 	// Another engine for the queen is read by the next turn as it starts;
 	// rebuilding for it would close the service under the turns running on
 	// it and stop them, and the coding runs they started with them.
-	if backend.OnlyQueenEngineDiffers(before, &s) {
+	// Unless the service has to change with them: one built without a model
+	// exists only for an engine, and one never built has to be, now that an
+	// engine can think without a key.
+	a.mu.Lock()
+	svcNow := a.svc
+	a.mu.Unlock()
+	keepSvc := svcNow != nil && (svcNow.HasModel() || s.EngineThinks())
+	if keepSvc && backend.OnlyQueenEngineDiffers(before, &s) {
 		a.emit("settings:changed", nil)
 		return nil
 	}
 	backend.ApplyProxy(s.Proxy)
-	a.syncProxy()
 	a.rebuild()
 	a.syncLoginItem(s.StartAtLogin)
 	// The scheduler runs turns against the service that was just replaced, and
@@ -691,66 +647,6 @@ func (a *App) SaveSettings(s backend.Settings) error {
 	// desktop control), and those views have nothing else to listen to.
 	a.emit("settings:changed", nil)
 	return nil
-}
-
-// CLIProxyStatus reports the embedded CLIProxyAPI state for the Settings page.
-func (a *App) CLIProxyStatus() map[string]any {
-	a.mu.Lock()
-	p := a.proxy
-	perr := a.proxyErr
-	a.mu.Unlock()
-
-	st := map[string]any{
-		"running": p != nil,
-		"error":   perr,
-		"baseURL": p.BaseURL(),
-		"authDir": p.AuthDir(),
-		"config":  p.ConfigPath(),
-		"models":  []string{},
-	}
-	if p != nil {
-		models, err := p.Models(context.Background())
-		if err != nil {
-			st["error"] = err.Error()
-		} else {
-			st["models"] = models
-		}
-	}
-	return st
-}
-
-// ensureProxy returns the running proxy, starting it if needed. Login and the
-// status panel both need it before the user has saved anything, so it must not
-// depend on the persisted enable flag.
-func (a *App) ensureProxy() (*backend.CLIProxy, error) {
-	a.mu.Lock()
-	if a.proxy != nil {
-		p := a.proxy
-		a.mu.Unlock()
-		return p, nil
-	}
-	port := backend.DefaultCLIProxyPort
-	if a.settings != nil && a.settings.CLIProxyPort > 0 {
-		port = a.settings.CLIProxyPort
-	}
-	a.mu.Unlock()
-
-	p, err := backend.StartCLIProxy(port)
-
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	if err != nil {
-		a.proxyErr = err.Error()
-		return nil, err
-	}
-	// Another goroutine may have won the race; keep the first one.
-	if a.proxy != nil {
-		go p.Close()
-		return a.proxy, nil
-	}
-	a.proxyErr = ""
-	a.proxy = p
-	return p, nil
 }
 
 // SetUIRules receives the transcript's rendering rules from the frontend (which
@@ -772,134 +668,6 @@ func (a *App) SetUIRules(rules string) string {
 		a.restartScheduler()
 	}
 	return "ok"
-}
-
-// CLIProxyProviders lists the providers the user can log into.
-func (a *App) CLIProxyProviders() []backend.CLIProxyProvider {
-	return backend.CLIProxyProviders()
-}
-
-// CLIProxyLogin runs a provider OAuth flow for the embedded proxy. It returns
-// immediately; progress is delivered as "cliproxy:login" events with a status of
-// started / prompt / done / error. On success the credential lands in the auth
-// dir and the proxy hot-loads it, so the new models appear without a restart.
-//
-// Only one login may be in flight at a time.
-func (a *App) CLIProxyLogin(provider, projectID string) string {
-	a.mu.Lock()
-	busy := a.loginCh != nil
-	a.mu.Unlock()
-
-	// Logging in only needs the proxy's config and auth dir, so start it on
-	// demand rather than making the user save settings first.
-	p, err := a.ensureProxy()
-	if err != nil {
-		a.emitLogin("error", provider, "could not start the CLI proxy: "+err.Error())
-		return "error"
-	}
-	if busy {
-		a.emitLogin("error", provider, "another login is already in progress")
-		return "error"
-	}
-
-	// Buffered so a late submission never blocks the frontend call.
-	ch := make(chan string, 1)
-	a.mu.Lock()
-	a.loginCh = ch
-	a.mu.Unlock()
-
-	go func() {
-		defer func() {
-			a.mu.Lock()
-			a.loginCh = nil
-			a.mu.Unlock()
-		}()
-
-		ctx, cancel := context.WithTimeout(context.Background(), 6*time.Minute)
-		defer cancel()
-
-		a.emitLogin("started", provider, "Opening your browser to sign in…")
-
-		prompt := func(text string) (string, error) {
-			a.emitLogin("prompt", provider, text)
-			select {
-			case v := <-ch:
-				return v, nil
-			case <-ctx.Done():
-				return "", ctx.Err()
-			}
-		}
-
-		saved, err := p.Login(ctx, provider, projectID, prompt)
-		if err != nil {
-			a.emitLogin("error", provider, err.Error())
-			return
-		}
-		_ = saved // the path is an implementation detail; the UI just needs the outcome
-		a.emitLogin("done", provider, "Signed in.")
-	}()
-
-	return "ok"
-}
-
-// CLIProxyAccounts lists the signed-in provider credentials (no tokens).
-func (a *App) CLIProxyAccounts() []backend.CLIProxyAccount {
-	a.mu.Lock()
-	p := a.proxy
-	a.mu.Unlock()
-	if p == nil {
-		return []backend.CLIProxyAccount{}
-	}
-	accounts, err := p.Accounts()
-	if err != nil {
-		return []backend.CLIProxyAccount{}
-	}
-	return accounts
-}
-
-// CLIProxySetAccountEnabled enables or disables one credential without deleting
-// it — the way to park an account or switch which one serves a shared model.
-func (a *App) CLIProxySetAccountEnabled(file string, enabled bool) string {
-	a.mu.Lock()
-	p := a.proxy
-	a.mu.Unlock()
-	if p == nil {
-		return "CLI proxy is not running"
-	}
-	if err := p.SetAccountDisabled(file, !enabled); err != nil {
-		return err.Error()
-	}
-	return "ok"
-}
-
-// CLIProxySignOut deletes a credential, signing that provider account out.
-func (a *App) CLIProxySignOut(file string) string {
-	a.mu.Lock()
-	p := a.proxy
-	a.mu.Unlock()
-	if p == nil {
-		return "CLI proxy is not running"
-	}
-	if err := p.RemoveAccount(file); err != nil {
-		return err.Error()
-	}
-	return "ok"
-}
-
-// CLIProxySubmitPrompt answers the pending login prompt (the pasted callback URL).
-func (a *App) CLIProxySubmitPrompt(value string) string {
-	a.mu.Lock()
-	ch := a.loginCh
-	a.mu.Unlock()
-	if ch == nil {
-		return "no login in progress"
-	}
-	select {
-	case ch <- value:
-		return "ok"
-	default:
-		return "not waiting for input"
-	}
 }
 
 // windowEmit is the Wails leg of emit, held in a variable only so a test can
@@ -968,14 +736,6 @@ func loopCallEvent(name string, payload map[string]any) bool {
 	return false
 }
 
-func (a *App) emitLogin(status, provider, message string) {
-	a.emit("cliproxy:login", map[string]any{
-		"status":   status,
-		"provider": provider,
-		"message":  message,
-	})
-}
-
 // GetStatus reports backend readiness for the frontend.
 func (a *App) GetStatus() map[string]any {
 	a.mu.Lock()
@@ -987,8 +747,6 @@ func (a *App) GetStatus() map[string]any {
 		"mcp":            0,
 		"mcpTools":       0,
 		"avatarPort":     0,
-		"cliproxy":       a.proxy != nil,
-		"cliproxyError":  a.proxyErr,
 		"scheduler":      a.scheduler != nil,
 		"schedulerError": a.schedulerErr,
 		"telegram":       a.telegram != nil,
@@ -1193,7 +951,7 @@ func (a *App) startTurn(requestID, sessionID, message string, imagePaths []strin
 func (a *App) hasModel() bool {
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	return a.svc != nil || a.ownTurnFn != nil
+	return (a.svc != nil && a.svc.HasModel()) || a.ownTurnFn != nil
 }
 
 // ownTurn runs a turn with this app's model. standIn names the queen engine
@@ -1219,6 +977,15 @@ func (a *App) ownTurn(requestID, sessionID, message string, imagePaths []string,
 	buildErr := a.buildErr
 	a.mu.Unlock()
 
+	if svc != nil && !svc.HasModel() {
+		// Built for a CLI engine alone, and no engine took this turn (a
+		// scheduled run, a pasted picture, an engine that is signed out).
+		a.emit("chat:error", map[string]any{
+			"requestId": requestID,
+			"error":     "no model: add an API model under Settings, or sign in to a CLI engine",
+		})
+		return
+	}
 	if svc == nil {
 		// The id is returned even though nothing was started. Withholding it
 		// (returning "") orphans the error event below: the caller cannot bind
@@ -1816,19 +1583,19 @@ func (a *App) OpenWorkspaceFileExternal(path string) string {
 }
 
 // EmitAvatarTest pushes a test emotion + speech event for the avatar test button.
-// Life returns the life-assistant data (schedules/records/persons/reminders) for the Life panel.
+// Life returns the life-assistant data (schedules and reminders).
 func (a *App) Life() backend.LifeData {
 	a.mu.Lock()
 	svc := a.svc
 	a.mu.Unlock()
 	if svc == nil {
-		return backend.LifeData{Persons: map[string]map[string]any{}}
+		return backend.LifeData{}
 	}
 	return svc.Life()
 }
 
-// ForgetLife deletes one calendar entry ("schedule"), note ("record") or
-// person ("person", by name) that SuperLeo got wrong.
+// ForgetLife deletes one calendar entry ("schedule") that SuperLeo got wrong.
+// Notes and people live in noted, which deletes its own.
 func (a *App) ForgetLife(kind, key string) error {
 	a.mu.Lock()
 	svc := a.svc
@@ -1844,12 +1611,12 @@ func (a *App) ForgetLife(kind, key string) error {
 	return nil
 }
 
-// AddSchedule and AddRecord are the life-assistant writes a rendered `ui` block
-// may trigger, and the only two. They exist as App methods so a button the
-// model drew has somewhere bounded to land: the action names are registered in
-// the frontend, the arguments are typed here, and the same Service methods the
-// agent's own tools call do the work. A model that wants a third kind of write
-// has to be given one deliberately, which is the point.
+// AddSchedule is the life-assistant write a rendered `ui` block may trigger,
+// and the only one. It exists as an App method so a button the model drew has
+// somewhere bounded to land: the action name is registered in the frontend,
+// the arguments are typed here, and the same Service method the agent's own
+// tool calls does the work. A model that wants a second kind of write has to
+// be given one deliberately, which is the point.
 func (a *App) AddSchedule(title, startAt, location string, participants []string) map[string]any {
 	a.mu.Lock()
 	svc := a.svc
@@ -1907,21 +1674,6 @@ func (a *App) Notify(level, title, message string) string {
 		Level: backend.Level(level), Title: title, Message: message,
 	})
 	return "ok"
-}
-
-// AddRecord writes one diary / work / note / habit entry.
-func (a *App) AddRecord(kind, title, body string, tags []string, project string) map[string]any {
-	a.mu.Lock()
-	svc := a.svc
-	a.mu.Unlock()
-	if svc == nil {
-		return map[string]any{"ok": false, "error": "agent is not ready"}
-	}
-	rec, err := svc.AddRecord(kind, title, body, tags, project)
-	if err != nil {
-		return map[string]any{"ok": false, "error": err.Error()}
-	}
-	return map[string]any{"ok": true, "data": rec}
 }
 
 // MemoryRecall queries long-term memory and returns the formatted recall context.

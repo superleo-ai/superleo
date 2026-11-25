@@ -62,6 +62,9 @@ type Service struct {
 	// single structured completion (reading an install page, say) can ask the
 	// model directly instead of going through a whole agent turn.
 	brain domain.Generator
+	// noModel: built without an API model, for a CLI queen engine (nomodel.go).
+	// brain is then nil, and the agent runs on a generator that always refuses.
+	noModel bool
 	// promptScheduler is injected by whoever owns the process lifetime (the app,
 	// or the background daemon), because a cron loop outlives a chat turn. Tools
 	// that create schedules — set_reminder — go through it. Guarded by schedMu
@@ -168,11 +171,16 @@ func (s *Service) MCPServersWithTools() []string {
 
 // NewService builds the full SuperLeo agent service from the provided settings.
 func NewService(s *Settings) (*Service, error) {
-	if strings.TrimSpace(s.LLMKey) == "" || strings.TrimSpace(s.LLMBaseURL) == "" {
-		return nil, fmt.Errorf("no account yet: add one under Settings → Accounts")
-	}
-	if strings.TrimSpace(s.LLMModel) == "" {
-		return nil, fmt.Errorf("no model selected: pick one under Settings → Accounts")
+	// With a CLI queen engine on, no API model is fine: the service is still
+	// built, for the tool gate and approvals, the scheduler, notices, MCP and
+	// the rest, and the person's turns go to the engine. Whatever needs the
+	// agent's own model refuses with ErrNoModel (Service.HasModel).
+	noModel := !s.HasModel()
+	if noModel && !s.EngineThinks() {
+		if strings.TrimSpace(s.LLMKey) == "" || strings.TrimSpace(s.LLMBaseURL) == "" {
+			return nil, fmt.Errorf("no model yet: add an API model under Settings")
+		}
+		return nil, fmt.Errorf("no model selected: pick one under Settings")
 	}
 	// Again here, not only on load: a model picked in the settings page
 	// reaches this without the file being read again.
@@ -185,18 +193,24 @@ func NewService(s *Settings) (*Service, error) {
 	}
 
 	// --- Brain (LLM): OpenAI-compatible pool. ---
-	brain, err := pool.NewPool(pool.PoolConfig{
-		Enabled:  true,
-		Strategy: pool.StrategyRoundRobin,
-		Providers: []pool.Provider{{
-			Name: "brain", BaseURL: s.LLMBaseURL, Key: s.LLMKey,
-			ModelName: s.LLMModel, MaxConcurrency: 5, Capability: 8,
-			ReasoningEffort: s.LLMReasoningEffort,
-			NativeWebSearch: brainNativeSearch(s),
-		}},
-	})
-	if err != nil {
-		return nil, fmt.Errorf("build brain: %w", err)
+	var brain domain.Generator = noModelLLM{}
+	if noModel {
+		slog.Info("no API model: the service is built for the CLI queen engine; turns that need SuperLeo's own model are refused")
+	} else {
+		p, err := pool.NewPool(pool.PoolConfig{
+			Enabled:  true,
+			Strategy: pool.StrategyRoundRobin,
+			Providers: []pool.Provider{{
+				Name: "brain", BaseURL: s.LLMBaseURL, Key: s.LLMKey,
+				ModelName: s.LLMModel, MaxConcurrency: 5, Capability: 8,
+				ReasoningEffort: s.LLMReasoningEffort,
+				NativeWebSearch: brainNativeSearch(s),
+			}},
+		})
+		if err != nil {
+			return nil, fmt.Errorf("build brain: %w", err)
+		}
+		brain = p
 	}
 
 	// --- Embedder (optional): graph memory when present, file memory otherwise. ---
@@ -451,11 +465,16 @@ func NewService(s *Settings) (*Service, error) {
 		return nil, fmt.Errorf("build SuperLeo: %w", err)
 	}
 
+	// Direct callers of the brain (install_url, warm-up) treat nil as "none".
+	ownBrain := brain
+	if noModel {
+		ownBrain = nil
+	}
 	out := &Service{
 		sharedMem: sharedMem,
 		svc:       svc, sb: sb, settings: s, MemoryMode: memMode, dataDir: cfg.DataDir(),
 		claims: newScheduleClaims(),
-		brain:  brain, SharedMemoryMCP: sharedMCP,
+		brain:  ownBrain, noModel: noModel, SharedMemoryMCP: sharedMCP,
 		gate: gate, plans: planStore,
 	}
 	// Token accounting for the dashboard: one observer sees every model turn,
@@ -505,7 +524,11 @@ func NewService(s *Settings) (*Service, error) {
 	}
 	// A brain that searches itself has the provider's web_search beside its
 	// tools; ours would take the name and the provider's would be dropped.
-	if !s.BrainSearchesItself() {
+	switch {
+	case s.BrainSearchesItself():
+	case strings.TrimSpace(searchBase) == "" || strings.TrimSpace(searchModel) == "":
+		slog.Info("web_search not registered: no search model and no API model to search with")
+	default:
 		agent.RegisterWebSearchTool(svc, agent.WebSearchConfig{
 			BaseURL: searchBase, APIKey: searchKey, Model: searchModel,
 			Native: searchNative, ReasoningEffort: searchEffort,
@@ -562,7 +585,9 @@ func NewService(s *Settings) (*Service, error) {
 		slog.Warn("cortexdb disabled", "error", derr)
 	} else {
 		out.cortex = db
-		if _, e := cortexbridge.RegisterImportFlow(svc, cortexbridge.NewImporter(db, brain)); e != nil {
+		if noModel {
+			slog.Info("import flow tools skipped: no API model")
+		} else if _, e := cortexbridge.RegisterImportFlow(svc, cortexbridge.NewImporter(db, brain)); e != nil {
 			slog.Warn("import flow tools skipped", "error", e)
 		}
 		// Memory is agent-go's on both backends (WithMemory above), so
@@ -736,6 +761,9 @@ func (s *Service) Stream(ctx context.Context, sessionID, message string, imagePa
 // StreamTurn runs one turn and returns the answer with the tokens it used.
 func (s *Service) StreamTurn(ctx context.Context, sessionID, message string, imagePaths []string, emit func(ev *agent.Event)) (TurnResult, error) {
 	var turn TurnResult
+	if !s.HasModel() {
+		return turn, ErrNoModel
+	}
 	// Whatever the turn started — a shell command, an MCP call — is bound to
 	// this context, and the turn ending is the end of it: a caller that never
 	// cancels (a channel, the hive, the MCP server) must not leave a tool call
@@ -1047,7 +1075,7 @@ func buildPersona(now time.Time, selfInstall, externalAgents bool) string {
 	return fmt.Sprintf(`You are a warm everyday assistant for life and work, one of several agents on the person's machines working together: a job that needs another machine, or an agent better suited to it, goes there, and you bring the results together into one answer. `+answerLanguageRule+`
 - Relative times (tomorrow, next Monday, 8 tonight…): work them out from the "Now:" line of the turn and pass RFC 3339 with its offset; resolve_datetime only for something you cannot work out.
 - Tools that do not depend on each other go out together in one reply (the day's events and to-dos: both at once), never one per round — each round is seconds the person waits.
-- Record unprompted, before replying: a plan→add_schedule, a person→upsert_person, work→add_record(work), life→add_record(diary), a note→add_record(note), a habit→add_record(habit).
+- Record unprompted, before replying: a plan→add_schedule; a note, a diary or work entry, a habit→noted's create_note; someone worth remembering (who they are to the person, a birthday, a phone number, news)→noted's upsert_person.
 - Reminders take one tool: daily at HH:MM or one moment→set_reminder; any other cadence→schedule_prompt (cron).
 - `+investingRule+`
 - Current facts→web_search; a page's content→fetch_url. "Save this as a dashboard"→dashboard_save; settings→settings_get, then settings_set.
@@ -1198,14 +1226,17 @@ var uiBlockName = regexp.MustCompile("```([a-z][a-z0-9-]*)|`([a-z][a-z0-9-]*)`�
 type lifeStore struct {
 	mu        sync.Mutex
 	path      string
-	Schedules []map[string]any          `json:"schedules"`
-	Records   []map[string]any          `json:"records"`
-	Persons   map[string]map[string]any `json:"persons"`
-	Reminders []map[string]any          `json:"reminders"`
+	Schedules []map[string]any `json:"schedules"`
+	Reminders []map[string]any `json:"reminders"`
+	// Notes ("records") and people moved to noted. What an older build wrote
+	// under these keys is carried through every save untouched, never read,
+	// so nothing is lost before it is moved there.
+	LegacyRecords json.RawMessage `json:"records,omitempty"`
+	LegacyPersons json.RawMessage `json:"persons,omitempty"`
 }
 
 func newLifeStore(path string) *lifeStore {
-	return &lifeStore{path: path, Persons: map[string]map[string]any{}}
+	return &lifeStore{path: path}
 }
 
 func (db *lifeStore) load() {
@@ -1216,9 +1247,6 @@ func (db *lifeStore) load() {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 	_ = json.Unmarshal(raw, db)
-	if db.Persons == nil {
-		db.Persons = map[string]map[string]any{}
-	}
 }
 
 func (db *lifeStore) save() {
@@ -1292,62 +1320,6 @@ func (s *Service) registerLifeTools() {
 			defer db.mu.Unlock()
 			return okData(db.Schedules), nil
 		}, read)
-
-	svc.AddToolWithMetadata("add_record", "Record one entry: diary, work, note or habit.",
-		obj(map[string]any{
-			"type": sp("Kind: diary|work|note|habit"), "title": sp("Short title"),
-			"body": sp("Body text"), "tags": arr("Tags"), "project": sp("Project it belongs to (for work records)"),
-		}, "type", "body"),
-		func(ctx context.Context, a map[string]any) (any, error) {
-			rec, err := s.AddRecord(str(a, "type"), str(a, "title"), str(a, "body"),
-				strSlice(a, "tags"), str(a, "project"))
-			if err != nil {
-				return errResult(err.Error()), nil
-			}
-			return okData(rec), nil
-		}, write)
-
-	svc.AddToolWithMetadata("search_records", "Search records by keyword, optionally filtered by type.",
-		obj(map[string]any{"query": sp("Keyword"), "type": sp("Optional: diary|work|note|habit")}, "query"),
-		func(ctx context.Context, a map[string]any) (any, error) {
-			db.mu.Lock()
-			defer db.mu.Unlock()
-			q, typ := strings.ToLower(str(a, "query")), str(a, "type")
-			hits := []map[string]any{}
-			for _, r := range db.Records {
-				if typ != "" && r["type"] != typ {
-					continue
-				}
-				blob := strings.ToLower(fmt.Sprintf("%v %v %v %v", r["title"], r["body"], r["tags"], r["project"]))
-				if q == "" || strings.Contains(blob, q) {
-					hits = append(hits, r)
-				}
-			}
-			return okData(hits), nil
-		}, read)
-
-	svc.AddToolWithMetadata("upsert_person", "Create or update a person's profile (relationship, preferences, what they are up to).",
-		obj(map[string]any{
-			"name": sp("Name"), "relation": sp("Relationship, e.g. colleague/friend/flatmate"), "note": sp("Preferences or recent news"),
-		}, "name"),
-		func(ctx context.Context, a map[string]any) (any, error) {
-			db.mu.Lock()
-			name := str(a, "name")
-			p := db.Persons[name]
-			if p == nil {
-				p = map[string]any{"name": name}
-			}
-			if v := str(a, "relation"); v != "" {
-				p["relation"] = v
-			}
-			if v := str(a, "note"); v != "" {
-				p["note"] = v
-			}
-			db.Persons[name] = p
-			db.mu.Unlock()
-			db.save()
-			return okData(p), nil
-		}, write)
 
 	// A reminder is a scheduled prompt. Until the scheduler existed this tool
 	// only appended a row to a JSON file while telling the model "SuperLeo will

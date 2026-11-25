@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   BellIcon, ChevronDownIcon, ChevronUpIcon, DatabaseIcon, ExternalLinkIcon, GlobeIcon, HexagonIcon, LaptopIcon,
-  LogOutIcon, MonitorIcon, NetworkIcon, PauseIcon, PencilIcon, PlayIcon, PlusIcon, RadarIcon,
+  MonitorIcon, NetworkIcon, PencilIcon, PlusIcon, RadarIcon,
   SettingsIcon, ShieldCheckIcon, SparklesIcon, SunIcon, Trash2Icon, WrenchIcon,
 } from "lucide-react";
 import { translate, useI18n } from "../lib/i18n";
@@ -24,24 +24,17 @@ import HiveMembershipCard from "../components/settings/HiveMembershipCard";
 import ResidentGroup from "../components/settings/ResidentGroup";
 import { ACCENTS } from "../components/ThemePicker";
 import {
-  Avatar, Block, Btn, Chips, ConfirmBtn, Group, IconBtn, Menu, Note, Num, Row, Secret, Seg, Select, State, Text, Toggle,
+  Avatar, Block, Btn, Chips, ConfirmBtn, Group, IconBtn, Menu, Note, Num, Row, Secret, Seg, State, Text, Toggle,
 } from "../components/settings/kit";
 import "../components/settings/settings.css";
 import {
-  CLIProxyAccounts,
-  CLIProxyLogin,
-  CLIProxyProviders,
-  CLIProxySetAccountEnabled,
-  CLIProxySignOut,
-  CLIProxyStatus,
-  CLIProxySubmitPrompt,
   GetSettings,
   OpenInBrowser,
   CheckRemoteAgents,
   PatchSettings,
   ToolApprovalInfo,
 } from "../../wailsjs/go/app/App";
-import { BrowserOpenURL, EventsOff, EventsOn } from "../../wailsjs/runtime/runtime";
+import { BrowserOpenURL } from "../../wailsjs/runtime/runtime";
 import { app, backend } from "../../wailsjs/go/models";
 import { toast } from "../lib/toasts";
 import { DEFAULT_QUEEN, setQueenName } from "../lib/queenName";
@@ -50,15 +43,6 @@ import { useDeskTheme } from "../desk/DeskShell";
 import { COLORS, ColorName } from "../canvas/theme";
 import { Accent, Theme } from "../lib/types";
 import { Skeleton, SkeletonLines, SkeletonRows, SkeletonCards } from "../components/Skeleton";
-
-type ProxyStatus = {
-  running: boolean;
-  error: string;
-  baseURL: string;
-  authDir: string;
-  config: string;
-  models: string[];
-};
 
 /** One line of the approval audit log, as the backend writes it. */
 type AuditEntry = {
@@ -286,16 +270,9 @@ export default function SettingsView({ onSaved, theme, onTheme, accent, onAccent
   const [section, setSection] = useState<SectionID>("general");
   const [narrow, setNarrow] = useState(false);
   const pageRef = useRef<HTMLDivElement | null>(null);
-  const [proxy, setProxy] = useState<ProxyStatus | null>(null);
-  const [providers, setProviders] = useState<backend.CLIProxyProvider[]>([]);
-  const [projectFor, setProjectFor] = useState<backend.CLIProxyProvider | null>(null);
-  const [projectID, setProjectID] = useState("");
-  const [login, setLogin] = useState<{ status: string; provider: string; message: string } | null>(null);
-  const [pasted, setPasted] = useState("");
   const [editEmbed, setEditEmbed] = useState(false);
   const [adding, setAdding] = useState<"" | "machine" | "link" | "worker">("");
 
-  const [accounts, setAccounts] = useState<backend.CLIProxyAccount[]>([]);
   const [approval, setApproval] = useState<ApprovalInfo | null>(null);
   // What each agent answered when last asked; asking takes seconds and a token.
   const [reachable, setReachable] = useState<app.RemoteAgentStatus[]>([]);
@@ -372,15 +349,6 @@ export default function SettingsView({ onSaved, theme, onTheme, accent, onAccent
       .catch(() => setApproval(null));
   };
 
-  const refreshProxy = () => {
-    CLIProxyStatus()
-      .then((res) => setProxy(res as ProxyStatus))
-      .catch(() => setProxy(null));
-    CLIProxyAccounts()
-      .then(setAccounts)
-      .catch(() => setAccounts([]));
-  };
-
   useEffect(() => {
     GetSettings()
       .then((res) => {
@@ -388,19 +356,7 @@ export default function SettingsView({ onSaved, theme, onTheme, accent, onAccent
         setS(res);
       })
       .catch((e) => toast.error(String(e?.message || e)));
-    CLIProxyProviders().then(setProviders).catch(() => setProviders([]));
-    refreshProxy();
     refreshApproval();
-
-    EventsOn("cliproxy:login", (ev: any) => {
-      setLogin(ev);
-      if (ev?.status === "done") {
-        setPasted("");
-        // The proxy hot-loads the new credential; give its watcher a moment.
-        setTimeout(refreshProxy, 1200);
-      }
-    });
-    return () => EventsOff("cliproxy:login");
   }, []);
 
   const set = <K extends keyof backend.Settings>(k: K, v: backend.Settings[K]) => {
@@ -419,7 +375,6 @@ export default function SettingsView({ onSaved, theme, onTheme, accent, onAccent
       setS(fresh);
       setQueenName(fresh.queen_name, fresh.queen_aliases);
       toast.success(translate("Saved"));
-      refreshProxy();
       // The gate is rebuilt with the service, so what it reports is only true
       // after the save has been through.
       refreshApproval();
@@ -431,13 +386,6 @@ export default function SettingsView({ onSaved, theme, onTheme, accent, onAccent
     }
   };
 
-  const signIn = (prov: backend.CLIProxyProvider, project = "") => {
-    setProjectFor(null);
-    setLogin({ status: "started", provider: prov.id, message: translate("Starting…") });
-    CLIProxyLogin(prov.id, project).then(() => refreshProxy()).catch((e) => setLogin({ status: "error", provider: prov.id, message: String(e?.message || e) }));
-  };
-  const providerLabel = (id: string) => providers.find((p) => p.id === id)?.label || id;
-
   if (!s) {
     return (
       <div className="view">
@@ -447,7 +395,6 @@ export default function SettingsView({ onSaved, theme, onTheme, accent, onAccent
   }
 
   const ra = s.remote_agents ?? new backend.RemoteAgents();
-  const loginBusy = login?.status === "started" || login?.status === "prompt";
   const embedHost = (() => {
     try {
       return s.embed_base_url ? new URL(s.embed_base_url).host : "";
@@ -523,84 +470,16 @@ export default function SettingsView({ onSaved, theme, onTheme, accent, onAccent
           {/* ── Model: what it thinks and remembers with ── */}
           {section === "model" && (
             <>
-              <Group icon={SparklesIcon} title="Model" testId="model-group"
-                action={s.cliproxy_enabled && providers.length > 0 ? (
-                  <Menu disabled={loginBusy}
-                    trigger={<Btn icon={PlusIcon} trail={ChevronDownIcon} disabled={loginBusy} data-testid="add-account">Add account</Btn>}
-                    items={providers.map((p) => ({
-                      key: p.id,
-                      hint: p.note,
-                      lead: <Avatar>{p.label.slice(0, 1).toUpperCase()}</Avatar>,
-                      label: p.label,
-                      onSelect: () => (p.needs_project ? setProjectFor(p) : signIn(p)),
-                    }))} />
-                ) : undefined}>
-                <Row label="Source">
-                  <Seg label="Source" testId="model-source" value={s.cliproxy_enabled ? "accounts" : "api"}
-                    options={[{ value: "accounts", label: "My accounts" }, { value: "api", label: "Custom API" }]}
-                    onChange={(v) => set("cliproxy_enabled", v === "accounts")} />
+              <Group icon={SparklesIcon} title="Model" testId="model-group">
+                <Row label="Base URL">
+                  <Text mono label="Base URL" placeholder="https://api.openai.com/v1" value={s.llm_base_url} onChange={(v) => set("llm_base_url", v)} />
                 </Row>
-
-                {s.cliproxy_enabled ? (
-                  <>
-                    {accounts.map((acc) => {
-                      const label = providerLabel(acc.provider);
-                      return (
-                        <Row key={acc.file} dim={acc.disabled} testId="account"
-                          lead={<Avatar tone={acc.disabled ? "muted" : undefined}>{label.slice(0, 1).toUpperCase()}</Avatar>}
-                          label={label} sub={`${acc.account}${acc.project ? ` · ${acc.project}` : ""}`}>
-                          {acc.disabled ? <State tone="off">Paused</State> : <State tone="ok">Available</State>}
-                          <IconBtn icon={acc.disabled ? PlayIcon : PauseIcon} label={acc.disabled ? "Resume" : "Pause"}
-                            onClick={() => void CLIProxySetAccountEnabled(acc.file, acc.disabled).then(() => setTimeout(refreshProxy, 800))} />
-                          <ConfirmBtn icon={LogOutIcon} label="Sign out" testId="sign-out"
-                            title={translate("Sign out of {name}?", { name: label })} sub={acc.account}
-                            onConfirm={() => CLIProxySignOut(acc.file).then(() => { setTimeout(refreshProxy, 800); })} />
-                        </Row>
-                      );
-                    })}
-                    {projectFor && (
-                      <Row label={projectFor.label} sub={projectFor.note}>
-                        <Text mono label="Google Cloud project ID" placeholder="Google Cloud project ID" value={projectID} onChange={setProjectID}
-                          onEnter={() => projectID.trim() && signIn(projectFor, projectID.trim())} />
-                        <Btn pri disabled={!projectID.trim()} onClick={() => signIn(projectFor, projectID.trim())}>Sign in</Btn>
-                      </Row>
-                    )}
-                    {login && (
-                      <Row label={providerLabel(login.provider)}
-                        sub={login.status === "error" ? <span className="st-note bad">{login.message}</span> : login.message}>
-                        {login.status === "prompt" ? (
-                          <>
-                            <Text mono label="Callback URL" placeholder="Paste the callback URL from your browser" value={pasted} onChange={setPasted}
-                              onEnter={() => { void CLIProxySubmitPrompt(pasted); setLogin({ ...login, status: "started", message: translate("Finishing sign-in…") }); }} />
-                            <Btn pri disabled={!pasted.trim()} onClick={() => {
-                              void CLIProxySubmitPrompt(pasted);
-                              setLogin({ ...login, status: "started", message: translate("Finishing sign-in…") });
-                            }}>Submit</Btn>
-                          </>
-                        ) : login.status === "started" ? <State tone="busy">Signing in…</State>
-                          : login.status === "done" ? <State tone="ok">Signed in</State>
-                          : <State tone="bad">Failed</State>}
-                      </Row>
-                    )}
-                    {accounts.length === 0 && !login && !projectFor && <Row label="No accounts yet" dim />}
-                    <Row label="Model" sub={proxy && !proxy.running && proxy.error ? <span className="st-note bad">{proxy.error}</span> : undefined}>
-                      <Select mono label="Model" testId="account-model" value={s.llm_model} placeholder="Choose a model"
-                        options={(proxy?.models ?? []).map((m) => ({ value: m, label: m }))} onChange={(v) => set("llm_model", v)} />
-                    </Row>
-                  </>
-                ) : (
-                  <>
-                    <Row label="Base URL">
-                      <Text mono label="Base URL" placeholder="https://api.openai.com/v1" value={s.llm_base_url} onChange={(v) => set("llm_base_url", v)} />
-                    </Row>
-                    <Row label="API key">
-                      <Secret label="API key" value={s.llm_key} onChange={(v) => set("llm_key", v)} />
-                    </Row>
-                    <Row label="Model">
-                      <Text mono label="Model" placeholder="gpt-5.5" value={s.llm_model} onChange={(v) => set("llm_model", v)} />
-                    </Row>
-                  </>
-                )}
+                <Row label="API key">
+                  <Secret label="API key" value={s.llm_key} onChange={(v) => set("llm_key", v)} />
+                </Row>
+                <Row label="Model">
+                  <Text mono label="Model" placeholder="gpt-5.5" value={s.llm_model} onChange={(v) => set("llm_model", v)} />
+                </Row>
               </Group>
 
               {/* The queen's engine: its own card, owned and styled apart. */}

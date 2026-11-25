@@ -61,25 +61,21 @@ func (s *Service) MCPServers() []mcp.ServerStatus {
 	return out
 }
 
-// LifeData is the snapshot the Life panel renders (schedules / records / persons
-// / reminders), read directly from the life-assistant store.
+// LifeData is the snapshot of the life-assistant store: schedules and
+// reminders. Notes and people live in noted.
 type LifeData struct {
-	Schedules []map[string]any          `json:"schedules"`
-	Records   []map[string]any          `json:"records"`
-	Persons   map[string]map[string]any `json:"persons"`
-	Reminders []map[string]any          `json:"reminders"`
+	Schedules []map[string]any `json:"schedules"`
+	Reminders []map[string]any `json:"reminders"`
 }
 
 // Life returns the current life-assistant data for the Life panel.
 func (s *Service) Life() LifeData {
 	if s == nil || s.store == nil {
-		return LifeData{Persons: map[string]map[string]any{}}
+		return LifeData{}
 	}
 	s.store.mu.Lock()
 	data := LifeData{
 		Schedules: append([]map[string]any(nil), s.store.Schedules...),
-		Records:   append([]map[string]any(nil), s.store.Records...),
-		Persons:   s.store.Persons,
 		Reminders: append([]map[string]any(nil), s.store.Reminders...),
 	}
 	s.store.mu.Unlock()

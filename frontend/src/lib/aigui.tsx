@@ -15,7 +15,7 @@ import { citation } from "@ai-gui/plugin-citation";
 import { bigscreen } from "@ai-gui/plugin-bigscreen";
 import { ui } from "@ai-gui/plugin-ui";
 import { CodeBlock } from "@/components/ai-elements/code-block";
-import { AddRecord, AddSchedule } from "../../wailsjs/go/app/App";
+import { AddSchedule } from "../../wailsjs/go/app/App";
 
 /**
  * The language SuperLeo speaks. The persona answers in Chinese, so the block
@@ -65,31 +65,6 @@ actions.register({
     location?: string;
     participants?: string[];
   }) => unwrap(await AddSchedule(p.title, p.start_at, p.location ?? "", p.participants ?? [])),
-});
-
-actions.register({
-  type: "life.addRecord",
-  schema: {
-    type: "object",
-    properties: {
-      type: { type: "string" },
-      title: { type: "string" },
-      body: { type: "string" },
-      tags: { type: "array", items: { type: "string" } },
-      project: { type: "string" },
-    },
-    required: ["type", "body"],
-  },
-  run: async (p: {
-    type: string;
-    title?: string;
-    body: string;
-    tags?: string[];
-    project?: string;
-  }) =>
-    unwrap(
-      await AddRecord(p.type, p.title ?? "", p.body, p.tags ?? [], p.project ?? ""),
-    ),
 });
 
 /**

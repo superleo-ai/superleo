@@ -30,17 +30,7 @@ import (
 
 // engineThinks is whether a queen engine answers the person's words, so the
 // app can be used before it has a model of its own.
-func engineThinks(s *backend.Settings) bool {
-	if s == nil || s.Hive.Role == backend.HiveRoleWorker {
-		return false
-	}
-	for _, e := range s.Hive.QueenEnginesOn() {
-		if e != backend.QueenEngineSuperLeo {
-			return true
-		}
-	}
-	return false
-}
+func engineThinks(s *backend.Settings) bool { return s.EngineThinks() }
 
 // firstRun takes the login shell's PATH, so the agents a person installed
 // are found and run even when the app was opened from the Finder.

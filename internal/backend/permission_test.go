@@ -269,7 +269,7 @@ func TestPolicyGatesEscapeHatchesAndLeavesTheJailedToolsAlone(t *testing.T) {
 
 	// Not gated, and deliberately so: prompting on every one of these is how a
 	// user learns to click Allow without reading, which costs more than it buys.
-	open := []string{"fs_write", "fs_read", "add_record", "upsert_person", "memory_update",
+	open := []string{"fs_write", "fs_read", "add_schedule", "memory_update",
 		"ingest_document", "web_search", "fetch_url", "set_reminder"}
 	for _, name := range open {
 		if toolNeedsApproval(agent.PermissionRequest{ToolName: name}) {

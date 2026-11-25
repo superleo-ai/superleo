@@ -3,16 +3,14 @@ package backend
 import (
 	"errors"
 	"strings"
-	"time"
 
 	"github.com/google/uuid"
 )
 
 // The life-assistant writes, as methods rather than tool closures.
 //
-// Two callers need them now: the agent, through add_schedule / add_record, and
-// a button the model drew in a `ui` block, through the App methods of the same
-// name. They must agree on the stored shape — a row written by a click that
+// Two callers need them now: the agent, through add_schedule, and a button the
+// model drew in a `ui` block, through the App method of the same name. They must agree on the stored shape — a row written by a click that
 // list_schedules then reads back differently is a bug that only shows up later,
 // in the model's own summary of the day.
 //
@@ -46,41 +44,10 @@ func (s *Service) AddSchedule(title, startAt, location string, participants []st
 	return rec, nil
 }
 
-// AddRecord appends one diary / work / note / habit entry and returns the row
-// as stored. `occurred_at` is stamped here, not taken from the caller: a record
-// is written when it happens, and a model backdating its own notes would make
-// search_records answer with a timeline nobody lived.
-func (s *Service) AddRecord(kind, title, body string, tags []string, project string) (map[string]any, error) {
-	if s == nil || s.store == nil {
-		return nil, errors.New("life store is unavailable")
-	}
-	kind = strings.TrimSpace(kind)
-	body = strings.TrimSpace(body)
-	if kind == "" {
-		return nil, errors.New("type is required")
-	}
-	if body == "" {
-		return nil, errors.New("body is required")
-	}
-	rec := map[string]any{
-		"id":          short(uuid.NewString()),
-		"type":        kind,
-		"title":       strings.TrimSpace(title),
-		"body":        body,
-		"tags":        trimmed(tags),
-		"project":     strings.TrimSpace(project),
-		"occurred_at": time.Now().Format(time.RFC3339),
-	}
-	s.store.mu.Lock()
-	s.store.Records = append(s.store.Records, rec)
-	s.store.mu.Unlock()
-	s.store.save()
-	return rec, nil
-}
-
-// Forget removes one entry the person says is wrong: a calendar entry or a
-// note by id, a person by name. It is the only delete there is; the agent's
-// tools only ever add, so a mistake it wrote stays until someone removes it.
+// Forget removes one calendar entry the person says is wrong, by id. It is the
+// only delete there is; the agent's tools only ever add, so a mistake it wrote
+// stays until someone removes it. Notes and people live in noted, which has its
+// own deletes.
 func (s *Service) Forget(kind, key string) error {
 	if s == nil || s.store == nil {
 		return errors.New("life store is unavailable")
@@ -99,11 +66,6 @@ func (s *Service) Forget(kind, key string) error {
 	switch kind {
 	case "schedule":
 		s.store.Schedules, found = drop(s.store.Schedules)
-	case "record":
-		s.store.Records, found = drop(s.store.Records)
-	case "person":
-		_, found = s.store.Persons[key]
-		delete(s.store.Persons, key)
 	default:
 		s.store.mu.Unlock()
 		return errors.New("nothing of kind " + kind + " can be forgotten")

@@ -32,7 +32,6 @@ type PhoneSettingsView struct {
 	LongTaskMaxTokens int               `json:"long_task_max_tokens"`
 	PIIRedaction      bool              `json:"pii_redaction"`
 	DisablePTC        bool              `json:"disable_ptc"`
-	CLIProxyEnabled   bool              `json:"cliproxy_enabled"`
 	LLMBaseURL        string            `json:"llm_base_url"`
 	LLMModel          string            `json:"llm_model"`
 	MemoryBackend     string            `json:"memory_backend"`
@@ -80,7 +79,7 @@ var phonePlainKeys = map[string]bool{
 	"queen_name": true, "queen_aliases": true,
 	"workspace_dir": true, "max_rounds": true, "turn_max_tokens": true, "long_task_max_tokens": true,
 	"pii_redaction": true, "disable_ptc": true,
-	"cliproxy_enabled": true, "llm_base_url": true, "llm_key": true, "llm_model": true,
+	"llm_base_url": true, "llm_key": true, "llm_model": true,
 	"memory_backend": true, "shared_memory_endpoint": true, "shared_memory_token": true, "shared_memory_namespace": true,
 	"embed_base_url": true, "embed_key": true, "embed_model": true,
 	"disable_tool_approval": true,
@@ -94,7 +93,7 @@ func phoneSettingsOf(s backend.Settings) PhoneSettingsView {
 		Proxy:        PhoneProxyView{Mode: s.Proxy.Mode, URL: redactURL(s.Proxy.URL)},
 		MaxRounds:    s.MaxRounds, TurnMaxTokens: s.TurnMaxTokens, LongTaskMaxTokens: s.LongTaskMaxTokens,
 		PIIRedaction: s.PIIRedaction, DisablePTC: s.DisablePTC,
-		CLIProxyEnabled: s.CLIProxyEnabled, LLMBaseURL: redactURL(s.LLMBaseURL), LLMModel: s.LLMModel,
+		LLMBaseURL: redactURL(s.LLMBaseURL), LLMModel: s.LLMModel,
 		MemoryBackend: s.MemoryBackend, SharedEndpoint: s.SharedMemoryEndpoint, SharedNamespace: s.SharedMemoryNamespace,
 		EmbedBaseURL: redactURL(s.EmbedBaseURL), EmbedModel: s.EmbedModel,
 		DisableApproval: s.DisableToolApproval,
@@ -190,6 +189,9 @@ func phonePatch(cur backend.Settings, patch map[string]any) (map[string]any, err
 	out := map[string]any{}
 	for k, v := range patch {
 		switch {
+		case k == "cliproxy_enabled":
+			// Gone with the embedded proxy; an older phone may still send it.
+			continue
 		case phonePlainKeys[k]:
 			if v == nil {
 				return nil, fmt.Errorf("%s cannot be removed", k)

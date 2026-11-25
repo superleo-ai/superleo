@@ -24,6 +24,10 @@ type Judge interface {
 	Verdict(ctx context.Context, goal string, steps []string) (verdict, reason string, err error)
 }
 
+// ErrNoJudge is the verdict of a Judge with no model to ask: an install that
+// thinks through a CLI engine has no API key. The drift check is skipped.
+var ErrNoJudge = errors.New("no judge model configured")
+
 // ChatJudge asks an OpenAI-compatible /chat/completions endpoint.
 type ChatJudge struct {
 	// Settings reads the app's llm_* settings when the config names none.
@@ -46,7 +50,7 @@ func (j *ChatJudge) Verdict(ctx context.Context, goal string, steps []string) (s
 		base, model, key = firstNonEmpty(base, s.LLMBaseURL), firstNonEmpty(model, s.LLMModel), firstNonEmpty(key, s.LLMKey)
 	}
 	if base == "" || model == "" {
-		return "", "", errors.New("no judge model configured")
+		return "", "", ErrNoJudge
 	}
 	user := "目标：\n" + trunc(goal, 1500) + "\n\n最近的步骤：\n" + strings.Join(steps, "\n")
 	body, _ := json.Marshal(map[string]any{

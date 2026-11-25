@@ -743,7 +743,9 @@ func TestChangingTheQueenEngineStopsNothing(t *testing.T) {
 		ExternalAgents: backend.ExternalAgents{Enabled: true, Binaries: map[string]string{"claude": bin}},
 		Hive:           backend.HiveSettings{Role: backend.HiveRoleQueen, Name: "q"},
 	}
-	a := &App{settings: s}
+	// A service is there (an empty one stands for it): without one, turning an
+	// engine on builds the service, which is not what this is about.
+	a := &App{settings: s, svc: &backend.Service{}}
 	// A rebuild sets buildErr either way, so it staying is no rebuild.
 	a.buildErr = "untouched"
 	stopped := make(chan struct{}, 1)

@@ -88,7 +88,6 @@ func TestAThinkingAgentMakesASoloSuperLeoItsQueen(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			s.CLIProxyEnabled = false
 			s.Hive = c.hive
 			a.settings = s
 			defer a.Shutdown(context.Background())

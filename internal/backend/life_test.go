@@ -1,6 +1,8 @@
 package backend
 
 import (
+	"encoding/json"
+	"os"
 	"path/filepath"
 	"testing"
 )
@@ -62,43 +64,8 @@ func TestAddScheduleRejectsMissingFields(t *testing.T) {
 	}
 }
 
-func TestAddRecordStampsOccurredAt(t *testing.T) {
-	s := testLifeService(t)
-
-	rec, err := s.AddRecord("note", "标题", " 正文 ", []string{"tag", " "}, " superleo ")
-	if err != nil {
-		t.Fatalf("AddRecord: %v", err)
-	}
-	if rec["body"] != "正文" {
-		t.Errorf("body not trimmed: %q", rec["body"])
-	}
-	if rec["project"] != "superleo" {
-		t.Errorf("project not trimmed: %q", rec["project"])
-	}
-	if got, _ := rec["occurred_at"].(string); got == "" {
-		t.Error("occurred_at not stamped")
-	}
-	tags, ok := rec["tags"].([]string)
-	if !ok || len(tags) != 1 || tags[0] != "tag" {
-		t.Errorf("tags = %#v, want [tag]", rec["tags"])
-	}
-}
-
-func TestAddRecordRejectsMissingFields(t *testing.T) {
-	s := testLifeService(t)
-	if _, err := s.AddRecord("", "", "正文", nil, ""); err == nil {
-		t.Error("expected an error for a missing type")
-	}
-	if _, err := s.AddRecord("note", "", "   ", nil, ""); err == nil {
-		t.Error("expected an error for a missing body")
-	}
-	if got := len(s.Life().Records); got != 0 {
-		t.Errorf("rejected records were stored (%d rows)", got)
-	}
-}
-
 // Empty lists must serialize as `[]`, not `null`: the rows go to the Life panel
-// and to the model as JSON, and both read participants/tags as a list.
+// and to the model as JSON, and both read participants as a list.
 func TestListFieldsAreNeverNil(t *testing.T) {
 	s := testLifeService(t)
 	sch, err := s.AddSchedule("标题", "2026-09-03T09:30:00+08:00", "", nil)
@@ -107,13 +74,6 @@ func TestListFieldsAreNeverNil(t *testing.T) {
 	}
 	if p, ok := sch["participants"].([]string); !ok || p == nil {
 		t.Errorf("participants = %#v, want an empty slice", sch["participants"])
-	}
-	rec, err := s.AddRecord("note", "", "正文", nil, "")
-	if err != nil {
-		t.Fatalf("AddRecord: %v", err)
-	}
-	if tg, ok := rec["tags"].([]string); !ok || tg == nil {
-		t.Errorf("tags = %#v, want an empty slice", rec["tags"])
 	}
 }
 
@@ -124,38 +84,59 @@ func TestLifeWritesOnUnbuiltService(t *testing.T) {
 	if _, err := s.AddSchedule("t", "now", "", nil); err == nil {
 		t.Error("expected an error from a nil service")
 	}
-	if _, err := s.AddRecord("note", "", "b", nil, ""); err == nil {
-		t.Error("expected an error from a nil service")
-	}
 }
 
 func TestForgetRemovesOnlyWhatWasNamed(t *testing.T) {
 	s := testLifeService(t)
 	a, _ := s.AddSchedule("standup", "2026-10-06T09:00:00+02:00", "", nil)
 	b, _ := s.AddSchedule("weekly", "2026-10-08T13:30:00+02:00", "Zoom", nil)
-	n, _ := s.AddRecord("note", "", "GUI ships next week", nil, "")
-	s.store.Persons["Rene"] = map[string]any{"role": "colleague"}
 
 	if err := s.Forget("schedule", a["id"].(string)); err != nil {
-		t.Fatal(err)
-	}
-	if err := s.Forget("record", n["id"].(string)); err != nil {
-		t.Fatal(err)
-	}
-	if err := s.Forget("person", "Rene"); err != nil {
 		t.Fatal(err)
 	}
 	life := s.Life()
 	if len(life.Schedules) != 1 || life.Schedules[0]["id"] != b["id"] {
 		t.Fatalf("schedules left: %v", life.Schedules)
 	}
-	if len(life.Records) != 0 || len(life.Persons) != 0 {
-		t.Fatalf("left behind: %v %v", life.Records, life.Persons)
-	}
 	if err := s.Forget("schedule", "nope"); err == nil {
 		t.Fatal("forgetting what is not there succeeded")
 	}
-	if err := s.Forget("reminder", "x"); err == nil {
-		t.Fatal("a kind with no delete was accepted")
+	for _, kind := range []string{"reminder", "record", "person"} {
+		if err := s.Forget(kind, "x"); err == nil {
+			t.Fatalf("%s has no delete here, but it was accepted", kind)
+		}
+	}
+}
+
+// Notes and people moved to noted. What an older build saved under "records"
+// and "persons" stays in the file through later saves, untouched, until it is
+// moved there by hand.
+func TestOldNotesAndPeopleSurviveASave(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "life.json")
+	old := `{"schedules":[],"records":[{"id":"r1","body":"GUI ships"}],"persons":{"Rene":{"relation":"colleague"}},"reminders":[]}`
+	if err := os.WriteFile(path, []byte(old), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	s := &Service{store: newLifeStore(path)}
+	s.store.load()
+	if _, err := s.AddSchedule("standup", "2026-10-06T09:00:00+02:00", "", nil); err != nil {
+		t.Fatal(err)
+	}
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got map[string]any
+	if err := json.Unmarshal(raw, &got); err != nil {
+		t.Fatal(err)
+	}
+	if rs, _ := got["records"].([]any); len(rs) != 1 {
+		t.Errorf("records lost: %s", raw)
+	}
+	if ps, _ := got["persons"].(map[string]any); ps["Rene"] == nil {
+		t.Errorf("persons lost: %s", raw)
+	}
+	if ss, _ := got["schedules"].([]any); len(ss) != 1 {
+		t.Errorf("schedule not saved: %s", raw)
 	}
 }

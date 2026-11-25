@@ -154,7 +154,6 @@ func TestRelayOnlyRoundTripsThroughTheSettingsRPC(t *testing.T) {
 	if len(s.AgentLink.RelayOnly) != 0 {
 		t.Fatalf("default relay_only: %v", s.AgentLink.RelayOnly)
 	}
-	s.CLIProxyEnabled = false
 	a.settings = s
 	defer a.Shutdown(context.Background())
 

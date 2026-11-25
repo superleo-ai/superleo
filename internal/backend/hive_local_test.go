@@ -192,13 +192,13 @@ func TestLocalWorkerEnvDropsTheQueensOwn(t *testing.T) {
 }
 
 func TestLocalWorkerSettingsKeepTheModelAndDropTheSingletons(t *testing.T) {
-	q := Settings{LLMModel: "m", LLMKey: "k", WorkspaceDir: "/ws", TelegramBotToken: "bot", CLIProxyEnabled: true, AvatarPort: 4321}
+	q := Settings{LLMModel: "m", LLMKey: "k", WorkspaceDir: "/ws", TelegramBotToken: "bot", AvatarPort: 4321}
 	q.Hive = HiveSettings{Role: HiveRoleQueen, Spawner: &SpawnerSettings{Kind: SpawnerLocal}}
 	w := LocalWorkerSettings(q, "local-0", "http://127.0.0.1:5000", "tok", "http://127.0.0.1:6000")
 	if w.LLMModel != "m" || w.LLMKey != "k" || w.WorkspaceDir != "/ws" {
 		t.Fatalf("model or workspace not carried over: %+v", w)
 	}
-	if w.TelegramBotToken != "" || w.CLIProxyEnabled || w.AvatarPort != 0 {
+	if w.TelegramBotToken != "" || w.AvatarPort != 0 {
 		t.Fatal("a worker took one of the queen's single listeners")
 	}
 	if w.Hive.Role != HiveRoleWorker || w.Hive.Spawner != nil || w.Hive.JoinURL != "http://127.0.0.1:5000" || w.Hive.JoinToken != "tok" || w.Hive.Name != "local-0" {

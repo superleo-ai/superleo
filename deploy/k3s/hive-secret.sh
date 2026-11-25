@@ -64,10 +64,7 @@ base.update(tts_base_url='http://edge-tts.$NS.svc.cluster.local:43540/v1', tts_m
 base.update(embed_base_url='http://192.168.123.98:43746/v1', embed_key='', embed_model='embeddinggemma:latest')
 base.update(memory_backend='shared', shared_memory_endpoint=s['shared_memory_endpoint'],
             shared_memory_namespace='hive', max_rounds=-1, headless=True, disable_browser=True,
-            workspace_dir='/data/workspace',
-            # Off: the default starts an embedded proxy with no accounts in it and
-            # routes the model through that, which answers "unknown provider".
-            cliproxy_enabled=False)
+            workspace_dir='/data/workspace')
 # Roles, not a list. The queen accepts joins; a worker announces itself to it
 # (superleo-hive/1, see internal/backend/hive.go), so the roster is whoever is
 # actually there and adding a worker is raising the replica count.

@@ -46,7 +46,7 @@ const (
 func (a *App) answersForQueen() bool {
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	return a.desktop && (a.svc != nil || a.desktopTurnFn != nil)
+	return a.desktop && ((a.svc != nil && a.svc.HasModel()) || a.desktopTurnFn != nil)
 }
 
 // startDesktopQueenRun is a queen run of this app's own agent: the turn

@@ -42,7 +42,7 @@ export default function Onboarding({ onDone, web = false, start = "ask" }: {
 }) {
   const { t } = useI18n();
   const theme = loadTheme();
-  const [step, setStep] = useState<"looking" | "found" | "model" | "key" | "phone">(start === "model" ? "model" : "looking");
+  const [step, setStep] = useState<"looking" | "found" | "key" | "phone">(start === "model" ? "key" : "looking");
   const [pick, setPick] = useState("");
   // Where the agents are looked for: this Mac, or the machine a browser's
   // SuperLeo runs on.
@@ -180,25 +180,8 @@ export default function Onboarding({ onDone, web = false, start = "ask" }: {
         return;
       }
       const s = await GetSettings();
-      await SaveSettings(new backend.Settings({ ...s, llm_base_url: base.trim(), llm_key: key.trim(), llm_model: model.trim(), cliproxy_enabled: false }));
+      await SaveSettings(new backend.Settings({ ...s, llm_base_url: base.trim(), llm_key: key.trim(), llm_model: model.trim() }));
       await FinishOnboarding("", looked);
-      await done();
-    } catch (e) {
-      setErr(String((e as Error)?.message ?? e));
-      setBusy(false);
-    }
-  };
-
-  // Accounts sign in through the browser from Settings, where their models
-  // are then picked: turned on here, finished there.
-  const useAccounts = async () => {
-    setBusy(true);
-    setErr("");
-    try {
-      const s = await GetSettings();
-      await SaveSettings(new backend.Settings({ ...s, cliproxy_enabled: true }));
-      await FinishOnboarding("", looked);
-      window.location.hash = "#/settings";
       await done();
     } catch (e) {
       setErr(String((e as Error)?.message ?? e));
@@ -243,20 +226,8 @@ export default function Onboarding({ onDone, web = false, start = "ask" }: {
               {busy ? t("Setting up…") : t("Use {name}", { name: chosen.label })}
             </button>
           )}
-          <button className={chosen ? "gate2-alt" : "cv-pill ink gate2-go"} disabled={busy} onClick={() => setStep("model")}>{t("Use my own model")}</button>
+          <button className={chosen ? "gate2-alt" : "cv-pill ink gate2-go"} disabled={busy} onClick={() => setStep("key")}>{t("Use my own model")}</button>
           <button className="gate2-alt" disabled={busy} onClick={() => finish("", true)}>{t("Later")}</button>
-          {err && <div className="gate2-err">{err}</div>}
-        </>}
-
-        {step === "model" && <>
-          <h1>{t("Sign in with your AI account")}</h1>
-          <p className="gate2-note">Claude · ChatGPT · Antigravity</p>
-          <button className="cv-pill ink gate2-go" disabled={busy} onClick={useAccounts}>
-            {busy ? t("Setting up…") : t("Sign in")}
-          </button>
-          <button className="gate2-alt" disabled={busy} onClick={() => setStep("key")}>{t("Use an API key")}</button>
-          <button className="gate2-alt" disabled={busy} onClick={look}>{t("Find agents")}</button>
-          <button className="gate2-alt" disabled={busy} onClick={() => finish("", looked)}>{t("Later")}</button>
           {err && <div className="gate2-err">{err}</div>}
         </>}
 
@@ -294,7 +265,7 @@ export default function Onboarding({ onDone, web = false, start = "ask" }: {
           <button className="cv-pill ink gate2-go" disabled={busy || !base || !model || (needsKey && !key)} onClick={saveKey}>
             {busy ? t("Setting up…") : t("Save and start")}
           </button>
-          <button className="gate2-alt" disabled={busy} onClick={() => setStep("model")}>{t("Back")}</button>
+          <button className="gate2-alt" disabled={busy} onClick={() => setStep("found")}>{t("Back")}</button>
           {err && <div className="gate2-err">{err}</div>}
         </>}
 

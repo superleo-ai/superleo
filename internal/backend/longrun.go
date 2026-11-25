@@ -115,6 +115,9 @@ func (s *Service) StreamLong(ctx context.Context, goal string, o LongRunOptions,
 	if s == nil || s.svc == nil {
 		return nil, fmt.Errorf("superleo: agent service unavailable")
 	}
+	if !s.HasModel() {
+		return nil, ErrNoModel
+	}
 
 	cfg := agent.LongRunConfig{
 		MaxSegments:      o.MaxSegments,
