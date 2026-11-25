@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SuperLeo</title>
-<meta name="description" content="SuperLeo is an AI assistant you install on your own computer. Download it for Mac and Windows, and pair your iPhone or Apple Watch with it.">
-<meta property="og:title" content="SuperLeo | An AI assistant you install on your own computer">
-<meta property="og:description" content="An AI assistant you install on your own computer.">
+<meta name="description" content="SuperLeo gets the agents you already use, like Claude Code, Codex and OpenClaw, working together across your machines, on your own subscriptions. Download it for Mac and Windows, and pair your phone with it.">
+<meta property="og:title" content="SuperLeo | Your agents, working together">
+<meta property="og:description" content="Claude Code, Codex, OpenClaw and more, working together across your machines, on your own subscriptions.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://superleo.app/">
 <meta property="og:image" content="https://superleo.app/media/og.png">
@@ -108,6 +108,11 @@
   footer nav { display: flex; flex-wrap: wrap; gap: 20px; }
   footer a { text-decoration: none; }
   footer a:hover { color: var(--ink); }
+  .ways { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); }
+  .ways li { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 4px 24px; padding: 18px 0; border-bottom: 1px solid var(--hair); }
+  .ways .k { font-weight: 600; }
+  .ways .v { color: var(--muted); }
+  @media (max-width: 600px) { .ways li { grid-template-columns: 1fr; } }
 </style>
 <script defer data-domain="superleo.app" src="https://stats.superleo.cn/js/script.js"></script>
 </head>
@@ -125,12 +130,12 @@
 <div class="col intro">
   <h1>SuperLeo</h1>
   <p class="tagline">
-    <span lang="zh">一个装在自己电脑上的 AI 助手。</span>
-    <span lang="en">An AI assistant you install on your own computer.</span>
+    <span lang="zh">让你手上的几个 Agent 一起干活，用你自己的订阅。</span>
+    <span lang="en">Your agents, working together, on your own subscriptions.</span>
   </p>
   <p class="why">
-    <span lang="zh">我想要一个能记住我的日程、能替我跑腿的助手，但不想把这些交给别人的服务器。所以写了 SuperLeo。它装在你自己的电脑上，手机和手表连回这台电脑，对话和记录都留在你这里。代码是开源的，哪里不放心可以直接去看。</span>
-    <span lang="en">I wanted an assistant that keeps track of my schedule and runs errands for me, without handing all of that to someone else's servers. So I wrote SuperLeo. It lives on your own computer, your phone and watch connect back to it, and your conversations and records stay with you. The code is open, so you can read exactly what it does.</span>
+    <span lang="zh">我手上有好几个 Agent：Mac 上的 Claude Code，服务器上的 Codex，家里跑着的 OpenClaw。每个都好用，但它们互相不认识，我只能在几个窗口之间来回传话。所以写了 SuperLeo。它装在你自己的电脑上，把各台机器上的 Agent 连起来：你说一件事，它交给最合适的那个去做，需要的话分给几个一起做，最后把结果合成一个回答给你。它们用的都是你已经付过钱的订阅，不用另买一份 API。代码是开源的。</span>
+    <span lang="en">I have a few agents: Claude Code on my Mac, Codex on a server, OpenClaw running at home. Each one is good, but they don't know about each other, and I ended up passing messages between windows. So I wrote SuperLeo. It runs on your own computer and links the agents on all your machines. You ask for something once; it goes to whichever agent suits it, or to several at once, and you get one answer back. They run on the subscriptions you already pay for, so there's no second API bill. The code is open.</span>
   </p>
   <div class="actions">
     <a class="btn" href="#download"><span lang="zh">下载</span><span lang="en">Download</span></a>
@@ -150,6 +155,29 @@
   </figure>
 </div>
 
+<section>
+  <div class="col">
+    <h2><span lang="zh">几个 Agent，一起干活</span><span lang="en">Several agents, one job</span></h2>
+    <ul class="ways">
+      <li>
+        <span class="k"><span lang="zh">你已经有的</span><span lang="en">The ones you have</span></span>
+        <span class="v"><span lang="zh">Claude Code、Codex、opencode、OpenClaw 等，装在哪台机器上都行。它在每台机器上找到它们，不用重新配置。</span><span lang="en">Claude Code, Codex, opencode, OpenClaw and others, on any of your machines. It finds them where they are; nothing to set up again.</span></span>
+      </li>
+      <li>
+        <span class="k"><span lang="zh">你自己的订阅</span><span lang="en">Your own subscriptions</span></span>
+        <span class="v"><span lang="zh">每个 Agent 照常用你的 Claude、ChatGPT 订阅登录。SuperLeo 不卖额度，也不经手你的账号。</span><span lang="en">Each agent signs in with your Claude or ChatGPT plan as it always has. SuperLeo sells no credits and never touches your accounts.</span></span>
+      </li>
+      <li>
+        <span class="k"><span lang="zh">多台机器</span><span lang="en">Many machines</span></span>
+        <span class="v"><span lang="zh">Mac、Windows、Linux 服务器都能加进来。要在那台机器上做的事，就在那台机器上做。</span><span lang="en">Add Macs, Windows PCs and Linux servers. A job that belongs on one machine runs there.</span></span>
+      </li>
+      <li>
+        <span class="k"><span lang="zh">共享记忆</span><span lang="en">Shared memory</span></span>
+        <span class="v"><span lang="zh">一个 Agent 查到的、你交代过的，别的 Agent 也知道，不用每次从头讲。</span><span lang="en">What one agent found out, or what you told it, the others know too. No starting over each time.</span></span>
+      </li>
+    </ul>
+  </div>
+</section>
 <section id="download">
   <div class="col">
     <h2><span lang="zh">下载</span><span lang="en">Download</span></h2>
@@ -196,12 +224,12 @@
           <span lang="en">In the morning it sends today's schedule and to-dos to my phone. When something comes to mind, I say it to my watch, and it reminds me at the right time.</span>
         </p>
         <p>
-          <span lang="zh">要查资料、改代码、看行情这类花时间的事，我交代给它，它会分给合适的机器去做，做完了告诉我结果。需要我确认的事，它会先问我。</span>
-          <span lang="en">Slower jobs, like looking things up, changing code or checking the markets, I hand to it, and it gives them to whichever machine suits them best and reports back. Anything that needs my approval, it asks first.</span>
+          <span lang="zh">改代码交给 Claude Code，查资料交给另一台机器上的 Codex，几件事同时跑，做完了告诉我结果。在 3D 视图里能看到每个 Agent 正在做什么。需要我确认的事，手机上会先问我。</span>
+          <span lang="en">Code changes go to Claude Code, research to Codex on another machine, several things at once, and I hear back when they're done. The 3D view shows what each agent is doing. Anything that needs my OK, my phone asks first.</span>
         </p>
         <p>
-          <span lang="zh">背后用哪家的模型由你自己决定，兼容 OpenAI 接口的服务都可以接，也可以接你自己跑的模型。</span>
-          <span lang="en">You choose the model behind it. Any service with an OpenAI-compatible API works, including models you run yourself.</span>
+          <span lang="zh">SuperLeo 自己的模型也由你决定：可以直接用 Claude Code 当大脑，也可以接任何兼容 OpenAI 接口的服务，或你自己跑的模型。</span>
+          <span lang="en">You also choose what SuperLeo itself thinks with: Claude Code on your plan, any OpenAI-compatible service, or a model you run yourself.</span>
         </p>
       </div>
       <video src="/media/iphone-en.mp4" poster="/media/iphone-en.jpg" autoplay muted loop playsinline width="360" height="782"
