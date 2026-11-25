@@ -510,3 +510,5 @@ export function WellbeingToday():Promise<any>;
 export function WellbeingTrend(arg1:string,arg2:number):Promise<any>;
 
 export function WorkerKit(arg1:string):Promise<backend.WorkerKit>;
+
+export function WorkspaceAbsPath(arg1:string):Promise<string>;

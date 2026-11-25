@@ -227,15 +227,6 @@ export default function DeskShell({ view, badges, children, overlay, onOpenConve
             pane), then Dashboards, light or dark, and the bell at the edge. */}
         {/* In 3D the world has the right edge to itself. */}
         {mode === "menu" && <div className="dk-toolbar" style={noDrag} role="toolbar">
-          {SIDE.map((k) => {
-            const Icon = LayoutDashboardIcon;
-            return (
-              <button key={k} type="button" className={`dk-tool${sideOn(k) ? " on" : ""}`} aria-pressed={sideOn(k)}
-                title={t(TITLES[k])} aria-label={t(TITLES[k])} onClick={() => openSide(k)}>
-                <Icon size={18} />
-              </button>
-            );
-          })}
           <NotificationCenter variant="desk" onOpenConversation={onOpenConversation} needs={needs} />
         </div>}
         <nav className="dk-rail" style={drag}>

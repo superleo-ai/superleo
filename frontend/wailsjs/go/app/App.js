@@ -1009,3 +1009,7 @@ export function WellbeingTrend(arg1, arg2) {
 export function WorkerKit(arg1) {
   return window['go']['app']['App']['WorkerKit'](arg1);
 }
+
+export function WorkspaceAbsPath(arg1) {
+  return window['go']['app']['App']['WorkspaceAbsPath'](arg1);
+}

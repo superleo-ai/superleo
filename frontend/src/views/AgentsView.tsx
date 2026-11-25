@@ -3,7 +3,10 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { PATHS } from "../lib/routes";
 import { focusInWorld } from "../world/bus";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { SquareIcon, ChevronRightIcon, PlusIcon, ArrowUpIcon, TerminalIcon, FolderIcon, FolderOpenIcon } from "lucide-react";
+import { SquareIcon, ChevronRightIcon, PlusIcon, ArrowUpIcon, TerminalIcon, FolderIcon, FolderOpenIcon, PaperclipIcon } from "lucide-react";
+import { useAttachments } from "../lib/useAttachments";
+import AttachmentChips from "../components/AttachmentChips";
+import { WorkspaceAbsPath } from "../../wailsjs/go/app/App";
 import "./coding.css";
 import { createPortal } from "react-dom";
 import {
@@ -362,8 +365,9 @@ function Start({ choices, onStarted }: { choices: string[] | null; onStarted: (r
  * of settings and the send button. With `names`, @ completes coding CLIs.
  */
 function Composer({
-  value, onChange, names = [], placeholder, onSend, sendable, disabled, foot, action, boxRef,
+  value, onChange, names = [], placeholder, onSend, sendable, disabled, foot, action, boxRef, onPaste,
 }: {
+  onPaste?: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void;
   value: string;
   onChange: (v: string) => void;
   names?: string[];
@@ -442,6 +446,7 @@ function Composer({
         onInput={event => syncInput(event.currentTarget)}
         onChange={event => syncInput(event.currentTarget)}
         onBlur={() => setQ(null)}
+        onPaste={onPaste}
         onCompositionStart={ime.handlers.onCompositionStart}
         onCompositionEnd={event => { ime.handlers.onCompositionEnd(event); syncInput(event.currentTarget); }}
         onKeyDown={(e) => {
@@ -605,6 +610,10 @@ function TermView({ term }: { term: Term }) {
   const [err, setErr] = useState("");
   const [reply, setReply] = useState("");
   const [sending, setSending] = useState(false);
+  // Pictures and files go in by path: the CLI reads them off this Mac's disk,
+  // so only a session running here can take them.
+  const local = !term.machine;
+  const att = useAttachments({ drop: local });
   const end = useRef<HTMLDivElement>(null);
   const stick = useRef(true);
   const log = useRef<HTMLDivElement>(null);
@@ -622,12 +631,15 @@ function TermView({ term }: { term: Term }) {
   useEffect(() => { if (stick.current) end.current?.scrollIntoView({ block: "end" }); }, [n]);
 
   const send = async () => {
-    const text = reply.trim();
-    if (!text || sending) return;
+    const typed = reply.trim();
+    if ((!typed && att.paths.length === 0) || sending) return;
     setSending(true);
     try {
+      const files = await Promise.all(att.paths.map((p) => WorkspaceAbsPath(p)));
+      const text = [typed, ...files.map((f) => (/\s/.test(f) ? `"${f}"` : f))].filter(Boolean).join("\n");
       const d = (await ReplyToCodingSession(term.machine ?? "", term.cli, term.session ?? "", text)) as { via?: string; note?: string };
       setReply("");
+      att.clear();
       stick.current = true;
       if (d?.note) toast.success(d.note);
     } catch (e) {
@@ -677,13 +689,20 @@ function TermView({ term }: { term: Term }) {
         </div>
       </div>
       <div className="cd-follow">
+        <AttachmentChips paths={att.paths} onRemove={att.remove} />
         <Composer
           value={reply}
           onChange={setReply}
           placeholder={term.replyable ? t("Reply to {cli}", { cli: term.cli }) : t("This session has ended")}
           onSend={send}
-          sendable={term.replyable && !sending && !!reply.trim()}
+          onPaste={local ? att.paste : undefined}
+          sendable={term.replyable && !sending && !att.importing && (!!reply.trim() || att.paths.length > 0)}
           disabled={!term.replyable}
+          foot={local && term.replyable ? (
+            <button type="button" className="cd-attach" title={t("Attach files")} aria-label={t("Attach files")} onClick={att.pick} disabled={att.importing}>
+              <PaperclipIcon size={16} />
+            </button>
+          ) : undefined}
         />
       </div>
     </div>

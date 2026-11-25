@@ -334,3 +334,18 @@ func (a *App) PickDirectory(start string) (string, error) {
 		CanCreateDirectories: true,
 	})
 }
+
+// WorkspaceAbsPath turns a workspace-relative path (what ImportPastedFile and
+// PickFiles hand back) into the absolute one, for a coding CLI running in some
+// other directory on this machine. It refuses a path that leaves the workspace.
+func (a *App) WorkspaceAbsPath(rel string) (string, error) {
+	ws := a.workspaceDir()
+	if ws == "" {
+		return "", fmt.Errorf("workspace not configured")
+	}
+	p := filepath.Clean(filepath.Join(ws, filepath.FromSlash(rel)))
+	if r, err := filepath.Rel(ws, p); err != nil || r == ".." || strings.HasPrefix(r, ".."+string(filepath.Separator)) {
+		return "", fmt.Errorf("%s is outside the workspace", rel)
+	}
+	return p, nil
+}
