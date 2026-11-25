@@ -6,7 +6,7 @@ import { app } from "../../wailsjs/go/models";
 import { EventsOn } from "../../wailsjs/runtime";
 import HiveTaskPage, { type FullTask } from "./HiveTaskPage";
 import { useI18n } from "../lib/i18n";
-import { PATHS, attentionPath, taskPath } from "../lib/routes";
+import { PATHS, attentionPath, conversationPath, taskPath } from "../lib/routes";
 import { attentionTitle, whenOf, type AttentionItem } from "../canvas/attention";
 import { elapsed, oneLine, useCodingRuns, useHive, useHosts, type Host, type HostAgent, type HiveTask } from "../canvas/data";
 import Reactor, { Counters, usePulse, fmtK, type Pillar } from "../components/Reactor";
@@ -518,12 +518,12 @@ function Recent({ onOpenConversation }: { onOpenConversation: (session: string) 
     window.addEventListener("focus", load);
     return () => { offs.forEach((o) => typeof o === "function" && o()); window.removeEventListener("focus", load); };
   }, [load]);
-  const open = (c: app.Conversation) => (c.kind === "queen" ? onOpenConversation(c.session) : navigate(`${PATHS.conversations}?open=${encodeURIComponent(c.id)}`));
+  const open = (c: app.Conversation) => (c.kind === "queen" ? onOpenConversation(c.session) : navigate(conversationPath(c.id)));
   return (
     <section className="dsh-sec dsh-recent" aria-label={t("Recent conversations")}>
       <div className="dsh-sh">
         <h2>{t("Recent conversations")}</h2>
-        <button type="button" className="dsh-link" onClick={() => navigate(PATHS.conversations)}>{t("All")}<ChevronRightIcon size={13} /></button>
+        <button type="button" className="dsh-link" onClick={() => navigate(conversationPath())}>{t("All")}<ChevronRightIcon size={13} /></button>
       </div>
       <div className="dsh-body">
         {items && items.length === 0 && <div className="dsh-none">{t("No conversations")}</div>}

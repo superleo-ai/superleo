@@ -706,3 +706,15 @@ html[data-desk] body { background: transparent; }
 .dk-earlier { grid-template-rows: 58px minmax(0, 1fr); }
 .dk-earlier-entry { margin-top: 8px; flex: none; }
 .dk-earlier-row { width: 100%; }
+
+/* Chat and Conversations are one page: the sidebar's last section is the
+   list, which takes the height that is left and scrolls inside; the rest of
+   the sidebar keeps its size. A conversation that is not the queen's opens
+   in a section of its own, in the queen's place. */
+.dk-side > * { flex: none; }
+.dk-side > .cv2-listbox { flex: 1 1 auto; min-height: 240px; }
+.dk-chat.dk-conv { display: flex; flex-direction: column; }
+.dk-chat.dk-conv > .cv2-pane { flex: 1; }
+.dk-chat.dk-conv .cv2-phead { min-height: 58px; padding: 0 18px; box-sizing: border-box; }
+.dk-chat.dk-conv .cv2-phead .dk-icon { flex: none; }
+.dk-world.window-on > .dk .cv2-phead { padding-right: 52px; }

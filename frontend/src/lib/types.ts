@@ -5,7 +5,6 @@ export type Accent = "signal" | "copper" | "cobalt" | "jade" | "rose" | "violet"
 export type ViewKey =
   | "home"
   | "chat"
-  | "conversations"
   | "settings"
   | "knowledge"
   | "skills"

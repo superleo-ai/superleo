@@ -2,6 +2,7 @@
    open thread beside it. Narrow, the thread replaces the list. */
 .cv2 { flex: 1; min-width: 0; min-height: 0; display: grid; grid-template-columns: minmax(280px, 360px) 1fr; container-type: inline-size; color: var(--text-0); }
 .cv2-list { min-height: 0; display: flex; flex-direction: column; border-right: 1px solid var(--border); }
+.cv2-listbox { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .cv2-head { padding: 18px 16px 10px; display: flex; flex-direction: column; gap: 10px; }
 .cv2-head h1 { margin: 0; font-size: 20px; font-weight: 650; }
 .cv2-search { display: flex; align-items: center; gap: 8px; padding: 0 10px; height: 34px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-1); color: var(--text-2); }
@@ -71,5 +72,26 @@
   .cv2-back { display: inline-flex; }
 }
 
-/* In the 3D world the page is a panel of its own width. */
-.dk-world .dk-page.page-conversations { width: 600px; }
+/* In the chat sidebar: the list is a section under Pinned, so it takes the
+   sidebar's own rhythm: a small grey heading, a slim search, one row of
+   chips that scrolls sideways, and two-line rows with the time at the right. */
+.cv2-compact { flex: 1 1 auto; min-height: 0; }
+.cv2-compact .cv2-head { padding: 0 0 4px; gap: 6px; }
+.cv2-compact .dk-sec { padding: 14px 10px 0; }
+.cv2-compact .cv2-search { height: 30px; margin: 0 2px; border-radius: 9px; background: rgba(var(--glass-rgb), .5); }
+.cv2-compact .cv2-who { flex-wrap: nowrap; overflow-x: auto; padding: 0 2px 2px; scrollbar-width: none; }
+.cv2-compact .cv2-who::-webkit-scrollbar { display: none; }
+.cv2-compact .cv2-who button { flex: none; height: 24px; padding: 0 9px; gap: 4px; font-size: 11.5px; white-space: nowrap; background: transparent; }
+.cv2-compact .cv2-who button.on { background: var(--accent-soft); }
+.cv2-compact .cv2-rows { padding: 2px 0 6px; gap: 1px; }
+.cv2-compact .cv2-row { padding: 6px 8px; gap: 9px; align-items: center; border-radius: 10px; }
+.cv2-compact .cv2-row:hover { background: rgba(var(--glass-rgb), .45); }
+.cv2-compact .cv2-row.on { background: rgba(var(--glass-rgb), .78); border-color: transparent; box-shadow: inset 0 0 0 1px var(--border); }
+.cv2-compact .cv2-ico { width: 24px; height: 24px; border-radius: 7px; }
+.cv2-compact .cv2-main { gap: 1px; }
+.cv2-compact .cv2-top { gap: 6px; }
+.cv2-compact .cv2-ttl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; font-size: 13px; color: var(--text-0); }
+.cv2-compact .cv2-top em { flex: none; }
+.cv2-compact .cv2-sub { font-size: 11px; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cv2-compact .cv2-more { top: 50%; right: 6px; margin-top: -12px; }
+.cv2-compact .cv2-empty { padding: 24px 8px; }

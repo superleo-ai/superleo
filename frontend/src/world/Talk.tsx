@@ -5,6 +5,7 @@ import { AskIn, CancelChat, CancelCLIRun, ChatHistory, CLIRunDetail, FollowUpCLI
 import { EventsOn } from "../../wailsjs/runtime";
 import { loadQueenSession, queenSession } from "../lib/queenConsole";
 import { useI18n } from "../lib/i18n";
+import { conversationPath } from "../lib/routes";
 import { useImeGuard } from "../lib/ime";
 import { isInjectedMemory, visibleAnswer } from "../lib/format";
 import { stepLabel } from "../lib/trace";
@@ -304,7 +305,7 @@ export default function Talk({ who, placeholder }: { who: Talker; placeholder: s
     <div className="wt">
       {kept && (
         <button type="button" className="wt-hist" title={t("Conversations")} aria-label={t("Conversations")} data-testid="talk-history"
-          onClick={() => window.dispatchEvent(new CustomEvent("superleo:window", { detail: "/conversations?open=" + encodeURIComponent(kept) }))}>
+          onClick={() => window.dispatchEvent(new CustomEvent("superleo:window", { detail: conversationPath(kept) }))}>
           <HistoryIcon size={13} />
         </button>
       )}

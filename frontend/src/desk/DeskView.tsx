@@ -1,5 +1,5 @@
 import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowUpIcon, HexagonIcon, 
   PlusIcon, SquareIcon, SquarePenIcon, CalendarIcon, AlarmClockIcon, TerminalIcon, TriangleAlertIcon, XIcon, ChevronRightIcon,
@@ -48,6 +48,8 @@ import { isPersonalConversation, loadQueenSession, queenSession, useQueenSession
 import { useDeskPane, useDeskTheme, useDeskWorld } from "./DeskShell";
 import { machine } from "../lib/machine";
 import { SentMessage } from "../components/SentFiles";
+import { ConversationList } from "../views/ConversationList";
+import { Thread } from "../views/ConversationThread";
 
 type TabKey = string; // "hive" | "run:<id>" | "dash:<id>"
 
@@ -188,6 +190,12 @@ export default function DeskView({ approvals, openSession, onSessionOpened, atte
   const { m: membership } = useMembership();
   const earlierCount = useEarlierCount(!!membership?.joined);
   const [earlier, setEarlier] = useState(false);
+  // A conversation that is not the queen's, open in the main pane: a coding
+  // run, a terminal session, a worker or an agent. "" is the queen's chat.
+  const [conv, setConv] = useState("");
+  const [convStamp, setConvStamp] = useState(0);
+  const convChanged = useCallback(() => setConvStamp((n) => n + 1), []);
+  const [params, setParams] = useSearchParams();
   const attention = attentionItems;
   const [draft, setDraft] = useState("");
   const composerRef = useRef<HTMLTextAreaElement>(null);
@@ -234,6 +242,20 @@ export default function DeskView({ approvals, openSession, onSessionOpened, atte
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openSession]);
 
+  // /?open=<id>: where every link to a conversation lands. The queen's own
+  // open in the chat; the rest take the main pane.
+  const openParam = params.get("open") ?? "";
+  useEffect(() => {
+    if (!openParam) return;
+    setEarlier(false);
+    if (openParam.startsWith("queen:")) pickSession(openParam.slice(6));
+    else setConv(openParam);
+    const next = new URLSearchParams(params);
+    next.delete("open");
+    setParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openParam]);
+
   useEffect(() => {
     const load = () => dashboards.list().then(list => setPins(list ?? [])).catch(() => {});
     const offs = ["dashboard:updated", "dashboard:refreshing"].map(name => EventsOn(name, load));
@@ -277,7 +299,7 @@ export default function DeskView({ approvals, openSession, onSessionOpened, atte
       rows.push({ key: `n-${it.id}-${it.startTime}`, at: +new Date(it.startTime), noted: it });
     });
     feed.forEach((it, i) => rows.push({ key: `l-${it.kind}-${it.ref}-${i}`, at: it.at ? +new Date(it.at) : Infinity, life: it }));
-    return rows.sort((a, b) => a.at - b.at).slice(0, 6);
+    return rows.sort((a, b) => a.at - b.at).slice(0, 3);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [next.items, feed.map((f) => `${f.ref}@${f.at}`).join(), Math.floor(now.getTime() / 60000)]);
   const [sheet, setSheet] = useState<AttentionItem | null>(null);
@@ -334,6 +356,7 @@ export default function DeskView({ approvals, openSession, onSessionOpened, atte
 
   const pickSession = (id: string) => {
     setEarlier(false);
+    setConv("");
     setOnQueen(id === queenSession());
     chat.loadSession(id).catch(() => {});
   };
@@ -346,6 +369,7 @@ export default function DeskView({ approvals, openSession, onSessionOpened, atte
   useEffect(() => {
     const compose = () => {
       if (!takeCompose()) return;
+      setConv("");
       if (!onQueenRef.current) { setOnQueen(true); chatRef.current.loadSession(queenSession()).catch(() => {}); }
       // After the shell has shown this page (a window opening, a page
       // changing): a hidden box takes no focus.
@@ -382,9 +406,9 @@ export default function DeskView({ approvals, openSession, onSessionOpened, atte
         <div className="dk-ws">
           <b>SuperLeo</b>
           <button className="dk-icon" title={t("Hide sidebar")} aria-label={t("Hide sidebar")} aria-controls="desk-sidebar" aria-expanded="true" onClick={() => foldSide(true)} style={{ marginLeft: "auto" }}><PanelLeftCloseIcon size={17} /></button>
-          <button className="dk-icon" title={t("New chat")} aria-label={t("New chat")} onClick={() => { setEarlier(false); chat.newSession(); setOnQueen(false); }}><SquarePenIcon size={17} /></button>
+          <button className="dk-icon" title={t("New chat")} aria-label={t("New chat")} onClick={() => { setEarlier(false); setConv(""); chat.newSession(); setOnQueen(false); }}><SquarePenIcon size={17} /></button>
         </div>
-        <button className={onQueen ? "dk-row on" : "dk-row"} onClick={() => pickSession(queenId)}><span className="dk-qhex">Q</span>{queenTitle(queen)}</button>
+        <button className={onQueen && !conv && !earlier ? "dk-row on" : "dk-row"} onClick={() => pickSession(queenId)}><span className="dk-qhex">Q</span>{queenTitle(queen)}</button>
         {(needs > 0 || attentionError) && (
           <button className="dk-row need" onClick={() => navigate(PATHS.tasks)} title={attention.filter((i) => i.level === "needs").slice(0, 3).map(attentionTitle).join("\n")}>
             <TriangleAlertIcon size={16} />
@@ -421,8 +445,8 @@ export default function DeskView({ approvals, openSession, onSessionOpened, atte
 
         {(pins.length > 0 || pinnedConvs.length > 0) && <div className="dk-sec">{t("Pinned")}</div>}
         {pinnedConvs.map((p) => (
-          <button key={p.id} className={!onQueen && p.kind === "queen" && p.session === chat.sessionId ? "dk-rec on" : "dk-rec"} data-testid="pinned-conversation"
-            onClick={() => (p.kind === "queen" ? pickSession(p.session) : navigate(`${PATHS.conversations}?open=${encodeURIComponent(p.id)}`))}>
+          <button key={p.id} className={(p.kind === "queen" ? !conv && !onQueen && p.session === chat.sessionId : p.id === conv) ? "dk-rec on" : "dk-rec"} data-testid="pinned-conversation"
+            onClick={() => { if (p.kind === "queen") pickSession(p.session); else { setEarlier(false); setConv(p.id); } }}>
             <MessagesSquareIcon size={14} /><span>{p.title || t("Untitled")}</span>
           </button>
         ))}
@@ -432,9 +456,10 @@ export default function DeskView({ approvals, openSession, onSessionOpened, atte
           </button>
         ))}
 
-        <button className="dk-row" onClick={() => navigate(PATHS.conversations)} data-testid="all-conversations">
-          <MessagesSquareIcon size={16} /><span className="dk-row-t">{t("Conversations")}</span>
-        </button>
+        <ConversationList compact hideMain refresh={convStamp}
+          openId={conv || `queen:${chat.sessionId}`}
+          onOpen={(c) => { if (c.kind === "queen") pickSession(c.session); else { setEarlier(false); setConv(c.id); } }}
+          onDeleted={(c) => { if (c.id === conv) setConv(""); else if (c.kind === "queen" && c.session === chat.sessionId) pickSession(queenId); }} />
         {earlierCount > 0 && (
           <button className={earlier ? "dk-row on dk-earlier-entry" : "dk-row dk-earlier-entry"} onClick={() => setEarlier(true)} data-testid="earlier-entry">
             <HistoryIcon size={16} /><span className="dk-row-t">{t("Earlier chats on this Mac")}</span>
@@ -462,11 +487,11 @@ export default function DeskView({ approvals, openSession, onSessionOpened, atte
         onLostPointerCapture={() => setResizing(false)}
       />}
       {earlier && <EarlierChatsPane onClose={() => setEarlier(false)} />}
-      <section className="cv-glass dk-chat" hidden={earlier}>
+      <section className="cv-glass dk-chat" hidden={earlier || !!conv}>
         <header className="dk-chead">
           {sideFolded && <>
             <button className="dk-icon" title={t("Show sidebar")} aria-label={t("Show sidebar")} aria-controls="desk-sidebar" aria-expanded="false" onClick={() => foldSide(false)}><PanelLeftOpenIcon size={17} /></button>
-            <button className="dk-icon" title={t("New chat")} aria-label={t("New chat")} onClick={() => { setEarlier(false); chat.newSession(); setOnQueen(false); }}><SquarePenIcon size={17} /></button>
+            <button className="dk-icon" title={t("New chat")} aria-label={t("New chat")} onClick={() => { setEarlier(false); setConv(""); chat.newSession(); setOnQueen(false); }}><SquarePenIcon size={17} /></button>
           </>}
           <span className="dk-qhex big">Q</span>
           <div><b title={title}>{title}</b><small><i className={hive.role ? "dk-ok" : "dk-off"} />{status}</small></div>
@@ -551,6 +576,15 @@ export default function DeskView({ approvals, openSession, onSessionOpened, atte
           )}
         </form>
       </section>
+      {conv && (
+        <section className="cv-glass dk-chat dk-conv" hidden={earlier} data-testid="desk-conversation">
+          <Thread key={conv} id={conv} embedded onBack={() => setConv("")} onOpen={setConv} onChanged={convChanged}
+            lead={sideFolded ? <>
+              <button className="dk-icon" title={t("Show sidebar")} aria-label={t("Show sidebar")} aria-controls="desk-sidebar" aria-expanded="false" onClick={() => foldSide(false)}><PanelLeftOpenIcon size={17} /></button>
+              <button className="dk-icon" title={t("New chat")} aria-label={t("New chat")} onClick={() => { setConv(""); chat.newSession(); setOnQueen(false); }}><SquarePenIcon size={17} /></button>
+            </> : null} />
+        </section>
+      )}
       {sheet && <EventSheet item={sheet} onClose={() => setSheet(null)} />}
       {naming && <NameDashboardModal suggested={suggestName(naming.prompt)} prompt={naming.prompt} onCancel={() => setNaming(null)} onSave={async name => {
         const saved = naming; setNaming(null);

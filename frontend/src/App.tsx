@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { PATHS, viewOf } from "./lib/routes";
+import { PATHS, conversationPath, viewOf } from "./lib/routes";
 import Sidebar from "./components/Sidebar";
 import Pet from "./components/Pet";
 import { useRoom } from "./lib/useViewport";
@@ -107,8 +107,9 @@ export default function App() {
   const openConversation = useCallback((session: string) => {
     if (!session) return;
     setPendingSession(session);
-    setView("chat");
-  }, [setView]);
+    // The desktop's chat page is its home, where the list and the thread are one card.
+    if (clientKind() === "desktop") navigate(PATHS.home); else setView("chat");
+  }, [setView, navigate]);
 
   // Scheduled runs are listened for here, not in the Schedules view: a timer
   // fires while the user is somewhere else, which is the whole point of a timer.
@@ -220,6 +221,10 @@ export default function App() {
   // the glass. Its home is the conversation with the queen beside the live
   // hive, so a conversation opened from anywhere opens there.
   if (clientKind() === "desktop") {
+    // The old Conversations address: they are part of the chat page now.
+    if (location.pathname === "/conversations") {
+      return <Navigate to={conversationPath(new URLSearchParams(location.search).get("open") ?? undefined)} replace />;
+    }
     return (
       <>
         <DeskShell needs={{ items: attention.items, approvals: approvals.pending, onResolve: approvals.resolve }} overlay={<CardStack runs={runs} approvals={approvals.pending} note={approvals.note} onDismissNote={approvals.dismissNote} onResolve={approvals.resolve} onOpenConversation={openConversation} />} status={status} loading={loading} view={view} badges={{ tasks: attention.items.filter(i => i.level === "needs").length }} onOpenConversation={openConversation}>

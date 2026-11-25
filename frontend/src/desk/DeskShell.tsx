@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useRef, useState } from "r
 import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboardIcon, PanelRightOpenIcon, PanelRightCloseIcon, BookOpenIcon, HexagonIcon, MessageSquareIcon, PaletteIcon,
-  MessagesSquareIcon, PuzzleIcon, SlidersHorizontalIcon, TerminalIcon, XIcon,
+  PuzzleIcon, SlidersHorizontalIcon, TerminalIcon, XIcon,
   MoonIcon, SunIcon, CalendarDaysIcon, GlobeIcon,
   HeartPulseIcon, WorkflowIcon, GaugeIcon,
 } from "lucide-react";
@@ -17,7 +17,7 @@ import { useI18n } from "../lib/i18n";
 import { queenTitle, useQueenName } from "../lib/queenName";
 import NotificationCenter, { NeedsYou } from "../components/NotificationCenter";
 import ThemePanel from "../canvas/ThemePanel";
-import { ChatFab, ConversationsFab, FabStack, ModeFab, SettingsFab } from "../components/Fabs";
+import { ChatFab, FabStack, ModeFab, SettingsFab } from "../components/Fabs";
 import { askToCompose } from "../lib/compose";
 import { openBrowserPanel, useBrowserPanelOpen } from "../lib/browser";
 import { useFeatures, viewShown } from "../lib/features";
@@ -60,7 +60,6 @@ const loadMode = (): "world" | "menu" => {
 const RAIL: { key: ViewKey; label: string; Icon: typeof HexagonIcon; cls: string }[] = [
   { key: "hive", label: "Dashboard", Icon: GaugeIcon, cls: "dk-a-hive" },
   { key: "home", label: "The queen", Icon: MessageSquareIcon, cls: "dk-a-chat" },
-  { key: "conversations", label: "Conversations", Icon: MessagesSquareIcon, cls: "dk-a-rec" },
   { key: "schedule", label: "Schedule", Icon: CalendarDaysIcon, cls: "dk-a-sched" },
   { key: "wellbeing", label: "Wellbeing", Icon: HeartPulseIcon, cls: "dk-a-sched" },
   { key: "routines", label: "Automation", Icon: WorkflowIcon, cls: "dk-a-sched" },
@@ -73,7 +72,7 @@ const RAIL: { key: ViewKey; label: string; Icon: typeof HexagonIcon; cls: string
 const SIDE: ViewKey[] = ["dashboards"];
 
 export const TITLES: Record<ViewKey, string> = {
-  home: "", chat: "Chat", conversations: "Conversations", tasks: "Needs your attention", schedule: "Schedule", dashboards: "Dashboards", wellbeing: "Wellbeing", hive: "Dashboard", agents: "Bees", routines: "Automation", coding: "Coding", knowledge: "Knowledge",
+  home: "", chat: "Chat", tasks: "Needs your attention", schedule: "Schedule", dashboards: "Dashboards", wellbeing: "Wellbeing", hive: "Dashboard", agents: "Bees", routines: "Automation", coding: "Coding", knowledge: "Knowledge",
   skills: "Skills", mcp: "MCP", settings: "Settings",
 };
 
@@ -116,8 +115,10 @@ export default function DeskShell({ view, badges, children, overlay, onOpenConve
       if (modeRef.current === "menu") { navigate(path); return; }
       // Same page: the view does not change, so open it here. Not on a
       // timer: a navigation can take longer to land than any timer, and the
-      // window opened early is closed again when it does.
-      if ((window.location.hash.slice(1) || "/") === path) { setMode("window"); return; }
+      // window opened early is closed again when it does. A query (which
+      // conversation to open) is carried there all the same.
+      const here = window.location.hash.slice(1) || "/";
+      if (here.split("?")[0] === path.split("?")[0]) { if (here !== path) navigate(path); setMode("window"); return; }
       pendingWindow.current = true;
       navigate(path);
     };
@@ -281,7 +282,6 @@ export default function DeskShell({ view, badges, children, overlay, onOpenConve
           <button className="dk-win-x" style={noDrag} title={t("Back to the world")} onClick={() => setMode("world")}><XIcon size={18} /></button>
         )}
         <FabStack style={noDrag}>
-          {world && <ConversationsFab onClick={() => window.dispatchEvent(new CustomEvent("superleo:window", { detail: PATHS.conversations }))} />}
           {world && <SettingsFab onClick={() => window.dispatchEvent(new CustomEvent("superleo:window", { detail: PATHS.settings }))} />}
           <ModeFab world={world} onClick={toggleMode} />
           <ChatFab onClick={openChat} />

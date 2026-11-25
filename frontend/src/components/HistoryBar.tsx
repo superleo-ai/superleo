@@ -8,7 +8,7 @@ import {
   ScrollTextIcon,
 } from "lucide-react";
 import { copyText } from "../lib/format";
-import { PATHS } from "../lib/routes";
+import { conversationPath } from "../lib/routes";
 import { useI18n } from "../lib/i18n";
 
 /** The History / New chat buttons, and which conversation this is. */
@@ -30,7 +30,7 @@ export function HistoryBar({
     <div className="chat-toolbar">
       <button
         className="btn ghost sm"
-        onClick={() => navigate(PATHS.conversations)}
+        onClick={() => navigate(conversationPath())}
         title="Conversations"
       >
         <HistoryIcon className="size-3.5" /> Conversations

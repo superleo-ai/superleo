@@ -5,7 +5,7 @@ import { app } from "../../wailsjs/go/models";
 import { EventsOn } from "../../wailsjs/runtime";
 import { useI18n } from "../lib/i18n";
 import { withoutCallNotes } from "../lib/format";
-import { Thread } from "../views/ConversationsView";
+import { Thread } from "../views/ConversationThread";
 import Talk from "./Talk";
 import { folderOf, sessionsOf, type CodingConv } from "./codingSessions";
 

@@ -1,4 +1,5 @@
 import { ViewKey } from "./types";
+import { clientKind } from "./hivelink";
 
 // Where each screen lives.
 //
@@ -13,7 +14,6 @@ import { ViewKey } from "./types";
 export const PATHS: Record<ViewKey, string> = {
   home: "/",
   chat: "/chat",
-  conversations: "/conversations",
   hive: "/hive",
   agents: "/agents",
   routines: "/routines",
@@ -34,6 +34,9 @@ export function viewOf(pathname: string): ViewKey {
   const first = "/" + pathname.split("/")[1];
   // The old Stats address: the Dashboard has taken its page (App redirects it).
   if (first === "/stats") return "hive";
+  // Conversations are part of the chat page now; the old address is kept for
+  // links (the desktop forwards it into the chat page, App).
+  if (first === "/conversations") return "chat";
   const hit = (Object.keys(PATHS) as ViewKey[]).find((k) => PATHS[k] === first);
   return hit ?? "home";
 }
@@ -56,4 +59,12 @@ export function attentionPath(item: { kind: string; open?: string; ref?: string 
   if (item.kind === "reminder") return PATHS.routines;
   if (item.open === "records") return PATHS.schedule;
   return PATHS.hive;
+}
+
+/** Where a conversation opens. On the desktop it is the chat page, which
+ *  holds the list and the thread; the narrow web window, whose chat has no
+ *  list, keeps a page of its own. */
+export function conversationPath(id?: string): string {
+  const q = id ? `?open=${encodeURIComponent(id)}` : "";
+  return clientKind() === "web" ? `/conversations${q}` : `${PATHS.home}${q}`;
 }
