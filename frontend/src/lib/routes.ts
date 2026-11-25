@@ -22,6 +22,7 @@ export const PATHS: Record<ViewKey, string> = {
   schedule: "/schedule",
   dashboards: "/dashboards",
   wellbeing: "/wellbeing",
+  finance: "/finance",
   knowledge: "/knowledge",
   skills: "/skills",
   mcp: "/mcp",

@@ -16,7 +16,8 @@ export type ViewKey =
   | "tasks"
   | "schedule"
   | "dashboards"
-  | "wellbeing";
+  | "wellbeing"
+  | "finance";
 
 /**
  * Every streaming payload is tagged with the id `SendChat` returned for that

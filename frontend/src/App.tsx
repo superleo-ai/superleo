@@ -7,6 +7,7 @@ import { useRoom } from "./lib/useViewport";
 import StatusBar from "./components/StatusBar";
 import ChatView from "./views/ChatView";
 import WellbeingView from "./views/WellbeingView";
+import FinanceView from "./views/FinanceView";
 import DashboardView from "./views/DashboardView";
 import AgentsView from "./views/AgentsView";
 import StandingView from "./views/StandingView";
@@ -202,6 +203,7 @@ export default function App() {
       <Route path="/schedule" element={<ScheduleView />} />
       <Route path="/stats" element={<Navigate to="/hive" replace />} />
       <Route path="/wellbeing" element={<FeatureGate feature="wellbeing"><WellbeingView /></FeatureGate>} />
+      <Route path="/finance" element={<FeatureGate feature="finance"><FinanceView /></FeatureGate>} />
       {/* Everything under /hive is the Dashboard's own to route: the
           overview, and one page per hive task. */}
       <Route path="/hive/*" element={<DashboardView attention={attention.items} onOpenConversation={openConversation} />} />

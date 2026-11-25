@@ -57,7 +57,7 @@ export async function setFeature(name: Feature, on: boolean) {
 }
 
 /** The page a feature owns, hidden with it. */
-export const FEATURE_VIEW: Partial<Record<ViewKey, Feature>> = { wellbeing: "wellbeing", coding: "coding" };
+export const FEATURE_VIEW: Partial<Record<ViewKey, Feature>> = { wellbeing: "wellbeing", finance: "finance", coding: "coding" };
 
 /** Whether a page is shown: unknown until heard, so nothing flashes in and out. */
 export function viewShown(view: ViewKey | "browser", f: FeatureMap | null): boolean {

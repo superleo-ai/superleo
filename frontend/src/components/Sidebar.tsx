@@ -17,6 +17,7 @@ import {
   PuzzleIcon,
   SettingsIcon,
   HeartPulseIcon,
+  ChartCandlestickIcon,
   WorkflowIcon,
 } from "lucide-react";
 import { ViewKey } from "../lib/types";
@@ -50,6 +51,7 @@ const NAV: {
       { key: "dashboards", label: "Dashboards", Icon: LayoutDashboardIcon },
       { key: "schedule", label: "Schedule", Icon: CalendarDaysIcon },
       { key: "wellbeing", label: "Wellbeing", Icon: HeartPulseIcon },
+      { key: "finance", label: "Finance", Icon: ChartCandlestickIcon },
       { key: "tasks", label: "Needs your attention", Icon: ListTodoIcon },
       { key: "chat", label: "Chat", Icon: MessageSquareIcon, shortcut: "1" },
       { key: "hive", label: "Dashboard", Icon: GaugeIcon },

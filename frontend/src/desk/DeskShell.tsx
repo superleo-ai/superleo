@@ -4,7 +4,7 @@ import {
   LayoutDashboardIcon, BookOpenIcon, HexagonIcon, MessageSquareIcon, PaletteIcon,
   PuzzleIcon, SlidersHorizontalIcon, TerminalIcon, XIcon,
   CalendarDaysIcon, GlobeIcon,
-  HeartPulseIcon, WorkflowIcon, GaugeIcon,
+  HeartPulseIcon, WorkflowIcon, GaugeIcon, ChartCandlestickIcon,
 } from "lucide-react";
 import DeskStatusBar from "./DeskStatusBar";
 import World from "../world/World";
@@ -62,6 +62,7 @@ const RAIL: { key: ViewKey; label: string; Icon: typeof HexagonIcon; cls: string
   { key: "home", label: "The queen", Icon: MessageSquareIcon, cls: "dk-a-chat" },
   { key: "schedule", label: "Schedule", Icon: CalendarDaysIcon, cls: "dk-a-sched" },
   { key: "wellbeing", label: "Wellbeing", Icon: HeartPulseIcon, cls: "dk-a-sched" },
+  { key: "finance", label: "Finance", Icon: ChartCandlestickIcon, cls: "dk-a-sched" },
   { key: "routines", label: "Automation", Icon: WorkflowIcon, cls: "dk-a-sched" },
   { key: "coding", label: "Coding", Icon: TerminalIcon, cls: "dk-a-code" },
   { key: "knowledge", label: "Knowledge", Icon: BookOpenIcon, cls: "dk-a-know" },
@@ -72,7 +73,7 @@ const RAIL: { key: ViewKey; label: string; Icon: typeof HexagonIcon; cls: string
 const SIDE: ViewKey[] = ["dashboards"];
 
 export const TITLES: Record<ViewKey, string> = {
-  home: "", chat: "Chat", tasks: "Needs your attention", schedule: "Schedule", dashboards: "Dashboards", wellbeing: "Wellbeing", hive: "Dashboard", agents: "Bees", routines: "Automation", coding: "Coding", knowledge: "Knowledge",
+  home: "", chat: "Chat", tasks: "Needs your attention", schedule: "Schedule", dashboards: "Dashboards", wellbeing: "Wellbeing", finance: "Finance", hive: "Dashboard", agents: "Bees", routines: "Automation", coding: "Coding", knowledge: "Knowledge",
   skills: "Skills", mcp: "MCP", settings: "Settings",
 };
 
