@@ -46,8 +46,8 @@ const ago = (t: T, iso?: string) => {
 };
 
 // Vita's judgements (Scoring.swift, MetricTiles.swift), word for word.
-const recoveryTone = (v?: number): Tone => (v === undefined ? "muted" : v >= 67 ? "good" : v >= 34 ? "fair" : "low");
-const recoveryWord = (v?: number) => (v === undefined ? "No data" : v >= 67 ? "Recovered" : v >= 34 ? "Steady" : "Strained");
+export const recoveryTone = (v?: number): Tone => (v === undefined ? "muted" : v >= 67 ? "good" : v >= 34 ? "fair" : "low");
+export const recoveryWord = (v?: number) => (v === undefined ? "No data" : v >= 67 ? "Recovered" : v >= 34 ? "Steady" : "Strained");
 const stressTone = (v?: number): Tone => (v === undefined ? "muted" : v < 35 ? "good" : v < 65 ? "fair" : "low");
 const stressWord = (v?: number) => (v === undefined ? "No data" : v < 35 ? "Low" : v < 65 ? "Moderate" : "High");
 const sleepJudge = (h?: number): [string, Tone] => (h === undefined ? ["No data", "muted"] : h >= 7 ? ["Good", "good"] : h >= 6 ? ["Fair", "fair"] : ["Short", "fair"]);

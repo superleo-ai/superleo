@@ -1,56 +1,25 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, ChevronRightIcon, Gauge, HexagonIcon, LayoutGrid, Play, PlusIcon, Waves } from "lucide-react";
-import { CodingSessions, Conversations } from "../../wailsjs/go/app/App";
-import { app } from "../../wailsjs/go/models";
+import { ChevronRightIcon, HexagonIcon, PlusIcon } from "lucide-react";
+import { CodingSessions } from "../../wailsjs/go/app/App";
 import { EventsOn } from "../../wailsjs/runtime";
 import { useI18n } from "../lib/i18n";
-import { PATHS, attentionPath, conversationPath, taskPath } from "../lib/routes";
-import { attentionTitle, whenOf, type AttentionItem } from "../canvas/attention";
-import { elapsed, oneLine, useCodingRuns, useHive, useHosts, type Host, type HostAgent, type HiveTask } from "../canvas/data";
+import { PATHS } from "../lib/routes";
+import type { AttentionItem } from "../canvas/attention";
+import { useCodingRuns, useHive, useHosts, type Host, type HostAgent } from "../canvas/data";
 import type { CodingRun } from "../canvas/tiles";
 import { fmtK, usePulse } from "../components/Reactor";
 import { useEngineUsage } from "../components/HiveMeter";
-import { useNotedUpcoming } from "../lib/useNotedUpcoming";
-import { dayOf, localDay, notifyLabel, notifyOf, timeLabel, upcomingWhen } from "../lib/schedule";
 import { cliName, isCore, isStandby } from "../world/hosts";
 import { focusInWorld } from "../world/bus";
 import { clientKind } from "../lib/hivelink";
 import { queenTitle, useQueenName } from "../lib/queenName";
-import { isLegacyConsole, legacyConsoleTitle, pairedDeviceNames } from "../lib/queenConsole";
-import { withoutCallNotes } from "../lib/format";
 import { askToCompose } from "../lib/compose";
 import { useDeskWorldOn } from "../lib/deskWorld";
+import { DayColumn, NeedsYou, RecentConversations, TodayAutomations, TodayCards, useTodayNoted } from "./TodayParts";
 import "./agentsboard.css";
 
-/** Which of the dashboard's two views is shown: the agents board (the
- *  default) or the reactor with its charts. Kept per window. */
-export type DashView = "board" | "reactor";
-const VIEW_KEY = "superleo-dashboard-view";
-export function useDashView(): [DashView, (v: DashView) => void] {
-  const [view, setView] = useState<DashView>(() => {
-    try { return localStorage.getItem(VIEW_KEY) === "reactor" ? "reactor" : "board"; } catch { return "board"; }
-  });
-  const set = useCallback((v: DashView) => {
-    setView(v);
-    try { localStorage.setItem(VIEW_KEY, v); } catch { /* the choice lasts this visit */ }
-  }, []);
-  return [view, set];
-}
-
-/** The icon that swaps the two views, in either view's header. */
-export function ViewSwitch({ view, onSwitch, className }: { view: DashView; onSwitch: (v: DashView) => void; className?: string }) {
-  const { t } = useI18n();
-  const to: DashView = view === "board" ? "reactor" : "board";
-  const label = t(to === "reactor" ? "Reactor view" : "Agents view");
-  return (
-    <button type="button" className={className ?? "ab-iconbtn"} title={label} aria-label={label} data-testid="dash-view-switch" onClick={() => onSwitch(to)}>
-      {to === "reactor" ? <Gauge size={16} /> : <LayoutGrid size={16} />}
-    </button>
-  );
-}
-
-// ── Figures ────────────────────────────────────────────────────────────────
+// ── Run figures ────────────────────────────────────────────────────────────────
 
 /** A run as CLIRuns sends it: more than the tiles' CodingRun declares. */
 type Run = CodingRun & { ended?: string; cwd?: string; queen?: boolean; costUsd?: number };
@@ -276,7 +245,7 @@ export interface BoardStats {
 
 type Tab = "all" | "working" | "idle" | "remote";
 
-export default function AgentsBoard({ hive, now, attention, onOpenConversation, pulse, hosts, runs: rawRuns, stats, onSwitch }: {
+export default function AgentsBoard({ hive, now, attention, onOpenConversation, pulse, hosts, runs: rawRuns, stats, chips, engine }: {
   hive: ReturnType<typeof useHive>;
   now: number;
   attention: AttentionItem[];
@@ -285,7 +254,10 @@ export default function AgentsBoard({ hive, now, attention, onOpenConversation, 
   hosts: ReturnType<typeof useHosts>["hosts"];
   runs: ReturnType<typeof useCodingRuns>;
   stats: BoardStats;
-  onSwitch: (v: DashView) => void;
+  /** The header's facts about the engine: model, memory, graph. */
+  chips?: ReactNode;
+  /** The reactor, below the work: the same page, the engine's side. */
+  engine?: ReactNode;
 }) {
   const { t, language } = useI18n();
   const bt = useBoardT();
@@ -294,6 +266,7 @@ export default function AgentsBoard({ hive, now, attention, onOpenConversation, 
   const queen = useQueenName();
   const plan = useEngineUsage();
   const terms = useTerminals();
+  const noted = useTodayNoted(now);
   const runs = rawRuns as Run[];
   const [tab, setTab] = useState<Tab>("all");
 
@@ -316,8 +289,7 @@ export default function AgentsBoard({ hive, now, attention, onOpenConversation, 
   const working = cards.filter((c) => c.status === "working").length;
   const remote = cards.filter((c) => c.kind === "agent").length;
   const online = cards.filter((c) => c.status !== "offline").length;
-  const machines = (hosts ?? []).filter((h) => h.kind !== "ha" && !h.parent).length;
-  const counts: Record<Tab, number> = { all: cards.length, working, idle: cards.filter((c) => c.status !== "working" && c.kind !== "agent").length, remote };
+    const counts: Record<Tab, number> = { all: cards.length, working, idle: cards.filter((c) => c.status !== "working" && c.kind !== "agent").length, remote };
   const shown = cards.filter((c) => tab === "all" || (tab === "working" ? c.status === "working" : tab === "remote" ? c.kind === "agent" : c.status !== "working" && c.kind !== "agent"));
 
   const askQueen = () => {
@@ -335,97 +307,69 @@ export default function AgentsBoard({ hive, now, attention, onOpenConversation, 
   const change = weeks.pw > 0 ? Math.round(((weeks.w - weeks.pw) / weeks.pw) * 100) : null;
   const win = plan.mode === "subscription" && plan.cli ? (plan.windows ?? [])[0] : undefined;
   const [tokN, tokU] = bigK(stats.usage?.totalTokens ?? 0);
-  const peak = Math.max(1, ...all.days);
-  const date = new Date(now).toLocaleDateString(language === "en" ? "en-GB" : language, { weekday: "short", day: "numeric", month: "short" });
+    const date = new Date(now).toLocaleDateString(language === "en" ? "en-GB" : language, { weekday: "short", day: "numeric", month: "short" });
+
+  const waiting = terms.filter((x) => x.state === "waiting");
+  const needs = attention.filter((i) => i.level === "needs");
 
   return (
-    <div className="ab" data-testid="dashboard" data-view="board">
+    <div className="ab" data-testid="dashboard" data-view="day">
       <header className="ab-head">
         <h1>{t("Dashboard")}</h1>
-        {working > 0 && <span className="ab-pill live">{t("{n} working", { n: working })}</span>}
         <span className="ab-when">{date} · {hm(now)}</span>
+        {working > 0 && <span className="ab-pill live">{t("{n} working", { n: working })}</span>}
+        {chips}
         <span className="ab-sp" />
-        <ViewSwitch view="board" onSwitch={onSwitch} />
         <button type="button" className="ab-btn" onClick={askQueen}><HexagonIcon size={14} />{queen.name !== "queen" ? t("Ask {name}", { name: queenTitle(queen) }) : t("Ask the queen")}</button>
         <button type="button" className="ab-btn ink" onClick={() => navigate(PATHS.coding)}><PlusIcon size={15} />{bt("New run")}</button>
       </header>
 
-      <div className="ab-stats">
-        <Stat icon={<HexagonIcon size={14} />} label={t("Online")} chip={<span className="ab-chip mute">{t(machines === 1 ? "1 machine" : "{n} machines", { n: machines })}</span>}
-          value={<>{online}<small> / {cards.length}</small></>}
-          sub={t("queen {name} · {w} workers · {r} remote", { name: cards[0]?.name ?? "—", w: cards.filter((c) => c.kind === "cli" || c.kind === "worker").length, r: remote })} />
-        <Stat icon={<Play size={13} />} label={t("Runs · 30d")}
-          chip={change !== null ? <span className={`ab-chip ${change >= 0 ? "up" : "dn"}`}>{change >= 0 ? "↗" : "↘"} {Math.abs(change)}% {t("wk")}</span> : null}
-          value={<>{all.n30}</>}
-          sub={t("{w} this week · {pw} the week before", { w: weeks.w, pw: weeks.pw })}
-          extra={
-            <div className="ab-ticks" aria-hidden>
-              {all.days.map((n, i) => <b key={i} className={n === peak && n > 0 || i === 13 && n > 0 ? "h" : ""} style={{ height: `${n ? Math.max(8, (n / peak) * 100) : 3}%` }} />)}
-            </div>
-          } />
-        <Stat icon={<Check size={14} />} label={t("Success")} chip={<span className="ab-chip up">{t("{n} done", { n: all.done })}</span>}
-          value={fin ? <>{Math.round((all.done / fin) * 100)}<small>%</small></> : <>—</>}
-          sub={t("{f} failed · {c} cancelled", { f: all.failed, c: all.cancelled })} />
-        <Stat icon={<Waves size={14} />} label={t("Tokens")}
-          chip={win ? <span className="ab-chip mute">{t("{cli} plan {n}%", { cli: plan.cli ?? "", n: Math.round(win.percent) })}</span> : null}
-          value={<>{tokN}<small>{tokU}</small></>}
-          sub={t("all time · {n} turns today", { n: fmtK(stats.usage?.modelTurns ?? 0) })} />
-      </div>
+      <TodayCards now={now} noted={noted} />
 
       <div className="ab-main">
-        <section className="ab-agents" aria-label={t("Agents")}>
-          <div className="ab-sec-h">
-            <h2>{t("Agents")}</h2>
-            <div className="ab-tabs" role="tablist">
-              {(["all", "working", "idle", "remote"] as Tab[]).map((k) => (
-                <button key={k} type="button" role="tab" aria-selected={tab === k} className={tab === k ? "on" : ""} onClick={() => setTab(k)}>
-                  {t(k === "all" ? "All" : k === "working" ? "Working" : k === "idle" ? "Idle" : "Remote")}<em>{counts[k]}</em>
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="ab-grid">
-            {shown.map((c) => (
-              <AgentCard key={c.key} c={c} now={now}
-                onRuns={() => openRun((c.fig?.running[0] ?? c.fig?.last)?.id)}
-                onTalk={() => (c.kind === "queen" ? askQueen() : c.kind === "worker" ? show("worker", c.agent?.name ?? c.name) : show("agent", `${c.agent?.name ?? c.name}.${c.agent?.via || c.host?.name || ""}`))} />
-            ))}
-          </div>
-        </section>
-
+        <DayColumn now={now} noted={noted} />
         <aside className="ab-side">
-          <NowBox now={now} runs={runs} tasks={hive.tasks} terms={terms} needs={attention.filter((i) => i.level === "needs")} />
-          <NextBox now={now} />
-          <RecentBox onOpenConversation={onOpenConversation} />
+          <NeedsYou now={now} needs={needs} waiting={waiting} />
+          <RecentConversations onOpenConversation={onOpenConversation} />
+          <TodayAutomations now={now} />
         </aside>
       </div>
 
-      <div className="ab-eng" aria-label={t("Engine")}>
-        <Eng label={t("Tokens today")} value={fmtK(stats.usage?.today ?? 0)} />
-        <Eng label={t("Tool calls")} value={fmtK(pulse.calls)} />
-        <Eng label="MCP" value={`${stats.inv.mcp} · ${stats.inv.mcpTools}`} />
-        <Eng label={t("Skills")} value={String(stats.inv.skills)} />
-        <Eng label={t("Graph")} value={`${fmtK(stats.graph?.nodes ?? 0)} · ${fmtK(stats.graph?.edges ?? 0)}`} />
-        <Eng label={t("CPU · heap")} value={`${pulse.cpu.toFixed(0)}% · ${(pulse.heap / 1048576).toFixed(0)}MB`} />
-        <button type="button" className="ab-link strong" onClick={() => onSwitch("reactor")}>{t("Reactor")}<ChevronRightIcon size={13} /></button>
-      </div>
+      <section className="ab-agents" aria-label={t("Agents")}>
+        <div className="ab-sec-h">
+          <h2>{t("Agents")}</h2>
+          <div className="ab-tabs" role="tablist">
+            {(["all", "working", "idle", "remote"] as Tab[]).map((k) => (
+              <button key={k} type="button" role="tab" aria-selected={tab === k} className={tab === k ? "on" : ""} onClick={() => setTab(k)}>
+                {t(k === "all" ? "All" : k === "working" ? "Working" : k === "idle" ? "Idle" : "Remote")}<em>{counts[k]}</em>
+              </button>
+            ))}
+          </div>
+          <div className="ab-figs" aria-label={t("Runs · 30d")}>
+            <span title={t("{w} this week · {pw} the week before", { w: weeks.w, pw: weeks.pw })}><em>{t("Online")}</em>{online}/{cards.length}</span>
+            <span title={t("{w} this week · {pw} the week before", { w: weeks.w, pw: weeks.pw })}><em>{t("Runs · 30d")}</em>{all.n30}{change !== null && <i className={change >= 0 ? "up" : "dn"}>{change >= 0 ? "↗" : "↘"}{Math.abs(change)}%</i>}</span>
+            <span title={t("{f} failed · {c} cancelled", { f: all.failed, c: all.cancelled })}><em>{t("Success")}</em>{fin ? `${Math.round((all.done / fin) * 100)}%` : "—"}</span>
+            <span title={t("all time · {n} turns today", { n: fmtK(stats.usage?.modelTurns ?? 0) })}><em>{t("Tokens")}</em>{tokN}{tokU}</span>
+            {win && <span><em>{t(`${plan.cli} plan`)}</em>{Math.round(win.percent)}%</span>}
+          </div>
+        </div>
+        <div className="ab-grid">
+          {shown.map((c) => (
+            <AgentCard key={c.key} c={c} now={now}
+              onRuns={() => openRun((c.fig?.running[0] ?? c.fig?.last)?.id)}
+              onTalk={() => (c.kind === "queen" ? askQueen() : c.kind === "worker" ? show("worker", c.agent?.name ?? c.name) : show("agent", `${c.agent?.name ?? c.name}.${c.agent?.via || c.host?.name || ""}`))} />
+          ))}
+        </div>
+      </section>
+
+      {engine && (
+        <section className="ab-engine" aria-label={t("Engine")}>
+          <div className="ab-sec-h"><h2>{t("Engine")}</h2></div>
+          {engine}
+        </section>
+      )}
     </div>
   );
-}
-
-function Stat({ icon, label, chip, value, sub, extra }: { icon: ReactNode; label: string; chip: ReactNode; value: ReactNode; sub: string; extra?: ReactNode }) {
-  return (
-    <div className="ab-st">
-      <div className="ab-st-k"><span className="ab-ico">{icon}</span>{label}{chip}</div>
-      <div className="ab-st-v">{value}</div>
-      <div className="ab-st-sub">{sub}</div>
-      {extra}
-    </div>
-  );
-}
-
-function Eng({ label, value }: { label: string; value: string }) {
-  return <div className="ab-e"><div className="ab-e-l">{label}</div><div className="ab-e-n">{value}</div></div>;
 }
 
 const STATUS: Record<Status, { cls: string; label: string }> = {
@@ -476,119 +420,9 @@ function AgentCard({ c, now, onRuns, onTalk }: { c: Card; now: number; onRuns: (
   );
 }
 
-// ── Now, up next, recent ───────────────────────────────────────────────────
 
 /** Strings this board says differently from the rest of the app. */
 function useBoardT() {
   const { t } = useI18n();
   return (k: string) => { const v = t(`board·${k}`); return v.startsWith("board·") ? t(k) : v; };
-}
-
-function NowBox({ now, runs, tasks, terms, needs }: { now: number; runs: Run[]; tasks: HiveTask[]; terms: Term[]; needs: AttentionItem[] }) {
-  const { t } = useI18n();
-  const bt = useBoardT();
-  const navigate = useNavigate();
-  const running = runs.filter((r) => r.state === "running");
-  const hiveRunning = tasks.filter((x) => x.state === "running");
-  const live = terms.filter((x) => x.state === "working" || x.state === "waiting");
-  if (running.length + hiveRunning.length + live.length + needs.length === 0) return null;
-  return (
-    <div className="ab-box" data-testid="dash-now">
-      <h3>{t("Now")}</h3>
-      {needs.map((it, i) => (
-        <button type="button" key={`n-${it.ref}-${i}`} className="ab-row" onClick={() => navigate(attentionPath(it) === PATHS.hive ? PATHS.tasks : attentionPath(it))}>
-          <span className="ab-dot" />
-          <span className="ab-x">{attentionTitle(it)}<small>{whenOf(it, new Date(now))}</small></span>
-        </button>
-      ))}
-      {running.map((r) => (
-        <button type="button" key={r.id} className="ab-row" onClick={() => navigate(`${PATHS.coding}?run=${encodeURIComponent(r.id)}`)}>
-          <span className="ab-dot" />
-          <span className="ab-x">{keyOf(r)} · {base(r.cwd) || oneLine(r.prompt)}<small>{t("Run")} · {elapsed(r.started, now)}</small></span>
-        </button>
-      ))}
-      {hiveRunning.map((x) => (
-        <button type="button" key={x.id} className="ab-row" onClick={() => navigate(taskPath(x.id))}>
-          <span className="ab-dot" />
-          <span className="ab-x">{oneLine(x.prompt)}<small>{x.worker.replace(/^superleo-/, "")} · {elapsed(x.started_at, now)}</small></span>
-        </button>
-      ))}
-      {live.map((x) => (
-        <button type="button" key={`${x.machine}|${x.cli}|${x.session}`} className="ab-row" onClick={() => navigate(PATHS.coding)}>
-          <span className={`ab-dot${x.state === "waiting" ? " wait" : ""}`} />
-          <span className="ab-x">{x.cli} · {x.project || oneLine(x.title ?? "") || "—"}
-            <small>{t("Terminal")} · {x.state === "waiting" ? t("waiting for you") : `${x.machine || t("this Mac")} · ${elapsed(x.at, now)}`}</small>
-          </span>
-          {x.state === "waiting" && x.replyable && <span className="ab-tag">{bt("Reply")}</span>}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function NextBox({ now }: { now: number }) {
-  const { t } = useI18n();
-  const bt = useBoardT();
-  const navigate = useNavigate();
-  const next = useNotedUpcoming(6);
-  const minute = Math.floor(now / 60000);
-  const items = useMemo(() => next.items.filter((it) => it.allDay || +new Date(it.endTime || it.startTime) >= minute * 60000).slice(0, 3), [next.items, minute]);
-  const today = localDay(new Date(now));
-  return (
-    <div className="ab-box">
-      <h3>{bt("Up next")}<button type="button" className="ab-link" onClick={() => navigate(PATHS.schedule)}>{t("Schedule")}<ChevronRightIcon size={12} /></button></h3>
-      {items.length === 0 && <div className="ab-none">{next.ok ? t("Nothing scheduled") : "—"}</div>}
-      {items.map((it) => {
-        const mode = notifyOf(it);
-        return (
-          <button type="button" key={`${it.id}-${it.startTime}`} className="ab-row" onClick={() => navigate(`${PATHS.schedule}?id=${encodeURIComponent(it.id)}`)}>
-            <span className="ab-tm">{dayOf(it) === today ? timeLabel(it) : upcomingWhen(it, new Date(now))}</span>
-            <span className="ab-x">{it.title || t("Untitled")}</span>
-            {(mode === "alarm" || mode === "reminder") && <span className={`ab-tag${mode === "alarm" ? " al" : ""}`}>{notifyLabel(mode)}</span>}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function RecentBox({ onOpenConversation }: { onOpenConversation: (session: string) => void }) {
-  const { t } = useI18n();
-  const navigate = useNavigate();
-  const queen = useQueenName();
-  const [items, setItems] = useState<app.Conversation[] | null>(null);
-  const load = useCallback(() => {
-    Conversations(app.ConversationFilter.createFrom({ with: "", query: "", limit: 3 }))
-      .then(async (l) => {
-        const list = l?.items ?? [];
-        const devices = list.some((c) => c.kind === "queen" && isLegacyConsole(c.session)) ? await pairedDeviceNames() : [];
-        for (const c of list) if (c.kind === "queen" && isLegacyConsole(c.session)) c.title = legacyConsoleTitle(c.session, devices);
-        setItems(list);
-      })
-      .catch(() => setItems((cur) => cur ?? []));
-  }, []);
-  useEffect(() => {
-    load();
-    const offs = ["chat:done", "chat:error", "cli:run"].map((n) => EventsOn(n, load));
-    window.addEventListener("focus", load);
-    return () => { offs.forEach((o) => typeof o === "function" && o()); window.removeEventListener("focus", load); };
-  }, [load]);
-  const open = (c: app.Conversation) => (c.kind === "queen" ? onOpenConversation(c.session) : navigate(conversationPath(c.id)));
-  const who = (c: app.Conversation) => (c.kind === "queen" ? queenTitle(queen) : c.name || t(c.kind === "coding" ? "Coding" : c.kind === "worker" ? "Worker" : "Agent"));
-  const date = (iso: string) => {
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return "";
-    return d.toDateString() === new Date().toDateString() ? hm(d.getTime()) : `${d.getMonth() + 1}/${d.getDate()}`;
-  };
-  return (
-    <div className="ab-box">
-      <h3>{t("Recent")}<button type="button" className="ab-link" onClick={() => navigate(conversationPath())}>{t("All")}<ChevronRightIcon size={12} /></button></h3>
-      {items && items.length === 0 && <div className="ab-none">{t("No conversations")}</div>}
-      {(items ?? []).slice(0, 3).map((c) => (
-        <button type="button" key={c.id} className="ab-row" onClick={() => open(c)}>
-          <span className="ab-x">{withoutCallNotes(c.title) || t("Untitled")}<small>{who(c)} · {c.state === "running" ? t("now") : date(c.at)}</small></span>
-        </button>
-      ))}
-    </div>
-  );
 }

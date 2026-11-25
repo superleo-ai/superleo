@@ -17,16 +17,16 @@ import "./finance.css";
  * a change is asked of the queen.
  */
 
-type Money = { amount: number; currency?: string };
-interface Plan {
+export type Money = { amount: number; currency?: string };
+export interface Plan {
   active?: boolean; amount?: Money; day?: number; doneThisMonth?: boolean; investedThisMonth?: Money;
   nextTime?: string; streakMonths?: number; time?: string;
 }
-interface Position {
+export interface Position {
   avgCost?: Money; costBasis?: Money; marketValue?: Money; realizedPnl?: Money; unrealizedPnl?: Money;
   unrealizedPercent?: number; shares?: number; trades?: number; hasPrice?: boolean;
 }
-interface Holding {
+export interface Holding {
   id: string; name: string; symbol: string; quoteSymbol?: string; currency: string; archived?: boolean; notes?: string;
   price?: Money; priceTime?: string; lastPrice?: Money; lastPriceTime?: string; dayChange?: Money;
   plan?: Plan; position?: Position;
@@ -41,7 +41,7 @@ const amt = (m?: Money) => (m && typeof m.amount === "number" && isFinite(m.amou
 const tone = (v: number): Tone => (v > 1e-9 ? "good" : v < -1e-9 ? "low" : "muted");
 const quoteKey = (h: Holding) => h.quoteSymbol || h.symbol;
 
-function money(v: number, cur: string, loc?: string, digits = 2) {
+export function money(v: number, cur: string, loc?: string, digits = 2) {
   try {
     return new Intl.NumberFormat(loc, { style: "currency", currency: cur, currencyDisplay: "narrowSymbol", minimumFractionDigits: digits, maximumFractionDigits: digits }).format(v);
   } catch {
@@ -49,8 +49,8 @@ function money(v: number, cur: string, loc?: string, digits = 2) {
   }
 }
 const sign = (v: number) => (v > 1e-9 ? "+" : v < -1e-9 ? "−" : "");
-const sMoney = (v: number, cur: string, loc?: string) => `${sign(v)}${money(Math.abs(v), cur, loc)}`;
-const sPct = (f: number | undefined) => (f === undefined || !isFinite(f) ? "––" : `${sign(f)}${Math.abs(f * 100).toFixed(2)}%`);
+export const sMoney = (v: number, cur: string, loc?: string) => `${sign(v)}${money(Math.abs(v), cur, loc)}`;
+export const sPct = (f: number | undefined) => (f === undefined || !isFinite(f) ? "––" : `${sign(f)}${Math.abs(f * 100).toFixed(2)}%`);
 const qty = (v: number | undefined, loc?: string) => (v === undefined ? "––" : v.toLocaleString(loc, { maximumFractionDigits: 4 }));
 
 const ago = (t: T, iso?: string) => {
@@ -71,9 +71,9 @@ function dayPct(h: Holding, q?: Quote): number | undefined {
   return mv - dc > 0 ? dc / (mv - dc) : undefined;
 }
 
-type Totals = { currency: string; value: number; cost: number; unreal: number; real: number; day: number; held: Holding[] };
+export type Totals = { currency: string; value: number; cost: number; unreal: number; real: number; day: number; held: Holding[] };
 
-function totalsOf(items: Holding[]): Totals[] {
+export function totalsOf(items: Holding[]): Totals[] {
   const by = new Map<string, Totals>();
   for (const h of items) {
     const cur = h.currency || "USD";

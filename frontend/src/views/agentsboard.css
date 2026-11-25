@@ -1,5 +1,5 @@
-/* The dashboard's agents board: four figures, a card per agent, what runs
-   now and what is next beside them, the engine's figures at the foot.
+/* The dashboard, top to bottom: today's figures, the day beside what needs
+   you, the conversations and the automations, a card per agent, the engine.
    Daylight instrument: ink on cool white, hairlines, the one signal blue
    for live and needs you, green, amber and red only for status. */
 .ab {
@@ -74,7 +74,7 @@
 .ab-ticks b.h { background: var(--ab-ink); }
 
 /* Agents and the column beside them. */
-.ab-main { flex: 1 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 18px; align-items: start; }
+.ab-main { flex: none; display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 400px); gap: 14px; align-items: stretch; }
 .ab-sec-h { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; min-height: 30px; }
 .ab-sec-h h2 { margin: 0; font-size: 15px; font-weight: 650; }
 .ab-tabs { display: flex; gap: 4px; margin-left: 8px; flex-wrap: wrap; }
@@ -122,7 +122,7 @@
 .ab-link.strong:hover { color: var(--ab-blue) !important; }
 
 /* The column: now, up next, recent. */
-.ab-side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.ab-side { display: flex; flex-direction: column; gap: 14px; min-width: 0; align-self: start; }
 .ab-box { border: 1px solid var(--ab-line); border-radius: 16px; background: var(--ab-card); padding: 12px 14px; min-width: 0; }
 .ab-box h3 { font-size: 12px; font-weight: 600; color: var(--ab-ink-2); margin: 0 0 6px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.06em; }
 .ab-row { display: flex; align-items: center; gap: 10px; width: calc(100% + 12px); margin: 0 -6px; padding: 7px 6px; border: 0; border-top: 1px solid var(--ab-line-2); border-radius: 0; background: transparent; text-align: left; font-size: 13px !important; min-width: 0; }
@@ -137,29 +137,102 @@
 .ab-tag.al { color: var(--ab-amber); border-color: color-mix(in srgb, var(--ab-amber) 34%, transparent); background: var(--ab-amber-soft); }
 .ab-none { padding: 6px 0 2px; font-size: 12.5px; color: var(--ab-ink-3); }
 
-/* The engine's figures. */
-.ab-eng { flex: none; display: flex; align-items: center; border: 1px solid var(--ab-line); border-radius: 14px; background: var(--ab-card); padding: 10px 6px; font-family: var(--font-mono); }
-.ab-e { flex: 1; min-width: 0; padding: 0 12px; border-left: 1px solid var(--ab-line-2); }
-.ab-e:first-child { border-left: 0; }
-.ab-e-l { font-size: 10.5px; color: var(--ab-ink-3); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ab-e-n { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
-.ab-eng > .ab-link { font-family: var(--font-sans); font-size: 12.5px !important; padding: 0 14px; }
+/* The header's engine facts. */
+.ab-chips { flex: 0 1 auto; min-width: 0; display: flex; gap: 6px; overflow: hidden; }
+.ab-echip { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 9px; border: 1px solid var(--ab-line); border-radius: 999px; font: 500 11.5px var(--font-mono); color: var(--ab-ink-2); white-space: nowrap; background: var(--ab-card); }
+.ab-echip svg { color: var(--ab-ink-3); }
+
+/* Today's figures are buttons to their pages; up to four, as many as have a source. */
+.ab-stats { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.ab-st-btn { text-align: left; font: inherit; }
+.ab-st-btn:hover { border-color: color-mix(in srgb, var(--ab-ink) 22%, transparent); }
+.ab-st-v .ab-v-up { color: var(--ab-green); }
+.ab-st-v .ab-v-dn { color: var(--ab-red); }
+.ab-chip.warn { background: var(--ab-amber-soft); color: var(--ab-amber); }
+.ab-st-v small { font-size: 14px; }
+
+/* Section counts. */
+.ab-box h3 > em { font: 500 11px var(--font-mono); font-style: normal; color: var(--ab-ink-3); letter-spacing: 0; }
+.ab-box h3 .ab-link { text-transform: none; }
+
+/* The day: a rail with a mark per item, now as a blue line across it. */
+.ab-day { padding-bottom: 6px; }
+.ab-tl { list-style: none; margin: 4px 0 0; padding: 0; position: relative; }
+.ab-tl::before { content: ""; position: absolute; left: 61px; top: 6px; bottom: 6px; width: 1px; background: var(--ab-line); }
+.ab-tl-row { position: relative; display: flex; align-items: center; gap: 10px; width: calc(100% + 12px); margin: 0 -6px; padding: 7px 6px; border: 0; border-radius: 8px; background: transparent; text-align: left; font-size: 13.5px !important; min-width: 0; }
+.ab-tl-row:hover { background: var(--ab-hover); }
+.ab-tl-row .ab-tm { min-width: 48px; }
+.ab-tl-mk { flex: none; position: relative; z-index: 1; width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid var(--ab-ink); background: var(--ab-card); display: grid; place-items: center; }
+.ab-tl-row.k-task .ab-tl-mk { border-radius: 3px; }
+.ab-tl-row.k-alarm .ab-tl-mk { border-color: var(--ab-amber); }
+.ab-tl-row.done .ab-tl-mk { background: var(--ab-green); border-color: var(--ab-green); color: #fff; }
+.ab-tl-row.past { color: var(--ab-ink-3); }
+.ab-tl-row.past .ab-tm { color: var(--ab-ink-3); }
+.ab-tl-row.past .ab-tl-mk { border-color: var(--ab-ink-3); }
+.ab-tl-row.done .ab-x { text-decoration: line-through; text-decoration-color: var(--ab-ink-3); color: var(--ab-ink-3); }
+.ab-tl-now { position: relative; display: flex; align-items: center; gap: 10px; height: 14px; margin: 2px 0; }
+.ab-tl-now span { min-width: 48px; font: 600 11px var(--font-mono); color: var(--ab-blue); }
+.ab-tl-now i { flex: 1; height: 1px; background: var(--ab-blue); position: relative; }
+.ab-tl-now i::before { content: ""; position: absolute; left: -1px; top: -3.5px; width: 8px; height: 8px; border-radius: 50%; background: var(--ab-blue); box-shadow: 0 0 0 3px var(--ab-blue-soft); }
+
+/* Under way and projects, under the day. */
+.ab-sub { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--ab-line); }
+.ab-sub h4 { margin: 0 0 4px; font-size: 11.5px; font-weight: 600; color: var(--ab-ink-3); text-transform: uppercase; letter-spacing: 0.06em; }
+.ab-prog { display: flex; flex-direction: column; gap: 5px; width: calc(100% + 12px); margin: 0 -6px; padding: 7px 6px; border: 0; border-radius: 8px; background: transparent; text-align: left; min-width: 0; }
+.ab-prog:hover { background: var(--ab-hover); }
+.ab-prog-t { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 13px; }
+.ab-prog-t > i { flex: none; width: 7px; height: 7px; border-radius: 50%; }
+.ab-prog-t b { flex: 1; min-width: 0; font-weight: 550; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ab-prog-t em { flex: none; font: 600 12px var(--font-mono); font-style: normal; font-variant-numeric: tabular-nums; }
+.ab-late { flex: none; font-size: 11px; color: var(--ab-red); }
+.ab-bar { display: block; height: 3px; border-radius: 2px; background: var(--ab-line-2); overflow: hidden; }
+.ab-bar i { display: block; height: 100%; border-radius: 2px; }
+.ab-prog small { font-size: 11.5px; color: var(--ab-ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Needs you: the signal blue only when something waits. */
+.ab-needs.on { border-color: color-mix(in srgb, var(--ab-blue) 34%, var(--ab-line)); box-shadow: inset 3px 0 0 var(--ab-blue); }
+.ab-needs.on h3 { color: var(--ab-blue); }
+.ab-needs.on h3 > em { color: var(--ab-blue); }
+.ab-need-ico { flex: none; width: 24px; height: 24px; border-radius: 7px; display: grid; place-items: center; background: var(--ab-blue-soft); color: var(--ab-blue); }
+.ab-tag.sig { color: var(--ab-blue); border-color: color-mix(in srgb, var(--ab-blue) 30%, transparent); background: var(--ab-blue-soft); display: inline-flex; align-items: center; gap: 5px; }
+.ab-tag.ok { color: var(--ab-green); border-color: color-mix(in srgb, var(--ab-green) 30%, transparent); background: var(--ab-green-soft); }
+.ab-dot.sm { width: 5px; height: 5px; box-shadow: none; }
+
+/* Conversations. */
+.ab-conv-ico { flex: none; width: 24px; height: 24px; border-radius: 7px; display: grid; place-items: center; border: 1px solid var(--ab-line); color: var(--ab-ink-2); }
+.ab-conv.k-queen .ab-conv-ico { color: var(--ab-ink); border-color: color-mix(in srgb, var(--ab-ink) 30%, transparent); }
+.ab-when-r .ab-dot { display: inline-block; vertical-align: 1px; margin-right: 3px; }
+.ab-when-r { flex: none; font: 11.5px var(--font-mono); color: var(--ab-ink-3); white-space: nowrap; }
+.ab-x small.ab-mono { font-family: var(--font-mono); font-size: 11px; }
+
+/* Agents: the run figures on the section's line. */
+.ab-agents { flex: none; }
+.ab-figs { margin-left: auto; display: flex; gap: 0; font: 600 13px var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ab-figs > span { display: inline-flex; align-items: baseline; gap: 6px; padding: 0 12px; border-left: 1px solid var(--ab-line); }
+.ab-figs > span:first-child { border-left: 0; }
+.ab-figs em { font: 400 11px var(--font-sans); font-style: normal; color: var(--ab-ink-3); }
+.ab-figs i { font: 500 11px var(--font-mono); font-style: normal; }
+.ab-figs i.up { color: var(--ab-green); }
+.ab-figs i.dn { color: var(--ab-red); }
+
+/* The engine: the reactor, as it is. */
+.ab-engine { flex: none; }
 
 /* Narrower windows. */
 @container (max-width: 1180px) {
   .ab-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .ab-main { grid-template-columns: minmax(0, 1fr) 290px; }
+  .ab-main { grid-template-columns: minmax(0, 1fr) 330px; }
 }
 @container (max-width: 980px) {
   .ab-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ab-main { grid-template-columns: minmax(0, 1fr); }
-  .ab-side { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-  .ab-eng { flex-wrap: wrap; row-gap: 10px; }
-  .ab-e { flex: 1 0 30%; }
+  .ab-side { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); align-items: start; }
+  .ab-figs { margin-left: 0; width: 100%; }
+  .ab-agents .ab-sec-h { flex-wrap: wrap; }
 }
 @container (max-width: 640px) {
   .ab-head { flex-wrap: wrap; }
   .ab-grid, .ab-stats { grid-template-columns: minmax(0, 1fr); }
 }
 /* The desk's round buttons sit over the right edge at the foot. */
-.dk-shell .ab-eng { margin-right: 52px; }
+.dk-shell .ab-engine { margin-right: 52px; }

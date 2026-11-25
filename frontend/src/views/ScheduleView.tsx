@@ -30,7 +30,7 @@ export async function runCall(c: ToolCall) {
 }
 
 /** One noted read through CallTool: its structured answer, or null. */
-async function readTool(tool: string, args: Record<string, unknown>): Promise<unknown> {
+export async function readTool(tool: string, args: Record<string, unknown>): Promise<unknown> {
   try {
     const res = await CallTool("noted", tool, args, app.ActionOptions.createFrom({ label: tool, confirmed: false, sessionId: "" }));
     return res?.ok ? res.structured ?? null : null;
