@@ -167,6 +167,77 @@ func (r *readThroughMemoryStore) SearchByText(ctx context.Context, query string,
 	return merged, nil
 }
 
+// KnowledgeRecall is the brain's own recall in every namespace: its memories
+// and its knowledge, found by vector and then by a walk of the entity graph
+// from what that found. Memories merge by the server's score, as in
+// SearchByText; knowledge is not namespaced, so each document comes once; the
+// primary namespace's entities and context lead.
+func (r *readThroughMemoryStore) KnowledgeRecall(ctx context.Context, query string, topK int, scope *domain.MemoryScope) (*domain.GraphRecallResult, error) {
+	if topK <= 0 {
+		topK = 10
+	}
+	all := append([]*store.CortexRemoteMemoryStore{r.CortexRemoteMemoryStore}, r.extra...)
+	type result struct {
+		res *domain.GraphRecallResult
+		err error
+	}
+	results := make([]result, len(all))
+	var wg sync.WaitGroup
+	for i, s := range all {
+		wg.Add(1)
+		go func(i int, s *store.CortexRemoteMemoryStore) {
+			defer wg.Done()
+			res, err := s.KnowledgeRecall(ctx, query, topK, scope)
+			results[i] = result{res, err}
+		}(i, s)
+	}
+	wg.Wait()
+	if results[0].err != nil {
+		return nil, results[0].err
+	}
+	out := &domain.GraphRecallResult{Query: query}
+	memIDs, knIDs, entities := map[string]bool{}, map[string]bool{}, map[string]bool{}
+	for i, res := range results {
+		if res.err != nil || res.res == nil {
+			continue
+		}
+		if out.ContextText == "" {
+			out.ContextText = res.res.ContextText
+		}
+		for _, e := range res.res.Entities {
+			if !entities[e] {
+				entities[e] = true
+				out.Entities = append(out.Entities, e)
+			}
+		}
+		for _, h := range res.res.Memories {
+			if h == nil || h.Memory == nil || memIDs[h.ID] {
+				continue
+			}
+			memIDs[h.ID] = true
+			if i > 0 {
+				r.foreign.Store(h.ID, struct{}{})
+			}
+			out.Memories = append(out.Memories, h)
+		}
+		for _, k := range res.res.Knowledge {
+			if k.ID == "" || knIDs[k.ID] {
+				continue
+			}
+			knIDs[k.ID] = true
+			out.Knowledge = append(out.Knowledge, k)
+		}
+	}
+	sort.SliceStable(out.Memories, func(a, b int) bool { return out.Memories[a].Score > out.Memories[b].Score })
+	if len(out.Memories) > topK {
+		out.Memories = out.Memories[:topK]
+	}
+	if len(out.Knowledge) > topK {
+		out.Knowledge = out.Knowledge[:topK]
+	}
+	return out, nil
+}
+
 func (r *readThroughMemoryStore) isForeign(id string) bool {
 	_, ok := r.foreign.Load(id)
 	return ok
@@ -207,8 +278,9 @@ func (r *readThroughMemoryStore) Close() error {
 }
 
 var (
-	_ domain.MemoryStore           = (*readThroughMemoryStore)(nil)
-	_ domain.MemoryStaleMarker     = (*readThroughMemoryStore)(nil)
-	_ domain.MemoryGraphWriter     = (*readThroughMemoryStore)(nil)
-	_ domain.MemoryServerEmbedding = (*readThroughMemoryStore)(nil)
+	_ domain.MemoryStore            = (*readThroughMemoryStore)(nil)
+	_ domain.MemoryStaleMarker      = (*readThroughMemoryStore)(nil)
+	_ domain.MemoryGraphWriter      = (*readThroughMemoryStore)(nil)
+	_ domain.MemoryServerEmbedding  = (*readThroughMemoryStore)(nil)
+	_ domain.KnowledgeGraphRecaller = (*readThroughMemoryStore)(nil)
 )
