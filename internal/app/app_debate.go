@@ -442,18 +442,21 @@ func (a *App) pushDebate(d *Debate) {
 	}
 }
 
+// finishDebate ends the run and drops its cancel in one step: a continue
+// that lands as soon as the state reads finished installs its own cancel,
+// which must not be the one this run then calls.
 func (a *App) finishDebate(d *Debate, state, msg string) {
-	a.mutateDebate(d, func(d *Debate) {
-		now := time.Now()
-		d.State, d.Error, d.Ended = state, msg, &now
-	})
 	s := a.debateStoreOf()
 	s.mu.Lock()
+	now := time.Now()
+	d.State, d.Error, d.Ended = state, msg, &now
 	if c := s.cancels[d.ID]; c != nil {
 		c()
 	}
 	delete(s.cancels, d.ID)
+	s.saveLocked()
 	s.mu.Unlock()
+	a.pushDebate(d)
 }
 
 // runDebate goes through the phases. round is where to pick up: 0 from the
